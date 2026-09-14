@@ -75,7 +75,7 @@ export default function VideoModal({
 
         {/* Modal Footer note */}
         <div className="px-6 py-3 bg-slate-900/80 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
-          <span>TİMAV Medya & Gençlik Yapımı • 23-24-25 Ekim 2026 Selçuklu Kongre Merkezi</span>
+          <span>ÖNDER Medya & Gençlik Yapımı • 23-24-25 Ekim 2026 Selçuklu Kongre Merkezi</span>
           <span className="text-amber-400 font-medium">HD 1080p</span>
         </div>
       </div>

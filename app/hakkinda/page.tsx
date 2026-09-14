@@ -67,7 +67,7 @@ export default function AboutPage() {
       
       {/* 1. HERO BANNER */}
       <InnerPageHero
-        badge={about.heroBadge || (settings.organizationName ? `${settings.organizationName.toUpperCase()} VİZYONU` : "TİMAV KURUMSAL VİZYONU")}
+        badge={about.heroBadge || (settings.organizationName ? `${settings.organizationName.toUpperCase()} VİZYONU` : "ÖNDER KURUMSAL VİZYONU")}
         title={about.heroTitle || "Köklü Miras, Çağdaş Müzakere: İrfan Meclisi"}
         description={about.heroDesc || "“Kökümüz İrfan, Sözümüz İstikbal” anlayışıyla; ilim, irfan ve hikmet ekseninde yetişen genç nesillerin, Türkiye'nin ve dünyanın temel meselelerine meclis simülasyonu disipliniyle çözüm ürettiği vizyoner bir platformdur."}
         breadcrumbs={[
@@ -84,7 +84,7 @@ export default function AboutPage() {
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
-              <span className="text-xs uppercase tracking-widest text-[#4DA3FF] font-bold block mb-0.5">
+              <span className="text-xs uppercase tracking-widest text-cyan-300 font-bold block mb-0.5">
                 {settings.slogan || "KÖKÜMÜZ İRFAN, SÖZÜMÜZ İSTİKBAL"}
               </span>
               <p className="text-sm sm:text-base font-semibold text-white">
@@ -94,7 +94,7 @@ export default function AboutPage() {
           </div>
           <Link
             href="/basvuru"
-            className="px-6 py-2.5 rounded-full bg-[#4DA3FF] hover:bg-[#258BF5] text-[#061A33] text-xs font-bold transition-all shadow-md shrink-0 flex items-center gap-1.5 cursor-pointer"
+            className="px-6 py-2.5 rounded-full bg-[#4DA3FF] hover:bg-[#38bdf8] text-[#020B16] text-xs font-bold transition-all shadow-[0_8px_24px_-6px_rgba(56,189,248,0.5)] shrink-0 flex items-center gap-1.5 cursor-pointer"
           >
             <span>Hemen Başvur</span>
             <ArrowRight className="w-3.5 h-3.5" />
@@ -109,7 +109,7 @@ export default function AboutPage() {
         
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-12">
-          <span className="px-3.5 py-1 rounded-full text-xs font-bold bg-[#0D3156] border border-[#4DA3FF]/30 text-[#4DA3FF] uppercase tracking-wider">
+          <span className="px-3.5 py-1 rounded-full text-xs font-bold bg-cyan-500/10 border border-cyan-400/30 text-cyan-300 uppercase tracking-wider">
             Kurumsal Felsefe
           </span>
           <h2 className="mt-3 text-3xl sm:text-4xl font-serif font-bold text-white tracking-tight">
@@ -124,7 +124,7 @@ export default function AboutPage() {
         <div className="space-y-8">
           
           {/* PRIMARY CENTERPIECE: 2. İRFAN MECLİSİ (ÖNE ÇIKAN MERKEZİ PLATFORM) */}
-          <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-[#0A2244] via-[#092746] to-[#061A33] border-2 border-[#4DA3FF]/40 shadow-2xl p-8 sm:p-12">
+          <div className="relative rounded-3xl overflow-hidden bg-[#06182e] border border-cyan-400/30 shadow-2xl p-8 sm:p-12">
             
             {/* Architectural subtle watermark background decoration */}
             <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-[#4DA3FF]/10 via-transparent to-transparent pointer-events-none" />
@@ -186,7 +186,7 @@ export default function AboutPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             
             {/* MANIFESTO 1: VİZYONUMUZ (ÖZGÜN DOKU VE ZARİF TİPOGRAFİ) */}
-            <div className="relative rounded-3xl bg-[#08203E] border border-[#4DA3FF]/25 p-8 sm:p-10 shadow-xl flex flex-col justify-between hover:border-[#4DA3FF]/50 transition-all duration-300 group">
+            <div className="relative rounded-3xl bg-[#06182e] border border-[#183659]/70 p-8 sm:p-10 shadow-xl flex flex-col justify-between hover:border-cyan-400/45 transition-all duration-300 group">
               
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
@@ -224,7 +224,7 @@ export default function AboutPage() {
             </div>
 
             {/* MANIFESTO 2: MİSYONUMUZ (ÖZGÜN DOKU VE ZARİF TİPOGRAFİ) */}
-            <div className="relative rounded-3xl bg-[#08203E] border border-[#4DA3FF]/25 p-8 sm:p-10 shadow-xl flex flex-col justify-between hover:border-[#4DA3FF]/50 transition-all duration-300 group">
+            <div className="relative rounded-3xl bg-[#06182e] border border-[#183659]/70 p-8 sm:p-10 shadow-xl flex flex-col justify-between hover:border-cyan-400/45 transition-all duration-300 group">
               
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
@@ -270,7 +270,7 @@ export default function AboutPage() {
       {/* ========================================================================= */}
       {/* 3. ZENGİNLEŞTİRİLMİŞ ETKİNLİK GÖRSEL & VİDEO VİTRİNİ                       */}
       {/* ========================================================================= */}
-      <section className="py-20 bg-[#030D1A] border-y border-blue-900/40">
+      <section className="py-20 bg-[#020B16] border-y border-[#183659]/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
@@ -288,7 +288,7 @@ export default function AboutPage() {
 
             <Link
               href="/galeri"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#092746] hover:bg-[#0D3156] border border-[#4DA3FF]/30 text-white text-xs font-semibold transition-all shrink-0 cursor-pointer"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#06182e] hover:bg-[#0a2342] border border-cyan-400/30 text-white text-xs font-semibold transition-all shrink-0 cursor-pointer"
             >
               <span>Tüm Medya Galerisini Aç</span>
               <ArrowRight className="w-3.5 h-3.5 text-[#4DA3FF]" />
@@ -346,9 +346,9 @@ export default function AboutPage() {
       </section>
 
       {/* ========================================================================= */}
-      {/* 4. TİMAV KURUMSAL TANITIM BLOĞU                                           */}
+      {/* 4. ÖNDER KURUMSAL TANITIM BLOĞU                                           */}
       {/* ========================================================================= */}
-      <section className="py-20 bg-[#092746]/60 border-b border-[#4DA3FF]/15">
+      <section className="py-20 bg-[#06182e]/70 border-b border-[#183659]/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             
@@ -357,7 +357,7 @@ export default function AboutPage() {
               <div className="relative rounded-3xl overflow-hidden aspect-[4/3] border border-[#4DA3FF]/30 shadow-2xl group bg-[#061A33]">
                 <Image
                   src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1200&q=80"
-                  alt="TİMAV Gençlik Çalışmaları"
+                  alt="ÖNDER Gençlik Çalışmaları"
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-700 opacity-90"
                 />
@@ -366,7 +366,7 @@ export default function AboutPage() {
                 <button
                   onClick={() => openVideo(about.timav?.videoUrl)}
                   className="absolute inset-0 flex items-center justify-center cursor-pointer group"
-                  aria-label="TİMAV Tanıtımını İzle"
+                  aria-label="ÖNDER Tanıtımını İzle"
                 >
                   <div className="w-18 h-18 rounded-full bg-[#4DA3FF] hover:bg-[#258BF5] flex items-center justify-center text-[#061A33] shadow-2xl transition-all duration-300 group-hover:scale-110">
                     <Play className="w-8 h-8 fill-[#061A33] ml-1 text-[#061A33]" />
@@ -374,8 +374,8 @@ export default function AboutPage() {
                 </button>
 
                 <div className="absolute bottom-5 left-6 right-6 p-4 rounded-xl bg-[#061A33]/90 backdrop-blur-md border border-[#4DA3FF]/20 text-xs text-slate-300">
-                  <span className="text-[#4DA3FF] font-bold block mb-1 font-serif text-sm">TİMAV (Türkiye İmam Hatipliler Vakfı)</span>
-                  <span>1994 yılından bu yana gençlik, kültür ve eğitim alanında öncü vakıf teşkilatı.</span>
+                  <span className="text-[#4DA3FF] font-bold block mb-1 font-serif text-sm">ÖNDER İmam Hatipliler Derneği</span>
+                  <span>65 yılı aşkın süredir gençlik, kültür ve eğitim alanında öncü sivil toplum kuruluşu.</span>
                 </div>
               </div>
             </div>
@@ -384,28 +384,28 @@ export default function AboutPage() {
             <div className="lg:col-span-6 space-y-6">
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-[#4DA3FF]/10 border border-[#4DA3FF]/30 text-[#4DA3FF] uppercase tracking-wider">
                 <Building2 className="w-3.5 h-3.5" />
-                <span>{about.timav?.tag || "Önder Kurumumuz"}</span>
+                <span>{about.timav?.tag || "Önder Kurumumuz: ÖNDER"}</span>
               </div>
 
               <h2 className="text-3xl sm:text-4xl font-serif font-bold text-white tracking-tight leading-tight">
-                {about.timav?.heading || "TİMAV'ın Gençlik ve Gelecek Vizyonu"}
+                {about.timav?.heading || "ÖNDER Derneği'nin Gençlik ve Gelecek Vizyonu"}
               </h2>
 
               <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
-                {about.timav?.p1 || "Türkiye İmam Hatipliler Vakfı (TİMAV); 30 yılı aşkın süredir eğitim, kültür, sanat ve akademi sahasında nesillerin yetişmesine öncülük eden, Türkiye'nin saygın ve köklü sivil toplum kuruluşlarındandır."}
+                {about.timav?.p1 || "ÖNDER İmam Hatipliler Derneği; 65 yılı aşkın süredir eğitim, kültür, sanat ve akademi sahasında nesillerin yetişmesine öncülük eden, Türkiye'nin en köklü ve saygın sivil toplum kuruluşlarındandır."}
               </p>
 
               <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
-                {about.timav?.p2 || "İrfan Meclisi; TİMAV'ın gençlik vizyonunun en somut ve dinamik tezahürlerinden biri olarak, gençleri sadece teorik bilgiyle değil; meclis başkanı, komisyon raportörü, müzakereci ve kanun yapıcı kimlikleriyle geleceğe hazırlar."}
+                {about.timav?.p2 || "İrfan Meclisi; ÖNDER'in gençlik vizyonunun en somut ve dinamik tezahürlerinden biri olarak, gençleri sadece teorik bilgiyle değil; meclis başkanı, komisyon raportörü, müzakereci ve kanun yapıcı kimlikleriyle geleceğe hazırlar."}
               </p>
 
               <div className="grid grid-cols-2 gap-4 pt-4">
                 <div className="p-5 rounded-2xl bg-[#061A33] border border-[#4DA3FF]/20 shadow-md">
-                  <span className="text-3xl font-serif font-bold text-[#4DA3FF]">{about.timav?.stat1Number || "30+ Yıl"}</span>
+                  <span className="text-3xl font-serif font-bold text-[#4DA3FF]">{about.timav?.stat1Number || "65+ Yıl"}</span>
                   <p className="text-xs text-slate-400 mt-1 font-sans">{about.timav?.stat1Label || "Eğitim ve Gençlik Tecrübesi"}</p>
                 </div>
                 <div className="p-5 rounded-2xl bg-[#061A33] border border-[#4DA3FF]/20 shadow-md">
-                  <span className="text-3xl font-serif font-bold text-[#4DA3FF]">{about.timav?.stat2Number || "10.000+"}</span>
+                  <span className="text-3xl font-serif font-bold text-[#4DA3FF]">{about.timav?.stat2Number || "100.000+"}</span>
                   <p className="text-xs text-slate-400 mt-1 font-sans">{about.timav?.stat2Label || "Gencimize Ulaşan Projeler"}</p>
                 </div>
               </div>
@@ -419,7 +419,7 @@ export default function AboutPage() {
       {/* 5. BOTTOM CTA                                                             */}
       {/* ========================================================================= */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="p-8 sm:p-12 rounded-3xl bg-gradient-to-r from-[#092746] to-[#0D3156] border border-[#4DA3FF]/30 shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-8 text-center sm:text-left">
+        <div className="p-8 sm:p-12 rounded-3xl bg-[#06182e] border border-cyan-400/25 shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-8 text-center sm:text-left">
           <div className="space-y-2">
             <h3 className="text-2xl sm:text-3xl font-serif font-bold text-white">
               {about.bottomCta?.heading || "Tarihe Not Düşecek 250 Delegeden Biri Olun"}
@@ -430,7 +430,7 @@ export default function AboutPage() {
           </div>
           <Link
             href="/basvuru"
-            className="px-8 py-4 rounded-full bg-[#4DA3FF] hover:bg-[#258BF5] text-[#061A33] font-bold text-sm shadow-xl hover:shadow-[#4DA3FF]/30 transition-all shrink-0 flex items-center gap-2 cursor-pointer"
+            className="px-8 py-4 rounded-full bg-[#4DA3FF] hover:bg-[#38bdf8] text-[#020B16] font-bold text-sm shadow-[0_8px_24px_-6px_rgba(56,189,248,0.5)] transition-all shrink-0 flex items-center gap-2 cursor-pointer"
           >
             <Sparkles className="w-4 h-4 text-[#061A33]" />
             <span>{about.bottomCta?.buttonText || "Delege Başvuru Formuna Git"}</span>
@@ -443,7 +443,7 @@ export default function AboutPage() {
       <VideoModal
         isOpen={isVideoOpen}
         onClose={() => setIsVideoOpen(false)}
-        title="TİMAV Gençlik Vizyonu ve İrfan Meclisi"
+        title="ÖNDER Gençlik Vizyonu ve İrfan Meclisi"
       />
 
       {/* Photo Lightbox */}

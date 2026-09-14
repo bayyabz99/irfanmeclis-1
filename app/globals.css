@@ -81,6 +81,53 @@ body {
   box-shadow: 0 8px 24px -4px rgba(37, 139, 245, 0.45);
 }
 
+/* Inner pages aligned with homepage + profile */
+.igm-page {
+  min-height: 100vh;
+  background: #020B16;
+  color: #f8fafc;
+}
+
+.igm-card {
+  background: #06182e;
+  border: 1px solid rgba(24, 54, 89, 0.72);
+  box-shadow: 0 18px 40px -24px rgba(0, 0, 0, 0.7);
+}
+
+.igm-card-hover {
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.igm-card-hover:hover {
+  border-color: rgba(56, 189, 248, 0.45);
+  box-shadow: 0 16px 36px -16px rgba(34, 211, 238, 0.22);
+}
+
+.igm-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(34, 211, 238, 0.12);
+  border: 1px solid rgba(34, 211, 238, 0.3);
+  color: #22d3ee;
+}
+
+.igm-input {
+  background: #030a14;
+  border: 1px solid rgba(24, 54, 89, 0.85);
+  color: #fff;
+}
+
+.igm-input::placeholder {
+  color: #64748b;
+}
+
+.igm-input:focus {
+  outline: none;
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.12);
+}
+
 /* Smooth Infinite Marquee Animation (Right to Left) */
 @keyframes marquee-scroll {
   0% {

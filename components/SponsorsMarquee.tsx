@@ -9,7 +9,7 @@ const SPONSORS_LIST = [
   { name: 'MERAM BELEDİYESİ', role: 'Sosyal Destek' },
   { name: 'SELÇUKLU BELEDİYESİ', role: 'Hizmet Ortağı' },
   { name: 'KONYA BÜYÜKŞEHİR BELEDİYESİ', role: 'Ana Destekçi' },
-  { name: 'TİMAV', role: 'Önder Kurum' },
+  { name: 'ÖNDER İMAM HATİPLİLER DERNEĞİ', role: 'Önder Kurum' },
   { name: 'SELÇUK ÜNİVERSİTESİ', role: 'Akademik Destek' },
   { name: 'KTO KARATAY ÜNİVERSİTESİ', role: 'Eğitim & Sanat Ortağı' },
   { name: 'T.C. GENÇLİK VE SPOR BAKANLIĞI', role: 'Kurumsal Destek' }

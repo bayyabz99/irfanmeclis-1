@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { 
@@ -8,6 +8,7 @@ import {
   Video, 
   Play, 
   Upload, 
+  UploadCloud,
   Sparkles, 
   CheckCircle, 
   AlertCircle,
@@ -15,10 +16,12 @@ import {
   Eye,
   Lock,
   ShieldCheck,
-  Users
+  Users,
+  Loader2
 } from 'lucide-react';
 import { GalleryItem, Application } from '@/lib/types';
 import { getStoredGallery, submitUserMedia, getCurrentUser } from '@/lib/storage';
+import { uploadImageToSupabaseStorage } from '@/lib/supabase';
 import Lightbox from '@/components/Lightbox';
 import InnerPageHero from '@/components/InnerPageHero';
 
@@ -31,6 +34,13 @@ export default function GalleryPage() {
   const [isUploadOpen, setIsUploadOpen] = useState(false);
 
   // Upload Form State
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [filePreview, setFilePreview] = useState<string | null>(null);
+  const [isReadingFile, setIsReadingFile] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
+
   const [uploadData, setUploadData] = useState({
     title: '',
     uploaderName: '',
@@ -85,27 +95,109 @@ export default function GalleryPage() {
     return item.category === selectedFilter;
   });
 
-  const handleUploadSubmit = (e: React.FormEvent) => {
+  // Handle file selection from device
+  const processFile = (file: File) => {
+    setUploadError(null);
+    const maxSizeBytes = 15 * 1024 * 1024; // 15 MB
+    if (file.size > maxSizeBytes) {
+      setUploadError('Dosya boyutu çok büyük! Lütfen 15 MB\'den küçük bir fotoğraf veya video seçiniz.');
+      return;
+    }
+
+    const isVideo = file.type.startsWith('video');
+    const isImage = file.type.startsWith('image');
+
+    if (!isImage && !isVideo) {
+      setUploadError('Desteklenmeyen dosya türü! Yalnızca fotoğraf (JPG, PNG, WEBP, GIF) veya video (MP4) yükleyebilirsiniz.');
+      return;
+    }
+
+    setSelectedFile(file);
+    setIsReadingFile(true);
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const result = event.target?.result as string;
+      setFilePreview(result);
+      setUploadData((prev) => ({
+        ...prev,
+        mediaUrl: result,
+        mediaType: isVideo ? 'video' : 'image',
+        // Otomatik başlık önerisi (eğer başlık girilmediyse)
+        title: prev.title || file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ')
+      }));
+      setIsReadingFile(false);
+    };
+    reader.onerror = () => {
+      setUploadError('Dosya cihazdan okunurken bir hata oluştu. Lütfen tekrar deneyiniz.');
+      setIsReadingFile(false);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      processFile(file);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      processFile(file);
+    }
+  };
+
+  const handleUploadSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setUploadError(null);
-    if (!uploadData.title.trim() || !uploadData.mediaUrl.trim()) {
-      setUploadError('Lütfen başlık ve görsel/video dosyasını eksiksiz giriniz.');
+
+    if (!uploadData.title.trim()) {
+      setUploadError('Lütfen görsel / video başlığını giriniz.');
       return;
+    }
+
+    if (!uploadData.mediaUrl && !selectedFile) {
+      setUploadError('Lütfen cihazınızdan yüklenecek bir fotoğraf veya video seçiniz.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    let finalMediaUrl = uploadData.mediaUrl;
+
+    // Supabase Storage'a yüklemeyi dene (bulut aktifse)
+    if (selectedFile) {
+      try {
+        const fileExt = selectedFile.name.split('.').pop() || 'jpg';
+        const fileName = `user_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
+        const { url, error } = await uploadImageToSupabaseStorage('gallery', fileName, selectedFile);
+        if (url && !error) {
+          finalMediaUrl = url;
+        }
+      } catch (err) {
+        console.warn('Supabase storage upload fallback to local data URL:', err);
+      }
     }
 
     submitUserMedia({
       title: uploadData.title.trim(),
       uploaderName: uploadData.uploaderName.trim() || currentUser?.fullName || 'Delege',
       uploaderEmail: currentUser?.email,
-      mediaUrl: uploadData.mediaUrl.trim(),
+      mediaUrl: finalMediaUrl,
       mediaType: uploadData.mediaType,
       category: uploadData.category
     });
 
+    setIsSubmitting(false);
     setUploadSuccess(true);
+    setSelectedFile(null);
+    setFilePreview(null);
     setUploadData({
       title: '',
-      uploaderName: '',
+      uploaderName: currentUser?.fullName || '',
       mediaUrl: '',
       mediaType: 'image',
       category: 'etkinlik'
@@ -284,7 +376,7 @@ export default function GalleryPage() {
                       {item.title}
                     </h3>
                     <span className="text-[10px] text-slate-300 block mt-0.5 font-sans">
-                      {item.uploaderName || 'TİMAV Medya'}
+                      {item.uploaderName || 'ÖNDER Medya'}
                     </span>
                   </div>
                 </div>
@@ -404,36 +496,141 @@ export default function GalleryPage() {
                   </select>
                 </div>
 
+                {/* Device Upload Field */}
                 <div>
                   <label className="block text-xs font-semibold text-slate-200 mb-1.5 uppercase tracking-wider">
-                    Görsel / Video URL Adresi *
+                    Fotoğraf / Video Dosyası Seçin *
                   </label>
+
+                  {/* Hidden file input */}
                   <input
-                    type="url"
-                    required
-                    placeholder="https://images.unsplash.com/... veya dosya linki"
-                    value={uploadData.mediaUrl}
-                    onChange={(e) => setUploadData({ ...uploadData, mediaUrl: e.target.value })}
-                    className="w-full bg-[#061A33] border border-[#4DA3FF]/30 rounded-xl p-3 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-[#4DA3FF]"
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/quicktime,image/*,video/*"
+                    onChange={handleFileChange}
+                    className="hidden"
                   />
-                  <span className="text-[10px] text-slate-400 block mt-1">
-                    Hızlı deneme için herhangi bir doğrudan görsel/video linki yapıştırabilirsiniz.
-                  </span>
+
+                  {filePreview ? (
+                    /* Selected file preview card */
+                    <div className="relative rounded-2xl border border-emerald-500/40 bg-[#061A33] p-3.5 flex items-center gap-3.5 shadow-lg">
+                      <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-black/40 border border-white/10 shrink-0 flex items-center justify-center">
+                        {uploadData.mediaType === 'video' ? (
+                          <video src={filePreview} className="w-full h-full object-cover" />
+                        ) : (
+                          /* eslint-disable-next-line @next/next/no-img-element */
+                          <img src={filePreview} alt="Önizleme" className="w-full h-full object-cover" />
+                        )}
+                        <span className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-black/75 text-[9px] font-semibold text-white uppercase">
+                          {uploadData.mediaType === 'video' ? 'Video' : 'Fotoğraf'}
+                        </span>
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5 text-emerald-400 text-xs font-semibold">
+                          <CheckCircle className="w-3.5 h-3.5" />
+                          <span>Yüklemeye Hazır</span>
+                        </div>
+                        <p className="text-xs text-white font-medium truncate mt-0.5">
+                          {selectedFile?.name || 'Seçilen Medya Dosyası'}
+                        </p>
+                        <p className="text-[11px] text-slate-400 mt-0.5">
+                          {selectedFile ? `${(selectedFile.size / (1024 * 1024)).toFixed(2)} MB` : ''}
+                        </p>
+                        <div className="flex items-center gap-2.5 mt-2">
+                          <button
+                            type="button"
+                            onClick={() => fileInputRef.current?.click()}
+                            className="text-[11px] font-semibold text-[#4DA3FF] hover:underline cursor-pointer"
+                          >
+                            Dosyayı Değiştir
+                          </button>
+                          <span className="text-slate-600">•</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedFile(null);
+                              setFilePreview(null);
+                              setUploadData((prev) => ({ ...prev, mediaUrl: '' }));
+                              if (fileInputRef.current) fileInputRef.current.value = '';
+                            }}
+                            className="text-[11px] font-semibold text-rose-400 hover:underline cursor-pointer"
+                          >
+                            Kaldır
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    /* Dropzone when no file is selected */
+                    <div
+                      onClick={() => fileInputRef.current?.click()}
+                      onDragOver={(e) => {
+                        e.preventDefault();
+                        setIsDragOver(true);
+                      }}
+                      onDragLeave={() => setIsDragOver(false)}
+                      onDrop={handleDrop}
+                      className={`relative rounded-2xl border-2 border-dashed p-6 text-center transition-all cursor-pointer ${
+                        isDragOver
+                          ? 'border-[#4DA3FF] bg-[#4DA3FF]/15 shadow-xl shadow-[#4DA3FF]/20 scale-[1.01]'
+                          : 'border-[#4DA3FF]/30 hover:border-[#4DA3FF] bg-[#061A33]/80 hover:bg-[#061A33]'
+                      }`}
+                    >
+                      {isReadingFile ? (
+                        <div className="py-4 space-y-2">
+                          <Loader2 className="w-8 h-8 text-[#4DA3FF] animate-spin mx-auto" />
+                          <p className="text-xs text-slate-300 font-medium">Dosya cihazdan okunuyor...</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-2.5">
+                          <div className="w-12 h-12 rounded-full bg-[#4DA3FF]/15 border border-[#4DA3FF]/30 text-[#4DA3FF] flex items-center justify-center mx-auto transition-transform hover:scale-110">
+                            <UploadCloud className="w-6 h-6" />
+                          </div>
+                          <div>
+                            <p className="text-xs sm:text-sm font-semibold text-white">
+                              Cihazınızdan Fotoğraf veya Video Seçin
+                            </p>
+                            <p className="text-[11px] text-slate-400 mt-0.5">
+                              Tıklayarak cihazınızdan dosya seçin veya buraya sürükleyip bırakın
+                            </p>
+                          </div>
+                          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#092746] border border-white/10 text-[10px] text-slate-300 font-mono">
+                            <span>JPG, PNG, WEBP, GIF, MP4 (Maks. 15 MB)</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {uploadError && (
+                    <div className="mt-3 p-3 rounded-xl bg-rose-500/15 border border-rose-500/30 flex items-center gap-2 text-rose-300 text-xs">
+                      <AlertCircle className="w-4 h-4 shrink-0" />
+                      <span>{uploadError}</span>
+                    </div>
+                  )}
                 </div>
 
                 <div className="pt-3 flex justify-end gap-3">
                   <button
                     type="button"
-                    onClick={() => setIsUploadOpen(false)}
-                    className="px-5 py-2.5 rounded-full text-xs text-slate-300 hover:text-white cursor-pointer"
+                    onClick={() => {
+                      setSelectedFile(null);
+                      setFilePreview(null);
+                      setUploadError(null);
+                      setIsUploadOpen(false);
+                    }}
+                    className="px-5 py-2.5 rounded-full text-xs text-slate-300 hover:text-white cursor-pointer transition-colors"
                   >
                     Vazgeç
                   </button>
                   <button
                     type="submit"
-                    className="px-6 py-2.5 rounded-full bg-[#4DA3FF] hover:bg-[#258BF5] text-[#061A33] font-bold text-xs shadow-lg cursor-pointer"
+                    disabled={isSubmitting || isReadingFile}
+                    className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#4DA3FF] hover:bg-[#258BF5] text-[#061A33] font-bold text-xs shadow-lg cursor-pointer transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Moderasyona Gönder
+                    {isSubmitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                    <span>{isSubmitting ? 'Gönderiliyor...' : 'Moderasyona Gönder'}</span>
                   </button>
                 </div>
               </form>

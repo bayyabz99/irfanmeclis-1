@@ -9,7 +9,6 @@ import {
   X, 
   ChevronDown, 
   ChevronRight, 
-  LogIn,
   Home,
   Info,
   Layers,
@@ -24,6 +23,36 @@ import {
 } from 'lucide-react';
 import { getCurrentUser, logoutParticipant } from '@/lib/storage';
 import { Application } from '@/lib/types';
+
+/* ========================================================================= */
+/* Seljuk / Ottoman Gold Active Indicator Ornament                           */
+/* ========================================================================= */
+function GoldActiveOrnament() {
+  return (
+    <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 flex items-center justify-center w-20 pointer-events-none select-none">
+      <svg width="60" height="9" viewBox="0 0 60 9" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-[#dfbe7a]">
+        {/* Left tapered accent line */}
+        <line x1="2" y1="4.5" x2="21" y2="4.5" stroke="currentColor" strokeWidth="1" strokeOpacity="0.8" />
+        {/* Left accent leaf node */}
+        <circle cx="22.5" cy="4.5" r="1.1" fill="currentColor" fillOpacity="0.9" />
+        {/* Central Seljuk floral-diamond knot motif */}
+        <g transform="translate(30, 4.5)">
+          <path 
+            d="M-4 0 C-4 -2.4, -2.4 -4, 0 -4 C2.4 -4, 4 -2.4, 4 0 C4 2.4, 2.4 4, 0 4 C-2.4 4, -4 2.4, -4 0 Z" 
+            fill="none" 
+            stroke="currentColor" 
+            strokeWidth="0.85" 
+          />
+          <polygon points="0,-2.3 2.3,0 0,2.3 -2.3,0" fill="currentColor" fillOpacity="0.95" />
+        </g>
+        {/* Right accent leaf node */}
+        <circle cx="37.5" cy="4.5" r="1.1" fill="currentColor" fillOpacity="0.9" />
+        {/* Right tapered accent line */}
+        <line x1="39" y1="4.5" x2="58" y2="4.5" stroke="currentColor" strokeWidth="1" strokeOpacity="0.8" />
+      </svg>
+    </div>
+  );
+}
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -51,7 +80,7 @@ export default function Navbar() {
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 20) {
+      if (window.scrollY > 15) {
         setIsScrolled(true);
       } else {
         setIsScrolled(false);
@@ -87,7 +116,7 @@ export default function Navbar() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Desktop navigation links
+  // Desktop navigation links matching reference
   const navLinks = [
     { name: 'Ana Sayfa', href: '/' },
     { name: 'Hakkımızda', href: '/hakkinda' },
@@ -107,7 +136,7 @@ export default function Navbar() {
     { name: 'İletişim', href: '/iletisim' },
   ];
 
-  // Mobile drawer links matching reference design
+  // Mobile drawer links
   const mobileNavLinks = [
     { name: 'Ana Sayfa', href: '/', icon: Home },
     { name: 'Hakkında', href: '/hakkinda', icon: Info },
@@ -123,332 +152,397 @@ export default function Navbar() {
     return pathname.startsWith(href);
   };
 
+  if (pathname?.startsWith('/profil')) {
+    return null;
+  }
+
   return (
     <>
+      {/* ========================================================================= */}
+      {/* DESKTOP & MOBILE HEADER                                                   */}
+      {/* Soft rounded bottom, petrol teal gradient, Seljuk pattern overlay         */}
+      {/* ========================================================================= */}
       <header 
-      className={`sticky top-0 z-40 transition-all duration-300 w-full ${
-        isScrolled 
-          ? 'bg-[#061A33]/95 backdrop-blur-md border-b border-[#4DA3FF]/20 shadow-xl shadow-[#030D1A]/50 py-3' 
-          : 'bg-[#061A33]/90 backdrop-blur-sm border-b border-white/5 py-3.5 sm:py-4'
-      }`}
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between w-full">
-        
-        {/* Left: Official Circular Logo + "ÖNDERLİĞİNDE / İRFAN GENÇ MECLİSİ" */}
-        <Link href="/" className="flex items-center gap-2.5 sm:gap-3.5 group min-w-0">
-          <div className="relative w-9 h-9 sm:w-11 sm:h-11 rounded-full overflow-hidden shrink-0 border border-[#4DA3FF]/40 shadow-lg shadow-[#061A33] bg-[#061A33] group-hover:scale-105 group-hover:border-[#4DA3FF] transition-all">
-            <Image
-              src="/logo.png"
-              alt="İrfan Meclis Simülasyonu"
-              fill
-              sizes="(max-width: 640px) 36px, 44px"
-              className="object-cover"
-              priority
-            />
-          </div>
-          <div className="flex flex-col min-w-0">
-            <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.18em] text-[#4DA3FF] font-medium leading-none mb-1">
-              ÖNDERLİĞİNDE
-            </span>
-            <span className="text-sm sm:text-base lg:text-lg font-serif font-black tracking-tight text-white leading-tight truncate">
-              İRFAN MECLİSİ
-            </span>
-          </div>
-        </Link>
+        className={`fixed top-0 left-0 right-0 z-50 w-full px-2 sm:px-4 transition-all duration-300 pointer-events-none ${
+          isScrolled ? 'pt-1 sm:pt-1.5' : 'pt-2 sm:pt-2.5'
+        }`}
+      >
+        <div
+          className={`pointer-events-auto relative w-full max-w-[1380px] mx-auto transition-all duration-300 overflow-hidden ${
+            /* Curved corners matching reference design */
+            'rounded-2xl sm:rounded-3xl'
+          } ${
+            isScrolled 
+              ? 'bg-gradient-to-b from-[#092530]/98 via-[#061d26]/96 to-[#04161e]/98 backdrop-blur-xl shadow-2xl shadow-[#020b10]/70 border border-[#cca663]/40'
+              : 'bg-gradient-to-b from-[#0b2f3d]/94 via-[#08242f]/92 to-[#051a23]/96 backdrop-blur-md shadow-xl shadow-[#020b10]/50 border border-[#cca663]/35'
+          }`}
+        >
+          {/* Subtle Authentic Islamic Geometric / Seljuk Pattern Texture Overlay */}
+          <div 
+            className="absolute inset-0 pointer-events-none opacity-[0.09] mix-blend-screen bg-repeat"
+            style={{
+              backgroundImage: `url('/images/nav-pattern.svg')`,
+              backgroundSize: '54px 54px',
+              maskImage: 'radial-gradient(ellipse 90% 120% at 50% 10%, black 50%, transparent 95%)',
+              WebkitMaskImage: 'radial-gradient(ellipse 90% 120% at 50% 10%, black 50%, transparent 95%)',
+            }}
+            aria-hidden="true"
+          />
 
-        {/* Center: Desktop Navigation Links */}
-        <nav className="hidden lg:flex items-center space-x-1 xl:space-x-2">
-          {navLinks.map((link) => {
-            const active = isActive(link.href);
+          {/* Soft ambient center glow behind navigation items */}
+          <div 
+            className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-8 pointer-events-none opacity-40 bg-gradient-to-b from-[#2dd4bf]/20 to-transparent blur-md"
+            aria-hidden="true"
+          />
+
+          {/* Inner Header Content Container */}
+          <div className="relative w-full mx-auto px-3 sm:px-5 lg:px-6 py-2.5 sm:py-3 flex items-center justify-between">
             
-            if (link.hasDropdown) {
-              return (
-                <div 
-                  key={link.name} 
-                  className="relative"
-                  onMouseEnter={() => setCommissionDropdown(true)}
-                  onMouseLeave={() => setCommissionDropdown(false)}
-                >
+            {/* Left: Emblem Logo + "ÖNDERLİĞİNDE / İRFAN MECLİSİ" */}
+            <Link href="/" className="flex items-center gap-2.5 sm:gap-3 group shrink-0 select-none">
+              {/* Circular Emblem with Golden Border Ring */}
+              <div className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-full p-0.5 border border-[#dfbe7a]/80 shadow-[0_0_14px_rgba(223,190,122,0.25)] bg-[#08242f] group-hover:border-[#f3d99d] group-hover:shadow-[0_0_18px_rgba(223,190,122,0.4)] transition-all duration-300 shrink-0">
+                <div className="relative w-full h-full rounded-full overflow-hidden">
+                  <Image
+                    src="/logo.png"
+                    alt="İrfan Meclisi"
+                    fill
+                    sizes="(max-width: 640px) 40px, 44px"
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    priority
+                  />
+                </div>
+              </div>
+
+              {/* Title & Slogan in Elegant Serif / Sand Gold */}
+              <div className="flex flex-col shrink-0">
+                <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.22em] text-[#dfbe7a] font-medium leading-none mb-1 drop-shadow-sm whitespace-nowrap">
+                  ÖNDERLİĞİNDE
+                </span>
+                <span className="text-sm sm:text-base lg:text-[16px] xl:text-[17px] font-serif font-bold tracking-wide text-white leading-tight whitespace-nowrap drop-shadow-sm group-hover:text-[#f8f9fa] transition-colors">
+                  İRFAN MECLİSİ
+                </span>
+              </div>
+            </Link>
+
+            {/* Center: Desktop Navigation Links */}
+            <nav className="hidden lg:flex items-center space-x-0.5 xl:space-x-1.5 whitespace-nowrap">
+              {navLinks.map((link) => {
+                const active = isActive(link.href);
+                
+                if (link.hasDropdown) {
+                  return (
+                    <div 
+                      key={link.name} 
+                      className="relative"
+                      onMouseEnter={() => setCommissionDropdown(true)}
+                      onMouseLeave={() => setCommissionDropdown(false)}
+                    >
+                      <Link
+                        href={link.href}
+                        className={`relative px-2.5 xl:px-3.5 py-1.5 xl:py-2 text-[13.5px] xl:text-[14px] font-serif transition-all inline-flex items-center gap-1.5 whitespace-nowrap ${
+                          active
+                            ? 'text-white font-semibold'
+                            : 'text-[#c6d7e0] hover:text-white font-normal'
+                        }`}
+                      >
+                        <span className="tracking-wide">{link.name}</span>
+                        <ChevronDown className={`w-3.5 h-3.5 text-[#dfbe7a] transition-transform duration-200 ${commissionDropdown ? 'rotate-180' : ''}`} />
+                        {active && <GoldActiveOrnament />}
+                      </Link>
+
+                      {commissionDropdown && (
+                        <div className="absolute top-full left-1/2 -translate-x-1/2 w-64 pt-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                          <div className="relative p-2 rounded-2xl bg-gradient-to-b from-[#092530]/98 to-[#04161e]/98 border border-[#cca663]/40 shadow-2xl backdrop-blur-xl space-y-1 overflow-hidden">
+                            {/* Texture inside dropdown */}
+                            <div 
+                              className="absolute inset-0 pointer-events-none opacity-10 bg-repeat"
+                              style={{
+                                backgroundImage: `url('/images/nav-pattern.svg')`,
+                                backgroundSize: '40px 40px',
+                              }}
+                            />
+                            {link.subLinks?.map((sub) => (
+                              <Link
+                                key={sub.href}
+                                href={sub.href}
+                                className="relative block p-2.5 rounded-xl hover:bg-[#0e3b4b]/60 transition-colors group/sub"
+                              >
+                                <span className="text-xs font-semibold text-white block group-hover/sub:text-[#dfbe7a] transition-colors">
+                                  {sub.name}
+                                </span>
+                                <span className="text-[11px] text-slate-300 block mt-0.5">
+                                  {sub.desc}
+                                </span>
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+
+                return (
                   <Link
+                    key={link.name}
                     href={link.href}
-                    className={`relative px-3.5 py-2 text-sm font-medium transition-all inline-flex items-center gap-1 ${
+                    className={`relative px-2.5 xl:px-3.5 py-1.5 xl:py-2 text-[13.5px] xl:text-[14px] font-serif transition-all whitespace-nowrap ${
                       active
                         ? 'text-white font-semibold'
-                        : 'text-slate-300 hover:text-white'
+                        : 'text-[#c6d7e0] hover:text-white font-normal'
                     }`}
                   >
-                    <span>{link.name}</span>
-                    <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
-                    {active && (
-                      <span className="absolute bottom-0 left-3.5 right-3.5 h-0.5 bg-[#4DA3FF] rounded-full" />
-                    )}
+                    <span className="tracking-wide">{link.name}</span>
+                    {active && <GoldActiveOrnament />}
                   </Link>
+                );
+              })}
+            </nav>
 
-                  {commissionDropdown && (
-                    <div className="absolute top-full left-0 w-64 pt-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-                      <div className="p-2 rounded-xl bg-[#092746] border border-[#4DA3FF]/25 shadow-2xl backdrop-blur-xl space-y-1">
-                        {link.subLinks?.map((sub) => (
-                          <Link
-                            key={sub.href}
-                            href={sub.href}
-                            className="block p-2.5 rounded-lg hover:bg-[#0D3156] transition-colors group/sub"
-                          >
-                            <span className="text-xs font-semibold text-white block group-hover/sub:text-[#4DA3FF] transition-colors">
-                              {sub.name}
-                            </span>
-                            <span className="text-[11px] text-slate-400 block mt-0.5">
-                              {sub.desc}
-                            </span>
-                          </Link>
-                        ))}
-                      </div>
+            {/* Right: Pill Styled Action Button ("Giriş Yap" / "Profilim") */}
+            <div className="hidden sm:flex items-center gap-2 sm:gap-3 shrink-0">
+              {currentUser ? (
+                <div className="flex items-center gap-2">
+                  <Link
+                    href="/profil"
+                    className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-[#cca663]/50 bg-[#0e3b4b]/70 hover:bg-[#124d60]/90 text-white text-xs font-semibold transition-all duration-300 shadow-md shadow-[#04161e]/50 group"
+                  >
+                    <div className="w-6 h-6 rounded-full bg-[#dfbe7a]/20 text-[#dfbe7a] border border-[#dfbe7a]/50 flex items-center justify-center font-bold text-[11px] shrink-0 overflow-hidden">
+                      {currentUser.avatarUrl ? (
+                        <img src={currentUser.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                      ) : (
+                        currentUser.fullName.charAt(0).toUpperCase()
+                      )}
                     </div>
-                  )}
+                    <span className="max-w-[110px] truncate">{currentUser.fullName.split(' ')[0]}</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#dfbe7a]/20 text-[#dfbe7a] font-sans">Profilim</span>
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      logoutParticipant();
+                      setCurrentUser(null);
+                    }}
+                    title="Çıkış Yap"
+                    className="p-2 rounded-full border border-[#cca663]/30 bg-[#08242f]/80 hover:bg-red-950/60 hover:border-red-500/50 text-slate-300 hover:text-red-300 transition-all cursor-pointer"
+                  >
+                    <LogOut className="w-3.5 h-3.5" />
+                  </button>
                 </div>
-              );
-            }
+              ) : (
+                /* Sleek Pill Login Button (exact match with reference image) */
+                <Link
+                  href="/giris"
+                  className="group inline-flex items-center rounded-full border border-[#2d6477]/75 hover:border-[#dfbe7a]/85 bg-gradient-to-r from-[#0c3340]/90 to-[#0e3c4c]/90 hover:from-[#0e3c4c] hover:to-[#134e63] text-white text-xs font-medium transition-all duration-300 shadow-md shadow-[#04161e]/50 hover:shadow-[0_0_16px_rgba(223,190,122,0.22)] active:scale-95 overflow-hidden"
+                >
+                  {/* Left User Icon Container */}
+                  <span className="flex items-center justify-center pl-3.5 pr-2.5 py-2 border-r border-[#2d6477]/60 group-hover:border-[#dfbe7a]/40 transition-colors">
+                    <UserIcon className="w-3.5 h-3.5 text-[#9cd8e6] group-hover:text-[#dfbe7a] transition-colors" />
+                  </span>
+                  {/* Right Action Text */}
+                  <span className="px-3.5 py-2 font-serif font-medium tracking-wide text-[13px]">
+                    Giriş Yap
+                  </span>
+                </Link>
+              )}
+            </div>
 
+            {/* Mobile Menu & Action Trigger */}
+            <div className="flex lg:hidden items-center gap-2 shrink-0">
+              {currentUser ? (
+                <Link
+                  href="/profil"
+                  className="text-xs border border-[#cca663]/50 px-3 py-1.5 rounded-full text-[#dfbe7a] font-semibold bg-[#0e3b4b]/80 flex items-center gap-1.5"
+                >
+                  <UserIcon className="w-3 h-3" />
+                  <span>Profil</span>
+                </Link>
+              ) : (
+                <Link
+                  href="/giris"
+                  className="text-xs border border-[#2d6477]/75 px-3 py-1.5 rounded-full text-white font-medium bg-[#0c3340]/90 flex items-center gap-1.5"
+                >
+                  <UserIcon className="w-3 h-3 text-[#9cd8e6]" />
+                  <span>Giriş</span>
+                </Link>
+              )}
+
+              <button
+                onClick={() => setMobileOpen(!mobileOpen)}
+                className="p-2 rounded-xl bg-[#08242f]/90 border border-[#cca663]/40 text-[#dfbe7a] hover:text-white shrink-0 cursor-pointer transition-all active:scale-95"
+                aria-label={mobileOpen ? "Menüyü Kapat" : "Menüyü Aç"}
+              >
+                {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </header>
+
+      {/* ========================================================================= */}
+      {/* MOBILE RIGHT-TO-LEFT SLIDE-OVER DRAWER                                     */}
+      {/* Enhanced with dark petrol teal, Seljuk pattern texture, gold accents      */}
+      {/* ========================================================================= */}
+      
+      {/* Backdrop Overlay */}
+      <div 
+        onClick={() => setMobileOpen(false)}
+        className={`fixed inset-0 z-[999] bg-[#020b10]/85 backdrop-blur-sm transition-all duration-300 lg:hidden ${
+          mobileOpen ? 'opacity-100 visible pointer-events-auto' : 'opacity-0 invisible pointer-events-none'
+        }`}
+        aria-hidden="true"
+      />
+
+      {/* Slide-over Drawer Panel */}
+      <div 
+        className={`fixed top-0 right-0 bottom-0 z-[1000] h-full h-[100dvh] w-[85vw] max-w-sm bg-gradient-to-b from-[#092530] via-[#061d26] to-[#04161e] border-l border-[#cca663]/35 shadow-2xl shadow-[#020b10] flex flex-col justify-between p-4 sm:p-5 transition-all duration-300 ease-out transform lg:hidden ${
+          mobileOpen ? 'translate-x-0 opacity-100 visible pointer-events-auto' : 'translate-x-full opacity-0 invisible pointer-events-none'
+        }`}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Mobil Gezinme Menüsü"
+      >
+        {/* Subtle Seljuk pattern inside drawer */}
+        <div 
+          className="absolute inset-0 pointer-events-none opacity-[0.08] mix-blend-screen bg-repeat"
+          style={{
+            backgroundImage: `url('/images/nav-pattern.svg')`,
+            backgroundSize: '50px 50px',
+          }}
+          aria-hidden="true"
+        />
+
+        {/* 1. Drawer Header */}
+        <div className="relative flex items-center justify-between pb-4 border-b border-[#cca663]/25 shrink-0">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="relative w-10 h-10 rounded-full p-0.5 border border-[#dfbe7a]/80 bg-[#08242f] shadow-md shrink-0">
+              <div className="relative w-full h-full rounded-full overflow-hidden">
+                <Image
+                  src="/logo.png"
+                  alt="İrfan Meclis Logo"
+                  fill
+                  sizes="40px"
+                  className="object-cover"
+                />
+              </div>
+            </div>
+            <div className="flex flex-col min-w-0">
+              <span className="text-sm font-serif font-black tracking-tight text-white leading-tight truncate">
+                İRFAN MECLİSİ
+              </span>
+              <span className="text-[10px] uppercase tracking-wider text-[#dfbe7a] font-semibold mt-0.5 truncate">
+                ÖNDER DERNEĞİ ÖNCÜLÜĞÜNDE
+              </span>
+            </div>
+          </div>
+
+          <button
+            onClick={() => setMobileOpen(false)}
+            className="w-9 h-9 rounded-xl bg-[#08242f] border border-[#cca663]/30 text-slate-300 hover:text-white flex items-center justify-center cursor-pointer transition-colors shrink-0"
+            aria-label="Menüyü Kapat"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* 2. Drawer Navigation Items */}
+        <div className="relative flex-1 py-4 overflow-y-auto space-y-1.5 no-scrollbar">
+          {mobileNavLinks.map((link) => {
+            const active = isActive(link.href);
+            const Icon = link.icon;
             return (
               <Link
                 key={link.name}
                 href={link.href}
-                className={`relative px-3.5 py-2 text-sm font-medium transition-all ${
+                onClick={() => setMobileOpen(false)}
+                className={`flex items-center justify-between px-3.5 py-3 rounded-2xl text-sm transition-all ${
                   active
-                    ? 'text-white font-semibold'
-                    : 'text-slate-300 hover:text-white'
+                    ? 'bg-[#0e3b4b]/90 border border-[#dfbe7a]/50 text-[#dfbe7a] shadow-md font-semibold'
+                    : 'text-slate-200 hover:text-white hover:bg-[#0c3340]/60 border border-transparent'
                 }`}
               >
-                <span>{link.name}</span>
-                {active && (
-                  <span className="absolute bottom-0 left-3.5 right-3.5 h-0.5 bg-[#4DA3FF] rounded-full" />
+                <div className="flex items-center gap-3 min-w-0">
+                  <Icon className={`w-5 h-5 shrink-0 ${active ? 'text-[#dfbe7a]' : 'text-slate-400'}`} />
+                  <span className={`truncate font-serif ${active ? 'text-white font-semibold' : 'text-slate-200'}`}>
+                    {link.name}
+                  </span>
+                </div>
+                {active ? (
+                  <span className="w-2 h-2 rounded-full bg-[#dfbe7a] shadow-[0_0_8px_#dfbe7a] shrink-0" />
+                ) : (
+                  <ChevronRight className="w-4 h-4 text-slate-500 shrink-0" />
                 )}
               </Link>
             );
           })}
-        </nav>
+        </div>
 
-        {/* Right: Desktop "Giriş Yap" / "Profilim" Button */}
-        <div className="hidden sm:flex items-center gap-3">
+        {/* 3. Drawer Bottom Action Buttons */}
+        <div className="relative pt-3 border-t border-[#cca663]/25 shrink-0 space-y-2.5">
           {currentUser ? (
-            <div className="flex items-center gap-2">
+            <div className="space-y-2">
               <Link
                 href="/profil"
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#4DA3FF]/50 bg-[#092746] hover:bg-[#0c3159] text-white text-xs font-semibold transition-all shadow-md group"
+                onClick={() => setMobileOpen(false)}
+                className="w-full flex items-center justify-between p-3 rounded-xl bg-[#0e3b4b] border border-[#cca663]/50 text-white font-semibold text-xs sm:text-sm shadow-md"
               >
-                <div className="w-6 h-6 rounded-full bg-[#4DA3FF]/20 text-[#4DA3FF] border border-[#4DA3FF]/40 flex items-center justify-center font-bold text-[11px] shrink-0 overflow-hidden">
-                  {currentUser.avatarUrl ? (
-                    <img src={currentUser.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
-                  ) : (
-                    currentUser.fullName.charAt(0).toUpperCase()
-                  )}
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-8 h-8 rounded-full bg-[#dfbe7a]/20 text-[#dfbe7a] border border-[#dfbe7a]/40 flex items-center justify-center font-bold text-xs shrink-0 overflow-hidden">
+                    {currentUser.avatarUrl ? (
+                      <img src={currentUser.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                    ) : (
+                      currentUser.fullName.charAt(0).toUpperCase()
+                    )}
+                  </div>
+                  <div className="flex flex-col min-w-0 text-left">
+                    <span className="text-white text-xs font-bold truncate">{currentUser.fullName}</span>
+                    <span className="text-[10px] text-[#dfbe7a]">Profilim & QR Kartım</span>
+                  </div>
                 </div>
-                <span className="max-w-[110px] truncate">{currentUser.fullName.split(' ')[0]}</span>
-                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[#4DA3FF]/20 text-[#4DA3FF] font-sans">Profilim</span>
+                <ArrowRight className="w-4 h-4 text-[#dfbe7a]" />
               </Link>
               <button
                 type="button"
                 onClick={() => {
                   logoutParticipant();
                   setCurrentUser(null);
+                  setMobileOpen(false);
                 }}
-                title="Çıkış Yap"
-                className="p-2 rounded-full border border-slate-700/60 bg-[#061A33] hover:bg-red-950/60 hover:border-red-500/50 text-slate-400 hover:text-red-300 transition-colors cursor-pointer"
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-red-500/30 bg-red-950/40 text-red-300 text-xs font-semibold cursor-pointer transition-colors"
               >
                 <LogOut className="w-3.5 h-3.5" />
+                <span>Oturumu Kapat</span>
               </button>
             </div>
           ) : (
             <Link
               href="/giris"
-              className="inline-flex items-center gap-2 px-5 py-2 rounded-full border border-slate-500/50 hover:border-[#4DA3FF] bg-[#092746]/60 hover:bg-[#092746] text-white text-xs font-semibold transition-all duration-200 shadow-sm"
+              onClick={() => setMobileOpen(false)}
+              className="w-full flex items-center justify-center gap-2.5 py-3 rounded-xl bg-[#0c3340] border border-[#2d6477] hover:border-[#dfbe7a]/60 text-white font-semibold text-xs sm:text-sm transition-all shadow-md active:scale-[0.99]"
             >
-              <LogIn className="w-3.5 h-3.5 text-[#4DA3FF]" />
-              <span>Giriş Yap</span>
+              <QrCode className="w-4 h-4 text-[#dfbe7a]" />
+              <span>Bilet Sorgula / Giriş</span>
             </Link>
           )}
-        </div>
 
-        {/* Mobile Action & Menu Trigger */}
-        <div className="flex lg:hidden items-center gap-1.5 sm:gap-2 shrink-0">
-          {currentUser ? (
-            <Link
-              href="/profil"
-              className="text-[11px] sm:text-xs border border-[#4DA3FF]/60 px-2.5 sm:px-3 py-1.5 rounded-full text-[#4DA3FF] font-semibold bg-[#092746] whitespace-nowrap flex items-center gap-1.5"
-            >
-              <UserIcon className="w-3 h-3" />
-              <span>Profilim</span>
-            </Link>
-          ) : (
-            <Link
-              href="/giris"
-              className="text-[11px] sm:text-xs border border-slate-600 px-2.5 sm:px-3 py-1.5 rounded-full text-white font-semibold bg-[#092746] whitespace-nowrap"
-            >
-              Giriş
-            </Link>
-          )}
-          <button
-            onClick={() => setMobileOpen(!mobileOpen)}
-            className="p-2 rounded-xl bg-[#092746] border border-slate-700/60 text-slate-300 hover:text-white shrink-0 cursor-pointer transition-colors active:scale-95"
-            aria-label={mobileOpen ? "Menüyü Kapat" : "Menüyü Aç"}
-          >
-            {mobileOpen ? <X className="w-5 h-5 sm:w-6 sm:h-6" /> : <Menu className="w-5 h-5 sm:w-6 sm:h-6" />}
-          </button>
-        </div>
-
-      </div>
-    </header>
-
-    {/* ========================================================================= */}
-    {/* MOBILE RIGHT-TO-LEFT SLIDE-OVER DRAWER (RENDERED AT ROOT LEVEL)           */}
-    {/* ========================================================================= */}
-    
-    {/* Backdrop Overlay */}
-    <div 
-      onClick={() => setMobileOpen(false)}
-      className={`fixed inset-0 z-[999] bg-[#030D1A]/80 backdrop-blur-sm transition-all duration-300 lg:hidden ${
-        mobileOpen ? 'opacity-100 visible pointer-events-auto' : 'opacity-0 invisible pointer-events-none'
-      }`}
-      aria-hidden="true"
-    />
-
-    {/* Slide-over Drawer Panel */}
-    <div 
-      className={`fixed top-0 right-0 bottom-0 z-[1000] h-full h-[100dvh] w-[85vw] max-w-sm bg-[#061A33] border-l border-[#4DA3FF]/25 shadow-2xl shadow-[#030D1A] flex flex-col justify-between p-4 sm:p-5 transition-all duration-300 ease-out transform lg:hidden ${
-        mobileOpen ? 'translate-x-0 opacity-100 visible pointer-events-auto' : 'translate-x-full opacity-0 invisible pointer-events-none'
-      }`}
-      role="dialog"
-      aria-modal="true"
-      aria-label="Mobil Gezinme Menüsü"
-    >
-      {/* 1. Drawer Header */}
-      <div className="flex items-center justify-between pb-4 border-b border-white/10 shrink-0">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="relative w-10 h-10 rounded-full overflow-hidden shrink-0 border border-[#4DA3FF]/40 bg-[#061A33] shadow-md">
-            <Image
-              src="/logo.png"
-              alt="İrfan Meclis Logo"
-              fill
-              sizes="40px"
-              className="object-cover"
-            />
-          </div>
-          <div className="flex flex-col min-w-0">
-            <span className="text-sm font-serif font-black tracking-tight text-white leading-tight truncate">
-              İRFAN MECLİSİ
-            </span>
-            <span className="text-[10px] uppercase tracking-wider text-[#4DA3FF] font-semibold mt-0.5 truncate">
-              TİMAV SİMÜLASYONU 2026
-            </span>
-          </div>
-        </div>
-
-        <button
-          onClick={() => setMobileOpen(false)}
-          className="w-9 h-9 rounded-xl bg-[#092746] border border-slate-700/60 text-slate-300 hover:text-white flex items-center justify-center cursor-pointer transition-colors shrink-0"
-          aria-label="Menüyü Kapat"
-        >
-          <X className="w-5 h-5" />
-        </button>
-      </div>
-
-      {/* 2. Drawer Navigation Items (Matching exact screenshot design) */}
-      <div className="flex-1 py-4 overflow-y-auto space-y-1.5 no-scrollbar">
-        {mobileNavLinks.map((link) => {
-          const active = isActive(link.href);
-          const Icon = link.icon;
-          return (
-            <Link
-              key={link.name}
-              href={link.href}
-              onClick={() => setMobileOpen(false)}
-              className={`flex items-center justify-between px-3.5 py-3 rounded-2xl text-sm font-medium transition-all ${
-                active
-                  ? 'bg-[#0c2b4c]/85 border border-[#4DA3FF]/45 text-[#4DA3FF] shadow-md shadow-[#0c2b4c]/50 font-semibold'
-                  : 'text-slate-200 hover:text-white hover:bg-[#092746]/60 border border-transparent'
-              }`}
-            >
-              <div className="flex items-center gap-3 min-w-0">
-                <Icon className={`w-5 h-5 shrink-0 ${active ? 'text-[#4DA3FF]' : 'text-slate-400'}`} />
-                <span className={`truncate ${active ? 'text-white font-semibold' : 'text-slate-200'}`}>
-                  {link.name}
-                </span>
-              </div>
-              {active ? (
-                <span className="w-2 h-2 rounded-full bg-[#4DA3FF] shadow-[0_0_8px_#4DA3FF] shrink-0" />
-              ) : (
-                <ChevronRight className="w-4 h-4 text-slate-500 shrink-0" />
-              )}
-            </Link>
-          );
-        })}
-      </div>
-
-      {/* 3. Drawer Bottom Action Buttons & Subtitle */}
-      <div className="pt-3 border-t border-white/10 shrink-0 space-y-2.5">
-        {/* Bilet Sorgula / Giriş or Profilim */}
-        {currentUser ? (
-          <div className="space-y-2">
-            <Link
-              href="/profil"
-              onClick={() => setMobileOpen(false)}
-              className="w-full flex items-center justify-between p-3 rounded-xl bg-[#0c2b4c] border border-[#4DA3FF]/50 text-white font-semibold text-xs sm:text-sm shadow-md"
-            >
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-8 h-8 rounded-full bg-[#4DA3FF]/20 text-[#4DA3FF] border border-[#4DA3FF]/40 flex items-center justify-center font-bold text-xs shrink-0 overflow-hidden">
-                  {currentUser.avatarUrl ? (
-                    <img src={currentUser.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
-                  ) : (
-                    currentUser.fullName.charAt(0).toUpperCase()
-                  )}
-                </div>
-                <div className="flex flex-col min-w-0 text-left">
-                  <span className="text-white text-xs font-bold truncate">{currentUser.fullName}</span>
-                  <span className="text-[10px] text-[#4DA3FF]">Profilim & QR Kartım</span>
-                </div>
-              </div>
-              <ArrowRight className="w-4 h-4 text-[#4DA3FF]" />
-            </Link>
-            <button
-              type="button"
-              onClick={() => {
-                logoutParticipant();
-                setCurrentUser(null);
-                setMobileOpen(false);
-              }}
-              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-red-500/30 bg-red-950/40 text-red-300 text-xs font-semibold cursor-pointer transition-colors"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-              <span>Oturumu Kapat</span>
-            </button>
-          </div>
-        ) : (
+          {/* Delege Başvurusu Yap Button */}
           <Link
-            href="/giris"
+            href="/basvuru"
             onClick={() => setMobileOpen(false)}
-            className="w-full flex items-center justify-center gap-2.5 py-3 rounded-xl bg-[#0c243f] border border-[#2a5078] hover:border-[#4DA3FF]/60 text-white font-semibold text-xs sm:text-sm transition-all shadow-md active:scale-[0.99]"
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-[#cca663] via-[#dfbe7a] to-[#cca663] hover:brightness-110 text-[#071d26] font-serif font-bold text-xs sm:text-sm shadow-lg shadow-[#cca663]/20 transition-all active:scale-[0.99]"
           >
-            <QrCode className="w-4 h-4 text-[#4DA3FF]" />
-            <span>Bilet Sorgula / Giriş</span>
+            <span>Delege Başvurusu Yap</span>
+            <ArrowRight className="w-4 h-4" />
           </Link>
-        )}
 
-        {/* Delege Başvurusu Yap Button */}
-        <Link
-          href="/basvuru"
-          onClick={() => setMobileOpen(false)}
-          className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-[#4DA3FF] hover:bg-[#3b8ee6] text-white font-bold text-xs sm:text-sm shadow-lg shadow-blue-500/25 transition-all active:scale-[0.99]"
-        >
-          <span>Delege Başvurusu Yap</span>
-          <ArrowRight className="w-4 h-4" />
-        </Link>
-
-        {/* Location & Date Footer */}
-        <p className="text-center text-[11px] text-slate-400 font-sans tracking-wide pt-2 pb-0.5">
-          23-24-25 Ekim 2026 • SKM Konya
-        </p>
+          {/* Location & Date Footer */}
+          <p className="text-center text-[11px] text-[#cca663]/80 font-serif tracking-wide pt-2 pb-0.5">
+            23-24-25 Ekim 2026 • SKM Konya
+          </p>
+        </div>
       </div>
-    </div>
-  </>
+    </>
   );
 }
-

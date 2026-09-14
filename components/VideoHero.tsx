@@ -51,7 +51,7 @@ export default function VideoHero() {
         {/* Top Badges */}
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-900/80 backdrop-blur-md border border-blue-500/30 text-xs sm:text-sm text-slate-300 mb-6 shadow-xl shadow-blue-950/50">
           <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
-          <span className="font-semibold text-amber-300">TİMAV Önderliğinde</span>
+          <span className="font-semibold text-amber-300">ÖNDER Derneği Öncülüğünde</span>
           <span className="text-slate-500">•</span>
           <span className="text-blue-300 font-medium">Ulusal Gençlik Meclisi Simülasyonu</span>
         </div>

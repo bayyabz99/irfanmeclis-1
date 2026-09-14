@@ -944,10 +944,14 @@ export function deleteAnnouncement(id: string): Announcement[] {
 export function getUserAnnouncements(userStatus?: ApplicationStatus): Announcement[] {
   const announcements = getStoredAnnouncements();
   return announcements.filter((a) => {
-    if (a.targetGroup === 'all') return true;
-    if (a.targetGroup === 'approved_delegates' && userStatus === 'approved') return true;
-    if (a.targetGroup === 'pending' && userStatus === 'pending') return true;
-    return false;
+    if (!a.targetGroup || a.targetGroup === 'all') return true;
+    if (a.targetGroup === 'approved_delegates') {
+      return !userStatus || userStatus === 'approved';
+    }
+    if (a.targetGroup === 'pending') {
+      return userStatus === 'pending';
+    }
+    return true;
   });
 }
 
@@ -1006,5 +1010,5 @@ export function exportApplicationsToExcel(applications: Application[]): void {
   worksheet['!cols'] = columnWidths;
 
   const dateStr = new Date().toISOString().split('T')[0];
-  XLSX.writeFile(workbook, `TIMAV_Irfan_Meclisi_Delegeler_${dateStr}.xlsx`);
+  XLSX.writeFile(workbook, `ONDER_Irfan_Meclisi_Delegeler_${dateStr}.xlsx`);
 }

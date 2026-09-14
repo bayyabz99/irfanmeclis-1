@@ -130,9 +130,9 @@ export default function ContactPage() {
                 <span>Doğrudan İrtibat Bilgileri</span>
               </h3>
               <div className="space-y-2 text-xs text-slate-300 font-sans">
-                <p><strong className="text-white">TİMAV Genel Merkezi:</strong> {contact.phoneTimav || '+90 (332) 350 20 40'}</p>
+                <p><strong className="text-white">ÖNDER Genel Merkezi:</strong> {contact.phoneTimav || '+90 (212) 521 19 58'}</p>
                 <p><strong className="text-white">Meclis Koordinasyon Masası:</strong> {contact.phoneCoord || '+90 (532) 111 20 26'}</p>
-                <p><strong className="text-white">Resmi E-Posta:</strong> {contact.email || 'bilgi@timav.org.tr / irfanmeclisi@timav.org.tr'}</p>
+                <p><strong className="text-white">Resmi E-Posta:</strong> {contact.email || 'bilgi@onder.org.tr / irfanmeclisi@onder.org.tr'}</p>
               </div>
             </div>
 

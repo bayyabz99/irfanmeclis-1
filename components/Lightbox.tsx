@@ -135,7 +135,7 @@ export default function Lightbox({
           {currentItem.title}
         </h3>
         <p className="text-xs text-slate-400">
-          Yükleyen: {currentItem.uploaderName || 'TİMAV Medya'} • {currentItem.createdAt}
+          Yükleyen: {currentItem.uploaderName || 'ÖNDER Medya'} • {currentItem.createdAt}
         </p>
       </div>
 

@@ -116,20 +116,22 @@ export default function HomePage() {
       {/* ========================================================================= */}
       {/* 1. HERO SECTION (BİREBİR REFERANS GÖRSEL TASARIMI)                        */}
       {/* ========================================================================= */}
-      <section className="relative min-h-[90vh] flex items-center overflow-hidden pt-8 pb-20 border-b border-blue-900/20">
+      <section className="relative w-full overflow-hidden flex items-center min-h-[660px] sm:min-h-[720px] md:min-h-[780px] lg:min-h-[calc(100vw*575/1024)]">
         
         {/* Background Image: Managed via CMS */}
-        <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 z-0 overflow-hidden">
           <Image
             src={hp.heroBgImage || "/images/anasayfa-arkaplan.png"}
             alt={settings.siteName || "İrfan Meclisi"}
             fill
+            sizes="100vw"
             priority
-            className="object-cover object-center"
+            className="object-cover"
+            style={{ objectPosition: 'center top' }}
           />
         </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-10">
+        <div className="relative z-10 max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-14 w-full pt-28 sm:pt-32 lg:pt-36 pb-12 sm:pb-16 lg:pb-20">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             
             {/* Left Column: Title, Subtitle, Countdown, CTA */}
@@ -156,7 +158,7 @@ export default function HomePage() {
 
               {/* Main Title in Serif */}
               <h1 className="text-2xl sm:text-4xl lg:text-6xl font-serif font-black tracking-tight leading-[1.15] break-words">
-                <span className="text-white block">{hp.heroPrefix || 'TİMAV ÖNDERLİĞİNDE'}</span>
+                <span className="text-white block">{hp.heroPrefix || 'ÖNDER DERNEĞİ ÖNCÜLÜĞÜNDE'}</span>
                 <span className="text-[#4DA3FF] block mt-1">{hp.heroTitle || 'İRFAN MECLİSİ'}</span>
               </h1>
 
@@ -173,34 +175,182 @@ export default function HomePage() {
                 />
               </div>
 
-              {/* Pill Button CTA */}
-              <div className="pt-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 w-full sm:w-auto">
+              {/* Seljuk Cartouche CTA Buttons (matching reference design with softened curves) */}
+              <div className="pt-4 flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-5 w-full sm:w-auto">
                 <Link
                   href="/basvuru"
-                  className="inline-flex items-center justify-center gap-3 px-6 sm:px-8 py-3.5 rounded-full bg-[#258BF5] hover:bg-[#1e7bdc] text-white font-bold text-sm shadow-xl shadow-blue-900/40 transition-all transform hover:-translate-y-0.5 text-center cursor-pointer"
+                  className="group relative inline-flex items-center justify-center h-[52px] px-8 transition-all duration-300 transform hover:-translate-y-0.5 hover:brightness-105 cursor-pointer select-none"
                 >
-                  <span>Delege Başvuru Formu</span>
-                  <ArrowRight className="w-4 h-4" />
+                  {/* Seljuk Turquoise Cartouche SVG Background */}
+                  <svg 
+                    className="absolute inset-0 w-full h-full pointer-events-none drop-shadow-lg"
+                    viewBox="0 0 230 52"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    preserveAspectRatio="none"
+                  >
+                    <defs>
+                      <linearGradient id="goldBorderPrimary" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#fae8be" />
+                        <stop offset="25%" stopColor="#dfbe7a" />
+                        <stop offset="60%" stopColor="#ab8438" />
+                        <stop offset="85%" stopColor="#e2c17f" />
+                        <stop offset="100%" stopColor="#fae8be" />
+                      </linearGradient>
+                      <linearGradient id="tealBtnBg" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="#2cb2cf" />
+                        <stop offset="45%" stopColor="#158ea9" />
+                        <stop offset="100%" stopColor="#0b677d" />
+                      </linearGradient>
+                    </defs>
+
+                    {/* Soft Cartouche Body */}
+                    <path 
+                      d="
+                        M 24 7
+                        C 40 5 60 4 105 4
+                        C 111 3 113 2 115 2
+                        C 117 2 119 3 125 4
+                        C 170 4 190 5 206 7
+                        C 207 13 212 17 218 18
+                        C 221 21 223 24 224 22
+                        C 225.5 24 226.5 25 226.5 26
+                        C 226.5 27 225.5 28 224 30
+                        C 223 28 221 31 218 34
+                        C 212 35 207 39 206 45
+                        C 190 47 170 48 125 48
+                        C 119 49 117 50 115 50
+                        C 113 50 111 49 105 48
+                        C 60 48 40 47 24 45
+                        C 23 39 18 35 12 34
+                        C 9 31 7 28 6 30
+                        C 4.5 28 3.5 27 3.5 26
+                        C 3.5 25 4.5 24 6 22
+                        C 7 24 9 21 12 18
+                        C 18 17 23 13 24 7
+                        Z
+                      "
+                      fill="url(#tealBtnBg)"
+                      stroke="url(#goldBorderPrimary)"
+                      strokeWidth="1.4"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+
+                    {/* Top enamel highlight */}
+                    <path 
+                      d="M 26 8 C 45 6 70 5.5 115 5.5 C 160 5.5 185 6 204 8"
+                      stroke="#ffffff"
+                      strokeWidth="1.2"
+                      strokeLinecap="round"
+                      opacity="0.4"
+                    />
+
+                    {/* Cardinal & Corner Soft Gold Pearls */}
+                    <circle cx="115" cy="1.5" r="0.9" fill="#fae8be" />
+                    <circle cx="115" cy="50.5" r="0.9" fill="#fae8be" />
+                    <circle cx="2" cy="26" r="0.9" fill="#fae8be" />
+                    <circle cx="228" cy="26" r="0.9" fill="#fae8be" />
+                    <circle cx="16" cy="11" r="0.8" fill="#dfbe7a" opacity="0.75" />
+                    <circle cx="214" cy="11" r="0.8" fill="#dfbe7a" opacity="0.75" />
+                    <circle cx="214" cy="41" r="0.8" fill="#dfbe7a" opacity="0.75" />
+                    <circle cx="16" cy="41" r="0.8" fill="#dfbe7a" opacity="0.75" />
+                  </svg>
+
+                  {/* Button Content */}
+                  <span className="relative z-10 text-white font-serif font-medium text-sm sm:text-base tracking-wide flex items-center gap-2.5 drop-shadow-sm">
+                    <span>Delege Başvuru Formu</span>
+                    <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1 text-white" />
+                  </span>
                 </Link>
 
                 <button
                   onClick={() => setIsVideoModalOpen(true)}
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-[#092746]/80 hover:bg-[#0D3156] border border-white/15 text-slate-200 hover:text-white text-sm font-semibold transition-all text-center cursor-pointer"
+                  className="group relative inline-flex items-center justify-center h-[52px] px-8 transition-all duration-300 transform hover:-translate-y-0.5 hover:brightness-105 cursor-pointer select-none"
                 >
-                  <Play className="w-3.5 h-3.5 text-[#4DA3FF] fill-[#4DA3FF]" />
-                  <span>Tanıtım Filmi</span>
+                  {/* Seljuk Dark Navy Cartouche SVG Background */}
+                  <svg 
+                    className="absolute inset-0 w-full h-full pointer-events-none drop-shadow-lg"
+                    viewBox="0 0 180 52"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    preserveAspectRatio="none"
+                  >
+                    <defs>
+                      <linearGradient id="goldBorderSecondary" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#fae8be" />
+                        <stop offset="25%" stopColor="#dfbe7a" />
+                        <stop offset="60%" stopColor="#ab8438" />
+                        <stop offset="85%" stopColor="#e2c17f" />
+                        <stop offset="100%" stopColor="#fae8be" />
+                      </linearGradient>
+                      <radialGradient id="navyBtnBg" cx="50%" cy="50%" r="70%">
+                        <stop offset="0%" stopColor="#0e2a44" stopOpacity="0.95" />
+                        <stop offset="100%" stopColor="#051627" stopOpacity="0.95" />
+                      </radialGradient>
+                    </defs>
+
+                    {/* Soft Cartouche Body */}
+                    <path 
+                      d="
+                        M 24 7
+                        C 38 5 55 4 80 4
+                        C 86 3 88 2 90 2
+                        C 92 2 94 3 100 4
+                        C 125 4 142 5 156 7
+                        C 157 13 162 17 168 18
+                        C 171 21 173 24 174 22
+                        C 175.5 24 176.5 25 176.5 26
+                        C 176.5 27 175.5 28 174 30
+                        C 173 28 171 31 168 34
+                        C 162 35 157 39 156 45
+                        C 142 47 125 48 100 48
+                        C 94 49 92 50 90 50
+                        C 88 50 86 49 80 48
+                        C 55 48 38 47 24 45
+                        C 23 39 18 35 12 34
+                        C 9 31 7 28 6 30
+                        C 4.5 28 3.5 27 3.5 26
+                        C 3.5 25 4.5 24 6 22
+                        C 7 24 9 21 12 18
+                        C 18 17 23 13 24 7
+                        Z
+                      "
+                      fill="url(#navyBtnBg)"
+                      stroke="url(#goldBorderSecondary)"
+                      strokeWidth="1.4"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+
+                    {/* Cardinal & Corner Soft Gold Pearls */}
+                    <circle cx="90" cy="1.5" r="0.9" fill="#fae8be" />
+                    <circle cx="90" cy="50.5" r="0.9" fill="#fae8be" />
+                    <circle cx="2" cy="26" r="0.9" fill="#fae8be" />
+                    <circle cx="178" cy="26" r="0.9" fill="#fae8be" />
+                    <circle cx="16" cy="11" r="0.8" fill="#dfbe7a" opacity="0.75" />
+                    <circle cx="164" cy="11" r="0.8" fill="#dfbe7a" opacity="0.75" />
+                    <circle cx="164" cy="41" r="0.8" fill="#dfbe7a" opacity="0.75" />
+                    <circle cx="16" cy="41" r="0.8" fill="#dfbe7a" opacity="0.75" />
+                  </svg>
+
+                  {/* Button Content */}
+                  <span className="relative z-10 text-white font-serif font-medium text-sm sm:text-base tracking-wide flex items-center gap-2.5 drop-shadow-sm">
+                    <Play className="w-4 h-4 fill-[#26c6da] text-[#26c6da] transition-transform group-hover:scale-110" />
+                    <span>Tanıtım Filmi</span>
+                  </span>
                 </button>
               </div>
 
             </div>
 
-            {/* Right Column: Editorial Quote Text Overlay (matching screenshot) */}
-            <div className="hidden lg:flex lg:col-span-5 justify-end">
-              <div className="text-right space-y-2 pr-4">
-                <p className="font-serif italic text-4xl xl:text-5xl text-white/90 font-light leading-tight tracking-wide whitespace-pre-line">
+            {/* Right Column: Editorial Quote Text Overlay (positioned further right per user request) */}
+            <div className="hidden lg:flex lg:col-span-5 justify-end lg:pr-2 xl:pr-6 2xl:pr-10 lg:translate-x-6 xl:translate-x-12 2xl:translate-x-16">
+              <div className="text-right space-y-2">
+                <p className="font-serif italic text-4xl xl:text-5xl 2xl:text-6xl text-white/95 font-light leading-tight tracking-wide whitespace-pre-line drop-shadow-md">
                   {hp.editorialQuote || "Fikir\nÜreten\nGençlik\nMeclisi"}
                 </p>
-                <div className="w-20 h-1 bg-[#4DA3FF] ml-auto mt-4 rounded-full" />
+                <div className="w-20 h-1 bg-[#4DA3FF] ml-auto mt-4 rounded-full shadow-sm" />
               </div>
             </div>
 
@@ -228,7 +378,7 @@ export default function HomePage() {
               </h2>
 
               <p className="text-slate-600 text-sm sm:text-base leading-relaxed font-sans">
-                {hp.aboutSummary?.paragraph || "TİMAV öncülüğünde gerçekleştirilen İrfan Meclisi; gençlerin Türkiye'nin temel meseleleri üzerinde derinlemesine düşünmelerini, analitik argüman geliştirmelerini ve uzlaşma kültürüyle kanun teklifleri hazırlamalarını sağlayan öncü bir meclis simülasyonudur."}
+                {hp.aboutSummary?.paragraph || "ÖNDER İmam Hatipliler Derneği öncülüğünde gerçekleştirilen İrfan Meclisi; gençlerin Türkiye'nin temel meseleleri üzerinde derinlemesine düşünmelerini, analitik argüman geliştirmelerini ve uzlaşma kültürüyle kanun teklifleri hazırlamalarını sağlayan öncü bir meclis simülasyonudur."}
               </p>
 
               <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 pt-2 w-full sm:w-auto">

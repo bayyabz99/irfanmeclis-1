@@ -167,7 +167,7 @@ export const TEAM_MEMBERS: TeamMember[] = [
   {
     id: '1',
     fullName: 'Dr. Ahmet Özdemir',
-    role: 'Genel Koordinatör & TİMAV Yönetim Temsilcisi',
+    role: 'Genel Koordinatör & ÖNDER Yönetim Temsilcisi',
     category: 'genel_koordinasyon',
     imageUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
     university: 'Selçuk Üniversitesi',
@@ -310,8 +310,8 @@ export const PROGRAM_DAYS: ProgramDay[] = [
         id: 's1-2',
         time: '09:30 - 10:45',
         title: 'Büyük Açılış Töreni & Protokol Hitapları',
-        description: 'TİMAV Genel Başkanı, Konya Protokolü ve Meclis Başkanlık Divanı açılış konuşmalarıyla meclis oturumunu resmen başlatır.',
-        speaker: 'Dr. Ecevit Öksüz (TİMAV Genel Başkanı) & Onur Konukları',
+        description: 'ÖNDER Genel Başkanı, Protokol ve Meclis Başkanlık Divanı açılış konuşmalarıyla meclis oturumunu resmen başlatır.',
+        speaker: 'Abdullah Ceylan (ÖNDER Genel Başkanı) & Onur Konukları',
         location: 'Sultan Selim Ana Genel Kurul Salonu',
         type: 'ceremony'
       },
@@ -424,7 +424,7 @@ export const PROGRAM_DAYS: ProgramDay[] = [
       {
         id: 's2-7',
         time: '19:30 - 21:30',
-        title: 'TİMAV Gençlik Gala Yemeği & Kültür Dinletisi',
+        title: 'ÖNDER Gençlik Gala Yemeği & Kültür Dinletisi',
         description: 'Geleneksel Türk Tasavvuf ve Sanat Musikisi eşliğinde delegelere özel akşam gala yemeği.',
         location: 'Mevlana Kültür Merkezi Balo Salonu',
         type: 'gala'
@@ -483,7 +483,35 @@ export const PROGRAM_DAYS: ProgramDay[] = [
 
 export const GALLERY_ITEMS: GalleryItem[] = [];
 
-export const MOCK_ANNOUNCEMENTS: Announcement[] = [];
+export const MOCK_ANNOUNCEMENTS: Announcement[] = [
+  {
+    id: 'ann-1',
+    title: 'İrfan Meclisi 2026 Açılış Oturumu & Kayıt Bildirimi',
+    content: 'Değerli Delege ve Katılımcılarımız,\n\n23 Ekim 2026 Cuma sabahı saat 09:00\'da Selçuklu Kongre Merkezi (SKM) Ana Fuaye alanında akreditasyon ve delege kayıt masaları faaliyete başlayacaktır. Açılış seremonisi saat 10:00\'da Sultan Selim Meclis Salonu\'nda icra edilecektir.\n\nGirişte profil sayfanızda yer alan QR Kodlu Delege Kimlik Kartınızı görevlilere ibraz etmeniz rica olunur.',
+    priority: 'important',
+    targetGroup: 'all',
+    createdAt: '2026-10-22T08:30:00.000Z',
+    authorName: 'ÖNDER Genel Merkez Divan Heyeti'
+  },
+  {
+    id: 'ann-2',
+    title: 'İhtisas Komisyonları Yasa Yazım Şablonları İlanı',
+    content: '8 İhtisas Komisyonumuzda görev alacak saygıdeğer delegelerimizin dikkatine:\n\nKomisyon oturumlarında müzakere edilecek kanun tekliflerinin yazım formatı, gerekçe taslakları ve oylama prosedürleri yönergesi komisyon masalarına teslim edilmiştir. Hazırlanan taslaklar gün sonunda Divan Katipliğine sunulacaktır.',
+    priority: 'normal',
+    targetGroup: 'all',
+    createdAt: '2026-10-21T14:15:00.000Z',
+    authorName: 'Gençlik Meclisi Divan Başkanlığı'
+  },
+  {
+    id: 'ann-3',
+    title: 'Konaklama ve Servis Ulaşım Saatleri',
+    content: 'Konya dışından katılım sağlayan delegelerimiz için anlaşmalı otellerimizden Selçuklu Kongre Merkezi\'ne sabah 08:15 ve 08:45\'te ring servisleri kalkacaktır. Akşam oturumları bitiminde servisler SKM ana kapısından hareket edecektir.',
+    priority: 'normal',
+    targetGroup: 'all',
+    createdAt: '2026-10-20T11:00:00.000Z',
+    authorName: 'Lojistik & Ulaşım Koordinatörlüğü'
+  }
+];
 
 export const MOCK_APPLICATIONS: Application[] = [];
 
@@ -492,7 +520,7 @@ export const TIMELINE_MILESTONES = [
     phase: '1. Aşama',
     date: '15 Haziran - 30 Ağustos 2026',
     title: 'Hazırlık, Komisyon Masaları & Şartname İlanı',
-    description: 'TİMAV Akademik Heyeti ve Gençlik Divanı tarafından 8 ana komisyonun yönergeleri ve yasa yazım rehberleri hazırlandı.'
+    description: 'ÖNDER Akademik Heyeti ve Gençlik Divanı tarafından 8 ana komisyonun yönergeleri ve yasa yazım rehberleri hazırlandı.'
   },
   {
     phase: '2. Aşama',
@@ -521,7 +549,7 @@ export const TIMELINE_MILESTONES = [
 ];
 
 export const SPONSORS = [
-  { name: 'TİMAV', role: 'Önder Kurum', logo: 'TİMAV' },
+  { name: 'ÖNDER İmam Hatipliler Derneği', role: 'Önder Kurum', logo: 'ÖNDER' },
   { name: 'T.C. Gençlik ve Spor Bakanlığı', role: 'Destekleyen Kurum', logo: 'GSB' },
   { name: 'Konya Büyükşehir Belediyesi', role: 'Ana Sponsor', logo: 'KONYA BŞB' },
   { name: 'Karatay Belediyesi', role: 'Kurumsal Paydaş', logo: 'KARATAY' },
@@ -543,15 +571,15 @@ export const FAQ_ITEMS = [
   },
   {
     question: 'Konaklama, yeme-içme ve materyaller nasıl temin ediliyor?',
-    answer: 'Konya dışından seçilerek gelen 250 delegemizin 3 günlük konaklama, tüm öğün ikramları, delege çantası, yaka kartı ve basılı yasa çalışma kılavuzları TİMAV ve paydaş kurumlarımız tarafından eksiksiz karşılanmaktadır.'
+    answer: 'Konya dışından seçilerek gelen 250 delegemizin 3 günlük konaklama, tüm öğün ikramları, delege çantası, yaka kartı ve basılı yasa çalışma kılavuzları ÖNDER ve paydaş kurumlarımız tarafından eksiksiz karşılanmaktadır.'
   },
   {
     question: 'Komisyonlarda üretilen kanun teklifleri ne olacak?',
-    answer: '8 ana ihtisas komisyonunda müzakere edilip Genel Kurul\'da salt çoğunlukla kabul edilen yasa teklifleri, TİMAV İrfan Meclisi Kanun Külliyatı haline getirilerek TBMM Başkanlığına, ilgili bakanlıklara ve sivil toplum kuruluşlarına resmi rapor olarak sunulacaktır.'
+    answer: '8 ana ihtisas komisyonunda müzakere edilip Genel Kurul\'da salt çoğunlukla kabul edilen yasa teklifleri, ÖNDER İrfan Meclisi Kanun Külliyatı haline getirilerek TBMM Başkanlığına, ilgili bakanlıklara ve sivil toplum kuruluşlarına resmi rapor olarak sunulacaktır.'
   },
   {
     question: 'Katılımcılara resmi sertifika verilecek mi?',
-    answer: '3 gün boyunca komisyon oturumlarının en az %80\'ine katılan ve Genel Kurul oylamalarında hazır bulunan tüm delegelere TİMAV onaylı Resmi Delege Başarı ve Katılım Sertifikası takdim edilecektir.'
+    answer: '3 gün boyunca komisyon oturumlarının en az %80\'ine katılan ve Genel Kurul oylamalarında hazır bulunan tüm delegelere ÖNDER onaylı Resmi Delege Başarı ve Katılım Sertifikası takdim edilecektir.'
   }
 ];
 

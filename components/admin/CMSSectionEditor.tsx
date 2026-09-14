@@ -47,6 +47,7 @@ import {
   resetCMSData,
   INITIAL_CMS_DATA 
 } from '@/lib/cmsStorage';
+import CMSImageUploader from '@/components/admin/CMSImageUploader';
 
 interface CMSSectionEditorProps {
   activeTab: 'anasayfa' | 'hakkimizda' | 'komisyonlar' | 'ekip' | 'program' | 'iletisim' | 'basvuru' | 'galeri';
@@ -163,7 +164,7 @@ export default function CMSSectionEditor({ activeTab }: CMSSectionEditorProps) {
                 <label className="block text-xs font-semibold text-slate-300 mb-1">Üst Başlık (Kurum Adı)</label>
                 <input
                   type="text"
-                  value={data.homepage.heroPrefix || 'TİMAV ÖNDERLİĞİNDE'}
+                  value={data.homepage.heroPrefix || 'ÖNDER DERNEĞİ ÖNCÜLÜĞÜNDE'}
                   onChange={(e) =>
                     updateCMS((prev) => ({
                       ...prev,
@@ -249,18 +250,18 @@ export default function CMSSectionEditor({ activeTab }: CMSSectionEditorProps) {
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Hero Arka Plan Görsel URL</label>
-                <input
-                  type="text"
+              <div className="md:col-span-2">
+                <CMSImageUploader
+                  label="Hero Arka Plan Görseli"
+                  helperText="Ana sayfa üst karşılama arka planı (1024x575 veya geniş format)"
                   value={data.homepage.heroBgImage || '/images/anasayfa-arkaplan.png'}
-                  onChange={(e) =>
+                  onChange={(url) =>
                     updateCMS((prev) => ({
                       ...prev,
-                      homepage: { ...prev.homepage, heroBgImage: e.target.value }
+                      homepage: { ...prev.homepage, heroBgImage: url }
                     }))
                   }
-                  className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-white text-xs focus:border-[#00B4D8] focus:outline-none font-mono"
+                  aspectRatio="banner"
                 />
               </div>
 
@@ -343,21 +344,21 @@ export default function CMSSectionEditor({ activeTab }: CMSSectionEditorProps) {
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Görsel URL</label>
-                <input
-                  type="text"
+              <div className="md:col-span-2">
+                <CMSImageUploader
+                  label="Bölüm Tanıtım Görseli"
+                  helperText="Neden İrfan Meclisi yanındaki ana görsel"
                   value={data.homepage.aboutSummary?.imageUrl || ''}
-                  onChange={(e) =>
+                  onChange={(url) =>
                     updateCMS((prev) => ({
                       ...prev,
                       homepage: {
                         ...prev.homepage,
-                        aboutSummary: { ...prev.homepage.aboutSummary, imageUrl: e.target.value }
+                        aboutSummary: { ...prev.homepage.aboutSummary, imageUrl: url }
                       }
                     }))
                   }
-                  className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-white text-xs font-mono"
+                  aspectRatio="video"
                 />
               </div>
 
@@ -502,15 +503,12 @@ export default function CMSSectionEditor({ activeTab }: CMSSectionEditorProps) {
                     }}
                     className="w-full p-2 bg-slate-950 border border-slate-800 rounded text-slate-300 text-xs"
                   />
-                  <input
-                    type="text"
+                  <CMSImageUploader
                     value={photo.url}
-                    placeholder="Görsel URL"
-                    onChange={(e) => {
-                      const val = e.target.value;
+                    onChange={(url) => {
                       updateCMS((prev) => {
                         const updated = [...(prev.homepage.atmosphere?.photos || INITIAL_CMS_DATA.homepage.atmosphere.photos)];
-                        updated[idx] = { ...updated[idx], url: val };
+                        updated[idx] = { ...updated[idx], url };
                         return {
                           ...prev,
                           homepage: {
@@ -520,7 +518,8 @@ export default function CMSSectionEditor({ activeTab }: CMSSectionEditorProps) {
                         };
                       });
                     }}
-                    className="w-full p-2 bg-slate-950 border border-slate-800 rounded text-slate-400 text-[10px] font-mono"
+                    compact
+                    aspectRatio="square"
                   />
                 </div>
               ))}
@@ -1045,30 +1044,29 @@ export default function CMSSectionEditor({ activeTab }: CMSSectionEditorProps) {
                     }}
                     className="w-full p-2 bg-slate-950 border border-slate-800 rounded text-slate-300 text-xs"
                   />
-                  <input
-                    type="text"
+                  <CMSImageUploader
+                    label="Medya Görseli"
                     value={m.url}
-                    placeholder="Görsel / Video URL"
-                    onChange={(e) => {
-                      const val = e.target.value;
+                    onChange={(url) => {
                       updateCMS((prev) => {
                         const updated = [...prev.aboutPage.mediaGallery];
-                        updated[idx] = { ...updated[idx], url: val };
+                        updated[idx] = { ...updated[idx], url };
                         return { ...prev, aboutPage: { ...prev.aboutPage, mediaGallery: updated } };
                       });
                     }}
-                    className="w-full p-2 bg-slate-950 border border-slate-800 rounded text-slate-400 text-[10px] font-mono"
+                    compact
+                    aspectRatio="video"
                   />
                 </div>
               ))}
             </div>
           </div>
 
-          {/* TİMAV Tanıtımı */}
+          {/* ÖNDER Tanıtımı */}
           <div className="bg-[#05101F] border border-slate-800 rounded-2xl p-6 space-y-4">
             <h3 className="text-lg font-bold text-white flex items-center gap-2">
               <Building2 className="w-5 h-5 text-[#00B4D8]" />
-              TİMAV Kurumsal Tanıtım Alanı
+              ÖNDER Kurumsal Tanıtım Alanı
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -1259,19 +1257,18 @@ export default function CMSSectionEditor({ activeTab }: CMSSectionEditorProps) {
                   </div>
 
                   <div>
-                    <label className="text-[10px] text-slate-400 uppercase font-semibold block mb-1">Kapak Görsel URL</label>
-                    <input
-                      type="text"
+                    <label className="text-[10px] text-slate-400 uppercase font-semibold block mb-1">Kapak Görseli</label>
+                    <CMSImageUploader
                       value={comm.coverImageUrl}
-                      onChange={(e) => {
-                        const val = e.target.value;
+                      onChange={(url) => {
                         updateCMS((prev) => {
                           const updated = [...prev.commissions];
-                          updated[idx] = { ...updated[idx], coverImageUrl: val };
+                          updated[idx] = { ...updated[idx], coverImageUrl: url };
                           return { ...prev, commissions: updated };
                         });
                       }}
-                      className="w-full px-2.5 py-1.5 bg-slate-950 border border-slate-800 rounded-lg text-slate-400 text-[10px] font-mono"
+                      compact
+                      aspectRatio="wide"
                     />
                   </div>
 
@@ -1412,19 +1409,18 @@ export default function CMSSectionEditor({ activeTab }: CMSSectionEditorProps) {
                       />
                     </div>
                     <div>
-                      <label className="text-[10px] text-slate-500 uppercase font-semibold block mb-0.5">Fotoğraf URL</label>
-                      <input
-                        type="text"
+                      <label className="text-[10px] text-slate-500 uppercase font-semibold block mb-1">Üye Fotoğrafı</label>
+                      <CMSImageUploader
                         value={member.imageUrl || ''}
-                        onChange={(e) => {
-                          const val = e.target.value;
+                        onChange={(url) => {
                           updateCMS((prev) => {
                             const updated = [...prev.team];
-                            updated[idx] = { ...updated[idx], imageUrl: val };
+                            updated[idx] = { ...updated[idx], imageUrl: url };
                             return { ...prev, team: updated };
                           });
                         }}
-                        className="w-full px-2 py-1 bg-slate-950 border border-slate-800 rounded text-slate-400 text-[10px] font-mono"
+                        compact
+                        aspectRatio="square"
                       />
                     </div>
                   </div>
@@ -1737,7 +1733,7 @@ export default function CMSSectionEditor({ activeTab }: CMSSectionEditorProps) {
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">TİMAV Telefon</label>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">ÖNDER Telefon</label>
                 <input
                   type="text"
                   value={data.contact.phoneTimav}

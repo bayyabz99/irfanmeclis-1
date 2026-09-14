@@ -107,7 +107,7 @@ export default function QrTicketModal({
                     İRFAN MECLİSİ
                   </h4>
                   <p className="text-[10px] text-[#4DA3FF] font-semibold tracking-wider uppercase">
-                    TİMAV Önderliğinde • Konya 2026
+                    ÖNDER Derneği Öncülüğünde • Konya 2026
                   </p>
                 </div>
               </div>

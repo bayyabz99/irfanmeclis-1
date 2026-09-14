@@ -164,7 +164,7 @@ export interface CMSData {
 export const INITIAL_CMS_DATA: CMSData = {
   siteSettings: {
     siteName: 'İrfan Meclisi',
-    organizationName: 'TİMAV Önderliğinde',
+    organizationName: 'ÖNDER Derneği Öncülüğünde',
     slogan: 'KÖKÜMÜZ İRFAN, SÖZÜMÜZ İSTİKBAL',
     countdownText: 'Yeni fikirler, güçlü sesler ve kararlı adımlar için geri sayım başladı.',
     targetDate: '2026-10-23T09:00:00+03:00',
@@ -172,7 +172,7 @@ export const INITIAL_CMS_DATA: CMSData = {
   },
   homepage: {
     badge: 'KÖKÜMÜZ İRFAN • SÖZÜMÜZ İSTİKBAL',
-    heroPrefix: 'TİMAV ÖNDERLİĞİNDE',
+    heroPrefix: 'ÖNDER DERNEĞİ ÖNCÜLÜĞÜNDE',
     heroTitle: 'İRFAN MECLİSİ',
     heroDesc: '“Kökümüz İrfan, Sözümüz İstikbal” anlayışıyla; gençlerin fikir gücüyle, daha adil, daha güçlü ve daha yaşanabilir bir gelecek için buluşuyoruz.',
     heroBgImage: '/images/anasayfa-arkaplan.png',
@@ -180,7 +180,7 @@ export const INITIAL_CMS_DATA: CMSData = {
     aboutSummary: {
       tag: '— Neden İrfan Meclisi?',
       heading: 'Sadece Dinleyen Değil, Geleceği Şekillendiren Gençlik',
-      paragraph: 'TİMAV öncülüğünde gerçekleştirilen İrfan Meclisi; gençlerin Türkiye\'nin temel meseleleri üzerinde derinlemesine düşünmelerini, analitik argüman geliştirmelerini ve uzlaşma kültürüyle kanun teklifleri hazırlamalarını sağlayan öncü bir meclis simülasyonudur.',
+      paragraph: 'ÖNDER İmam Hatipliler Derneği öncülüğünde gerçekleştirilen İrfan Meclisi; gençlerin Türkiye\'nin temel meseleleri üzerinde derinlemesine düşünmelerini, analitik argüman geliştirmelerini ve uzlaşma kültürüyle kanun teklifleri hazırlamalarını sağlayan öncü bir meclis simülasyonudur.',
       quote: '“Daha iyi bir gelecek, gençlerin fikirleriyle mümkün.”',
       imageUrl: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1000&q=80'
     },
@@ -214,7 +214,7 @@ export const INITIAL_CMS_DATA: CMSData = {
         },
         {
           url: 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=800&q=80',
-          title: 'TİMAV Delege Yaka Kartı',
+          title: 'ÖNDER Delege Yaka Kartı',
           subtitle: 'Akreditasyon & QR Kimlik'
         },
         {
@@ -274,7 +274,7 @@ export const INITIAL_CMS_DATA: CMSData = {
     }
   },
   aboutPage: {
-    heroBadge: 'TİMAV KURUMSAL VİZYONU',
+    heroBadge: 'ÖNDER KURUMSAL VİZYONU',
     heroTitle: 'Köklü Miras, Çağdaş Müzakere: İrfan Meclisi',
     heroDesc: '“Kökümüz İrfan, Sözümüz İstikbal” anlayışıyla; ilim, irfan ve hikmet ekseninde yetişen genç nesillerin, Türkiye\'nin ve dünyanın temel meselelerine meclis simülasyonu disipliniyle çözüm ürettiği vizyoner bir platformdur.',
     vizyon: {
@@ -299,13 +299,13 @@ export const INITIAL_CMS_DATA: CMSData = {
       footerTag: 'Fikir • Ahlak • Adalet • Aksiyon'
     },
     timav: {
-      heading: 'TİMAV\'ın Gençlik ve Gelecek Vizyonu',
-      tag: 'Önder Kurumumuz',
-      p1: 'Türkiye İmam Hatipliler Vakfı (TİMAV); 30 yılı aşkın süredir eğitim, kültür, sanat ve akademi sahasında nesillerin yetişmesine öncülük eden, Türkiye\'nin saygın ve köklü sivil toplum kuruluşlarındandır.',
-      p2: 'İrfan Meclisi; TİMAV\'ın gençlik vizyonunun en somut ve dinamik tezahürlerinden biri olarak, gençleri sadece teorik bilgiyle değil; meclis başkanı, komisyon raportörü, müzakereci ve kanun yapıcı kimlikleriyle geleceğe hazırlar.',
-      stat1Number: '30+ Yıl',
+      heading: 'ÖNDER Derneği\'nin Gençlik ve Gelecek Vizyonu',
+      tag: 'Önder Kurumumuz: ÖNDER',
+      p1: 'ÖNDER İmam Hatipliler Derneği; 65 yılı aşkın süredir eğitim, kültür, sanat ve akademi sahasında nesillerin yetişmesine öncülük eden, Türkiye\'nin en köklü ve saygın sivil toplum kuruluşlarındandır.',
+      p2: 'İrfan Meclisi; ÖNDER\'in gençlik vizyonunun en somut ve dinamik tezahürlerinden biri olarak, gençleri sadece teorik bilgiyle değil; meclis başkanı, komisyon raportörü, müzakereci ve kanun yapıcı kimlikleriyle geleceğe hazırlar.',
+      stat1Number: '65+ Yıl',
       stat1Label: 'Eğitim ve Gençlik Tecrübesi',
-      stat2Number: '10.000+',
+      stat2Number: '100.000+',
       stat2Label: 'Gencimize Ulaşan Projeler',
       videoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-curved-lines-of-an-auditorium-hall-with-warm-lights-42971-large.mp4'
     },
@@ -359,9 +359,9 @@ export const INITIAL_CMS_DATA: CMSData = {
   },
   contact: {
     address: 'Selçuklu Kongre Merkezi (SKM), Yazır Mah. Doç. Dr. Halil Ürün Cad. No: 28 Selçuklu / KONYA',
-    phoneTimav: '+90 (332) 350 20 40',
+    phoneTimav: '+90 (212) 521 19 58',
     phoneCoord: '+90 (532) 111 20 26',
-    email: 'bilgi@timav.org.tr / irfanmeclisi@timav.org.tr',
+    email: 'bilgi@onder.org.tr / irfanmeclisi@onder.org.tr',
     hours: '23 Ekim 2026 Cuma günü 08:30 - 09:30 arası akreditasyon ve kayıt',
     transport: {
       yht: 'Konya YHT Garı\'ndan taksi ile 10 dakika veya Gar önünden kalkan tramvay/otobüs hatlarıyla doğrudan Selçuklu Kongre Merkezi\'ne ulaşım sağlanmaktadır.',
@@ -372,7 +372,7 @@ export const INITIAL_CMS_DATA: CMSData = {
   }
 };
 
-const CMS_STORAGE_KEY = 'igm_cms_content_v3';
+const CMS_STORAGE_KEY = 'igm_cms_content_v4';
 
 export function getStoredCMSData(): CMSData {
   if (typeof window === 'undefined') return INITIAL_CMS_DATA;

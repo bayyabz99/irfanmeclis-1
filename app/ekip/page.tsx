@@ -54,7 +54,7 @@ export default function TeamPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[#061A33] text-white">
+    <div className="igm-page">
       {/* 1. HERO BANNER */}
       <InnerPageHero
         badge="GÖNÜLLÜ VE PROFESYONEL KADRO"
@@ -68,7 +68,7 @@ export default function TeamPage() {
 
       {/* 2. FILTER & SEARCH CONTROLS */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-20">
-        <div className="p-6 rounded-2xl bg-[#092746] border border-[#4DA3FF]/20 shadow-2xl space-y-6">
+        <div className="p-6 rounded-3xl bg-[#06182e] border border-[#183659]/70 shadow-2xl space-y-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <h3 className="text-xl font-serif font-bold text-white">Birimlere Göre İnceleyin</h3>
@@ -83,7 +83,7 @@ export default function TeamPage() {
                 placeholder="İsim, görev veya üniversite ara..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-[#061A33] border border-[#4DA3FF]/30 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-[#4DA3FF]"
+                className="w-full bg-[#030a14] border border-[#183659] rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-cyan-400"
               />
             </div>
           </div>
@@ -96,8 +96,8 @@ export default function TeamPage() {
                 onClick={() => setSelectedCategory(cat.id)}
                 className={`px-4 py-2.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer ${
                   selectedCategory === cat.id
-                    ? 'bg-[#4DA3FF] text-[#061A33] shadow-lg shadow-[#4DA3FF]/20 font-bold'
-                    : 'bg-[#061A33] text-slate-300 hover:text-white border border-[#4DA3FF]/20 hover:border-[#4DA3FF]/40'
+                    ? 'bg-[#4DA3FF] text-[#020B16] shadow-lg shadow-cyan-500/20 font-bold'
+                    : 'bg-[#030a14] text-slate-300 hover:text-white border border-[#183659] hover:border-cyan-400/40'
                 }`}
               >
                 {cat.label}
@@ -155,7 +155,7 @@ export default function TeamPage() {
                 <span className="text-[10px] uppercase font-bold tracking-wider text-[#4DA3FF] bg-[#061A33] px-2.5 py-1 rounded-full border border-[#4DA3FF]/20">
                   {member.category.replace('_', ' ')}
                 </span>
-                <span className="text-[10px] text-slate-400 font-medium">TİMAV Ekibi</span>
+                <span className="text-[10px] text-slate-400 font-medium">ÖNDER Ekibi</span>
               </div>
             </div>
           ))}

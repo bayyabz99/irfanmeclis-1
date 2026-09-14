@@ -126,7 +126,7 @@ export default function LoginPage() {
     setAdminError('');
 
     // Pre-set pass or simple pass for testing
-    if (adminPassword.trim() === 'admin123' || adminPassword.trim() === 'igm2026' || adminPassword.trim() === 'timav' || adminPassword.trim() === 'timav2026') {
+    if (adminPassword.trim() === 'admin123' || adminPassword.trim() === 'igm2026' || adminPassword.trim() === 'onder' || adminPassword.trim() === 'onder2026') {
       if (typeof window !== 'undefined') {
         sessionStorage.setItem('igm_admin_session', 'true');
       }

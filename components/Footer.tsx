@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import { 
   Phone, 
   Mail, 
@@ -46,6 +47,11 @@ function YoutubeIcon({ className = "w-4 h-4" }: { className?: string }) {
 
 
 export default function Footer() {
+  const pathname = usePathname();
+  if (pathname?.startsWith('/profil')) {
+    return null;
+  }
+
   return (
     <footer className="bg-[#030D1A] border-t border-blue-900/30 text-slate-400 relative overflow-hidden">
       
@@ -81,7 +87,7 @@ export default function Footer() {
             </Link>
 
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed pr-6 mt-4">
-              Türkiye İmam Hatipliler Vakfı (TİMAV) öncülüğünde “Kökümüz İrfan, Sözümüz İstikbal” anlayışıyla hayata geçirilen İrfan Meclisi; kadim irfan geleneğimizi çağdaş meclis simülasyonuyla buluşturarak, geleceğin lider gençlerini ortak akıl, yasa yapma kültürü ve medeniyet inşasında bir araya getiriyor.
+              ÖNDER İmam Hatipliler Derneği öncülüğünde “Kökümüz İrfan, Sözümüz İstikbal” anlayışıyla hayata geçirilen İrfan Meclisi; kadim irfan geleneğimizi çağdaş meclis simülasyonuyla buluşturarak, geleceğin lider gençlerini ortak akıl, yasa yapma kültürü ve medeniyet inşasında bir araya getiriyor.
             </p>
 
             <div className="pt-2 flex flex-col space-y-2 text-xs text-slate-300">
@@ -122,7 +128,7 @@ export default function Footer() {
                 className="flex items-center gap-2.5 hover:text-white transition-colors text-slate-400"
               >
                 <Phone className="w-3.5 h-3.5 text-slate-500 shrink-0" />
-                <span>+90 (332) 350 20 40 (TİMAV)</span>
+                <span>+90 (212) 521 19 58 (ÖNDER)</span>
               </a>
               <a 
                 href="mailto:info@irfanmeclisi.org" 
@@ -206,7 +212,7 @@ export default function Footer() {
 
         {/* Bottom Bar: Copyright & Legal */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-          <p>© 2026 TİMAV Önderliğinde İrfan Meclisi. Tüm hakları saklıdır.</p>
+          <p>© 2026 ÖNDER Derneği Öncülüğünde İrfan Meclisi. Tüm hakları saklıdır.</p>
           <div className="flex items-center gap-5">
             <Link href="/hakkinda" className="hover:text-slate-300 transition-colors">
               KVKK

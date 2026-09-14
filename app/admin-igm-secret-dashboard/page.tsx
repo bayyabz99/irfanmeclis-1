@@ -187,14 +187,14 @@ export default function ModernCMSAdminDashboard() {
     e.preventDefault();
     setAuthError(null);
     if (
-      (adminEmail === 'admin@timav.org.tr' || adminEmail === 'admin@irfanmeclisi.org' || adminEmail === 'admin') &&
-      (adminPassword === 'timav2026' || adminPassword === 'admin123' || adminPassword === 'igm2026')
+      (adminEmail === 'admin@onder.org.tr' || adminEmail === 'admin@timav.org.tr' || adminEmail === 'admin@irfanmeclisi.org' || adminEmail === 'admin') &&
+      (adminPassword === 'onder2026' || adminPassword === 'timav2026' || adminPassword === 'admin123' || adminPassword === 'igm2026')
     ) {
       setIsAuthenticated(true);
       sessionStorage.setItem('igm_admin_session', 'true');
       loadDashboardData();
     } else {
-      setAuthError('E-posta veya parola hatalı. (İpucu: admin@timav.org.tr / admin123)');
+      setAuthError('E-posta veya parola hatalı. (İpucu: admin@onder.org.tr / admin123)');
     }
   };
 
@@ -258,7 +258,7 @@ export default function ModernCMSAdminDashboard() {
                   type="text"
                   value={adminEmail}
                   onChange={(e) => setAdminEmail(e.target.value)}
-                  placeholder="admin@timav.org.tr"
+                  placeholder="admin@onder.org.tr"
                   className="w-full px-4 py-3 bg-[#132338] border border-slate-700/60 rounded-xl text-white text-sm focus:outline-none focus:border-[#1E6FFB]"
                   required
                 />
@@ -1408,7 +1408,7 @@ export default function ModernCMSAdminDashboard() {
             <div className="space-y-3 text-xs">
               <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
                 <span className="font-bold text-slate-800 block mb-0.5">Aktif Yönetici Hesabı</span>
-                <p className="text-slate-500">admin@timav.org.tr (Tam Yetkili Süpervizör)</p>
+                <p className="text-slate-500">admin@onder.org.tr (Tam Yetkili Süpervizör)</p>
               </div>
               <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
                 <span className="font-bold text-slate-800 block mb-0.5">Etkinlik Tarihi</span>

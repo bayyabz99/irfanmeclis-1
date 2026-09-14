@@ -17,11 +17,13 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: 'İrfan Meclisi 2026 | TİMAV Önderliğinde',
-  description: 'Türkiye İmam Hatipliler Vakfı (TİMAV) öncülüğünde “Kökümüz İrfan, Sözümüz İstikbal” anlayışıyla 23-24-25 Ekim 2026 tarihlerinde Konya Selçuklu Kongre Merkezi\'nde düzenlenecek olan İrfan Meclisi resmi web portalı. 8 ihtisas komisyonu, 250 delege ve yasa simülasyonu.',
+  title: 'İrfan Meclisi 2026 | ÖNDER Derneği Öncülüğünde',
+  description: 'ÖNDER İmam Hatipliler Derneği öncülüğünde “Kökümüz İrfan, Sözümüz İstikbal” anlayışıyla 23-24-25 Ekim 2026 tarihlerinde Konya Selçuklu Kongre Merkezi\'nde düzenlenecek olan İrfan Meclisi resmi web portalı. 8 ihtisas komisyonu, 250 delege ve yasa simülasyonu.',
   keywords: [
     'İrfan Meclisi',
-    'TİMAV',
+    'ÖNDER',
+    'ÖNDER Derneği',
+    'ÖNDER İmam Hatipliler Derneği',
     'Gençlik Meclisi',
     'Kökümüz İrfan Sözümüz İstikbal',
     'Konya 2026',
@@ -29,11 +31,11 @@ export const metadata: Metadata = {
     'Selçuklu Kongre Merkezi',
     'Delege Başvurusu'
   ],
-  authors: [{ name: 'TİMAV' }],
+  authors: [{ name: 'ÖNDER İmam Hatipliler Derneği' }],
   openGraph: {
-    title: 'İrfan Meclisi 2026 | TİMAV Önderliğinde',
+    title: 'İrfan Meclisi 2026 | ÖNDER Derneği Öncülüğünde',
     description: '“Kökümüz İrfan, Sözümüz İstikbal” - 23-24-25 Ekim 2026 Konya Selçuklu Kongre Merkezi.',
-    url: 'https://irfanmeclisi.timav.org.tr',
+    url: 'https://irfanmeclisi.onder.org.tr',
     siteName: 'İrfan Meclisi',
     locale: 'tr_TR',
     type: 'website',

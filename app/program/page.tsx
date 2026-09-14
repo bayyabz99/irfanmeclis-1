@@ -33,20 +33,6 @@ export default function ProgramPage() {
   const programDays = cmsData.program && cmsData.program.length > 0 ? cmsData.program : PROGRAM_DAYS;
   const currentDayData = programDays.find((d: any) => d.dayNumber === activeDay) || programDays[0];
 
-  const getSessionBadge = (type: ProgramSession['type']) => {
-    switch (type) {
-      case 'ceremony':
-        return { label: 'Tören & Protokol', bg: 'bg-[#4DA3FF]/15 text-[#4DA3FF] border-[#4DA3FF]/30', icon: Award };
-      case 'workshop':
-        return { label: 'Komisyon Çalıştayı', bg: 'bg-blue-600/20 text-blue-300 border-blue-500/30', icon: Users };
-      case 'break':
-        return { label: 'İkram / Mola', bg: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30', icon: Coffee };
-      case 'gala':
-        return { label: 'Gala & Kültür', bg: 'bg-purple-500/15 text-purple-300 border-purple-500/30', icon: Sparkles };
-      default:
-        return { label: 'Genel Kurul Oturumu', bg: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30', icon: BookOpen };
-    }
-  };
 
   const handlePrint = () => {
     window.print();
@@ -142,8 +128,6 @@ export default function ProgramPage() {
         {/* Timeline Items */}
         <div className="space-y-4">
           {currentDayData.sessions.map((session) => {
-            const badge = getSessionBadge(session.type);
-            const IconComp = badge.icon;
             const isBreak = session.type === 'break';
 
             return (
@@ -154,19 +138,14 @@ export default function ProgramPage() {
                     : 'bg-[#092746] border-[#4DA3FF]/20 hover:border-[#4DA3FF]/60 hover:shadow-xl'
                   }`}
               >
-                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5">
 
-                  {/* Left: Time & Badge */}
-                  <div className="flex flex-wrap items-center gap-3 shrink-0">
+                  {/* Left: Time */}
+                  <div className="flex items-center gap-3 shrink-0">
                     <div className="flex items-center gap-2 bg-[#061A33] px-4 py-2 rounded-xl border border-[#4DA3FF]/30 text-[#4DA3FF] font-mono text-sm font-bold shadow-inner">
                       <Clock className="w-4 h-4 text-[#4DA3FF]" />
                       <span>{session.time}</span>
                     </div>
-
-                    <span className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold border ${badge.bg}`}>
-                      <IconComp className="w-3.5 h-3.5" />
-                      <span>{badge.label}</span>
-                    </span>
                   </div>
 
                   {/* Middle: Content */}
@@ -187,12 +166,6 @@ export default function ProgramPage() {
                         )}
                       </div>
                     )}
-                  </div>
-
-                  {/* Right: Location Hall */}
-                  <div className="flex items-center gap-2 text-xs font-semibold text-slate-300 bg-[#061A33] px-3.5 py-2 rounded-xl border border-[#4DA3FF]/20 shrink-0 self-start lg:self-center">
-                    <MapPin className="w-3.5 h-3.5 text-[#4DA3FF]" />
-                    <span>{session.location}</span>
                   </div>
 
                 </div>

@@ -643,7 +643,7 @@ function ApplicationFormContent() {
                     className="mt-1 rounded bg-[#061A33] border-[#4DA3FF]/40 text-[#4DA3FF] focus:ring-[#4DA3FF] cursor-pointer"
                   />
                   <span className="text-xs text-slate-300 leading-relaxed font-sans">
-                    TİMAV İrfan Meclisi 2026 Delege Başvuru Şartnamesini ve Kişisel Verilerin Korunması Kanunu (KVKK) Aydınlatma Metnini okudum, kabul ediyorum.
+                    ÖNDER İrfan Meclisi 2026 Delege Başvuru Şartnamesini ve Kişisel Verilerin Korunması Kanunu (KVKK) Aydınlatma Metnini okudum, kabul ediyorum.
                   </span>
                 </label>
               </div>

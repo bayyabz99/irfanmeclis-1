@@ -30,7 +30,7 @@ export default function SiteLogo({
       {showText && (
         <div className="flex flex-col">
           <span className="text-[10px] uppercase tracking-[0.2em] text-[#4DA3FF] font-medium leading-none mb-1">
-            TİMAV ÖNDERLİĞİNDE
+            ÖNDER DERNEĞİ ÖNCÜLÜĞÜNDE
           </span>
           <span className="text-base sm:text-lg font-serif font-black tracking-tight text-white leading-tight">
             İRFAN MECLİSİ

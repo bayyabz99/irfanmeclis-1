@@ -276,7 +276,7 @@ export default function PdfReportGenerator({ onBack }: PdfReportGeneratorProps) 
         id="igm-official-pdf-report"
         className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 sm:p-10 print:p-0 print:border-none print:shadow-none print:m-0"
       >
-        {/* PDF Header with TİMAV & İrfan Meclisi Branding */}
+        {/* PDF Header with ÖNDER & İrfan Meclisi Branding */}
         <div className="border-b-2 border-slate-800 pb-6 mb-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -285,7 +285,7 @@ export default function PdfReportGenerator({ onBack }: PdfReportGeneratorProps) 
               </div>
               <div>
                 <span className="text-xs font-bold tracking-widest text-slate-500 uppercase block">
-                  TİMAV ÖNDERLİĞİNDE
+                  ÖNDER DERNEĞİ ÖNCÜLÜĞÜNDE
                 </span>
                 <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight font-serif">
                   İRFAN GENÇ MECLİSİ 2026
@@ -447,7 +447,7 @@ export default function PdfReportGenerator({ onBack }: PdfReportGeneratorProps) 
         {/* PDF Footer & Official Signatures */}
         <div className="mt-10 pt-6 border-t border-slate-300 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
           <div>
-            <p className="font-semibold text-slate-700">TİMAV İrfan Genç Meclisi Divan Başkanlığı</p>
+            <p className="font-semibold text-slate-700">ÖNDER İrfan Genç Meclisi Divan Başkanlığı</p>
             <p className="text-[10px]">Bu belge dijital yoklama takip sisteminden otomatik üretilmiştir.</p>
           </div>
           <div className="text-right">
