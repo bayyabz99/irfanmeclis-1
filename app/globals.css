@@ -269,3 +269,22 @@ body {
     margin-top: 24px !important;
   }
 }
+
+@keyframes scanLaser {
+  0% {
+    top: 6%;
+    opacity: 0.6;
+  }
+  50% {
+    top: 92%;
+    opacity: 1;
+  }
+  100% {
+    top: 6%;
+    opacity: 0.6;
+  }
+}
+
+.animate-scan-laser {
+  animation: scanLaser 2.2s ease-in-out infinite;
+}

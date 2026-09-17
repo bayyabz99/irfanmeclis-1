@@ -431,15 +431,68 @@ export function clearAllApplications(): void {
 
 export function findApplicationByQr(code: string): Application | undefined {
   if (!code) return undefined;
+  let raw = String(code).trim();
+  if (!raw) return undefined;
+
+  // Try decoding in case it's URI-encoded
+  try {
+    raw = decodeURIComponent(raw);
+  } catch {
+    // ignore
+  }
+
   const apps = getStoredApplications();
-  const clean = code.trim().toUpperCase();
-  return apps.find(
+  const clean = raw.toUpperCase();
+
+  // 1. Direct match on qrCodeId, secureQrToken, id, email, identityNo, phone
+  const directMatch = apps.find(
     (a) =>
       (a.qrCodeId && a.qrCodeId.toUpperCase() === clean) ||
       (a.secureQrToken && a.secureQrToken.toUpperCase() === clean) ||
-      (a.email && a.email.toLowerCase() === clean.toLowerCase()) ||
-      (a.identityNo && a.identityNo.trim() === clean)
+      (a.id && String(a.id).toUpperCase() === clean) ||
+      (a.email && a.email.toLowerCase() === raw.toLowerCase()) ||
+      (a.identityNo && a.identityNo.trim() === raw.trim()) ||
+      (a.phone && a.phone.replace(/\D/g, '') === raw.replace(/\D/g, '') && raw.replace(/\D/g, '').length >= 10)
   );
+  if (directMatch) return directMatch;
+
+  // 2. Extract IGM token from URL or text string (e.g., https://...#IGM26-SEC-... or IGM26-ADA-1234)
+  const tokenMatch = raw.match(/IGM26(?:-SEC)?-[A-Z0-9-]+/i);
+  if (tokenMatch) {
+    const extracted = tokenMatch[0].toUpperCase();
+    const tokenApp = apps.find(
+      (a) =>
+        (a.qrCodeId && a.qrCodeId.toUpperCase() === extracted) ||
+        (a.secureQrToken && a.secureQrToken.toUpperCase() === extracted)
+    );
+    if (tokenApp) return tokenApp;
+  }
+
+  // 3. Match alphanumeric stripped values (e.g. IGM26ADA1234 -> IGM26-ADA-1234)
+  const strippedClean = clean.replace(/[^A-Z0-9]/g, '');
+  if (strippedClean.length >= 6) {
+    const strippedMatch = apps.find((a) => {
+      const aQr = (a.qrCodeId || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+      const aSec = (a.secureQrToken || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+      return aQr === strippedClean || aSec === strippedClean;
+    });
+    if (strippedMatch) return strippedMatch;
+  }
+
+  // 4. Try JSON parsing if encoded as JSON object
+  if (raw.startsWith('{') && raw.endsWith('}')) {
+    try {
+      const parsed = JSON.parse(raw);
+      const possibleId = parsed.qrCodeId || parsed.token || parsed.id || parsed.code || parsed.email;
+      if (possibleId && typeof possibleId === 'string') {
+        return findApplicationByQr(possibleId);
+      }
+    } catch {
+      // not json
+    }
+  }
+
+  return undefined;
 }
 
 export type ScanResult = {
