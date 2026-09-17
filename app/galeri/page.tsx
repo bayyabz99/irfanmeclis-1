@@ -22,6 +22,7 @@ import {
 import { GalleryItem, Application } from '@/lib/types';
 import { getStoredGallery, submitUserMedia, getCurrentUser } from '@/lib/storage';
 import { uploadImageToSupabaseStorage } from '@/lib/supabase';
+import { getStoredCMSData, fetchServerCMSData, CMSData, INITIAL_CMS_DATA } from '@/lib/cmsStorage';
 import Lightbox from '@/components/Lightbox';
 import InnerPageHero from '@/components/InnerPageHero';
 
@@ -32,6 +33,7 @@ export default function GalleryPage() {
   const [selectedFilter, setSelectedFilter] = useState<string>('all');
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const [cmsData, setCmsData] = useState<CMSData>(INITIAL_CMS_DATA);
 
   // Upload Form State
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -57,16 +59,28 @@ export default function GalleryPage() {
     // Only approved items with status !== 'rejected' are shown in gallery
     setItems(all.filter((item) => item.isApproved && item.status !== 'rejected'));
 
+    // CMS Synchronization
+    setCmsData(getStoredCMSData());
+    fetchServerCMSData().then((serverData) => {
+      if (serverData) setCmsData(serverData);
+    });
+
     const handleAuth = () => {
       setCurrentUser(getCurrentUser());
       const updatedAll = getStoredGallery();
       setItems(updatedAll.filter((item) => item.isApproved && item.status !== 'rejected'));
     };
+    const handleCms = () => setCmsData(getStoredCMSData());
+
     window.addEventListener('igm_auth_change', handleAuth);
     window.addEventListener('igm_gallery_updated', handleAuth);
+    window.addEventListener('igm_cms_updated', handleCms);
+    window.addEventListener('storage', handleCms);
     return () => {
       window.removeEventListener('igm_auth_change', handleAuth);
       window.removeEventListener('igm_gallery_updated', handleAuth);
+      window.removeEventListener('igm_cms_updated', handleCms);
+      window.removeEventListener('storage', handleCms);
     };
   }, []);
 
@@ -209,14 +223,16 @@ export default function GalleryPage() {
     }, 3000);
   };
 
+  const gp = cmsData.galeriPage || INITIAL_CMS_DATA.galeriPage;
+
   return (
     <div className="min-h-screen bg-[#061A33] text-white">
       
       {/* 1. HERO BANNER */}
       <InnerPageHero
-        badge="MEDYA & ETKİNLİK ALANI"
-        title="Fotoğraf ve Video Galerisi"
-        description="“Kökümüz İrfan, Sözümüz İstikbal” — İrfan Meclisi'nin genel kurul oturumları, komisyon müzakereleri ve kulis anlarından yüksek çözünürlüklü kareler."
+        badge={gp.heroBadge || "MEDYA & ETKİNLİK ALANI"}
+        title={gp.heroTitle || "Fotoğraf ve Video Galerisi"}
+        description={gp.heroDesc || "“Kökümüz İrfan, Sözümüz İstikbal” — İrfan Meclisi'nin genel kurul oturumları, komisyon müzakereleri ve kulis anlarından yüksek çözünürlüklü kareler."}
         breadcrumbs={[
           { label: 'Ana Sayfa', href: '/' },
           { label: 'Galeri' }
@@ -333,49 +349,71 @@ export default function GalleryPage() {
         ) : (
           /* REGULAR UNLOCKED MEDIA GRID */
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-3.5 sm:gap-6">
               {filteredItems.map((item, idx) => (
                 <div
                   key={item.id}
                   onClick={() => setLightboxIndex(idx)}
-                  className="group relative rounded-2xl overflow-hidden aspect-[4/3] bg-[#092746] border border-[#4DA3FF]/20 hover:border-[#4DA3FF]/60 cursor-pointer shadow-xl transition-all duration-300 hover:shadow-2xl hover:shadow-[#4DA3FF]/15"
+                  className="group relative rounded-2xl overflow-hidden bg-[#092746] border border-[#4DA3FF]/20 hover:border-[#4DA3FF]/60 cursor-pointer shadow-xl transition-all duration-300 hover:shadow-2xl hover:shadow-[#4DA3FF]/15 flex flex-col justify-between"
                 >
-                  <Image
-                    src={item.mediaUrl}
-                    alt={item.title}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#061A33] via-[#061A33]/30 to-transparent opacity-80 group-hover:opacity-95 transition-opacity" />
+                  {/* Media Viewport - Full Image (Tamamen Gözükür, Kırpma Yok) */}
+                  <div className="relative aspect-[4/3] w-full bg-[#051527] overflow-hidden flex items-center justify-center p-2">
+                    {/* Atmospheric blurred backdrop */}
+                    <Image
+                      src={item.mediaUrl}
+                      alt=""
+                      fill
+                      unoptimized={item.mediaUrl.startsWith('data:')}
+                      className="object-cover blur-xl opacity-35 scale-125 pointer-events-none"
+                    />
 
-                  {/* Member Badge indicator */}
-                  {item.visibility === 'members' && (
-                    <div className="absolute top-3 left-3 p-1.5 rounded-lg bg-[#061A33]/90 text-amber-300 backdrop-blur border border-amber-500/40 text-[10px] font-bold flex items-center gap-1 z-10">
-                      <ShieldCheck className="w-3 h-3 text-amber-400" />
-                      <span>Üye Albümü</span>
-                    </div>
-                  )}
+                    {/* Main Image with object-contain to be 100% visible */}
+                    <Image
+                      src={item.mediaUrl}
+                      alt={item.title}
+                      fill
+                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw"
+                      unoptimized={item.mediaUrl.startsWith('data:')}
+                      className="object-contain p-1 relative z-10 group-hover:scale-105 transition-transform duration-300"
+                    />
 
-                  {item.mediaType === 'video' ? (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="w-12 h-12 rounded-full bg-[#4DA3FF] text-[#061A33] flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
-                        <Play className="w-5 h-5 fill-[#061A33] ml-0.5" />
+                    {/* Member Badge indicator */}
+                    {item.visibility === 'members' && (
+                      <div className="absolute top-2.5 left-2.5 p-1 px-2 rounded-lg bg-[#061A33]/90 text-amber-300 backdrop-blur border border-amber-500/40 text-[10px] font-bold flex items-center gap-1 z-20">
+                        <ShieldCheck className="w-3 h-3 text-amber-400" />
+                        <span>Üye</span>
                       </div>
-                    </div>
-                  ) : (
-                    <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity p-2 rounded-xl bg-[#061A33]/80 text-[#4DA3FF] backdrop-blur border border-[#4DA3FF]/30">
-                      <Eye className="w-4 h-4" />
-                    </div>
-                  )}
+                    )}
 
-                  <div className="absolute bottom-4 left-4 right-4">
-                    <span className="text-[10px] font-bold text-[#4DA3FF] uppercase tracking-wider block mb-1">
-                      {item.category}
-                    </span>
-                    <h3 className="text-sm font-serif font-bold text-white line-clamp-1 group-hover:text-[#4DA3FF] transition-colors">
+                    {item.mediaType === 'video' ? (
+                      <div className="absolute inset-0 flex items-center justify-center z-20">
+                        <div className="w-11 h-11 rounded-full bg-[#4DA3FF] text-[#061A33] flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
+                          <Play className="w-5 h-5 fill-[#061A33] ml-0.5" />
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="absolute top-2.5 right-2.5 opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg bg-[#061A33]/85 text-[#4DA3FF] backdrop-blur border border-[#4DA3FF]/30 z-20">
+                        <Eye className="w-3.5 h-3.5" />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Clean Card Meta Bar - Doesn't obscure the image */}
+                  <div className="p-3 bg-[#081e36] border-t border-[#4DA3FF]/15">
+                    <div className="flex items-center justify-between gap-1 mb-1">
+                      <span className="text-[10px] font-bold text-[#4DA3FF] uppercase tracking-wider block">
+                        {item.category}
+                      </span>
+                      {item.createdAt && (
+                        <span className="text-[9px] text-slate-400 font-mono">
+                          {item.createdAt}
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="text-xs sm:text-sm font-serif font-bold text-white line-clamp-1 group-hover:text-[#4DA3FF] transition-colors" title={item.title}>
                       {item.title}
                     </h3>
-                    <span className="text-[10px] text-slate-300 block mt-0.5 font-sans">
+                    <span className="text-[10px] text-slate-300 block mt-0.5 font-sans truncate">
                       {item.uploaderName || 'ÖNDER Medya'}
                     </span>
                   </div>

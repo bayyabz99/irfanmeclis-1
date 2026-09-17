@@ -1,22 +1,22 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import QRCode from 'qrcode';
-import { 
-  Users, 
-  CheckCircle2, 
-  XCircle, 
-  Clock, 
-  Search, 
-  Filter, 
-  Layers, 
-  Bell, 
-  Camera, 
-  Trash2, 
-  RefreshCw, 
-  LogOut, 
+import {
+  Users,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  Search,
+  Filter,
+  Layers,
+  Bell,
+  Camera,
+  Trash2,
+  RefreshCw,
+  LogOut,
   Sparkles,
   ChevronRight,
   ChevronDown,
@@ -69,30 +69,31 @@ import AttendanceManager from '@/components/admin/AttendanceManager';
 import CMSSectionEditor from '@/components/admin/CMSSectionEditor';
 import UsersManager from '@/components/admin/UsersManager';
 import PdfReportGenerator from '@/components/admin/PdfReportGenerator';
-import { 
-  getStoredApplications, 
-  getStoredGallery, 
-  getStoredAnnouncements, 
+import SupabaseConfigModal from '@/components/admin/SupabaseConfigModal';
+import {
+  getStoredApplications,
+  getStoredGallery,
+  getStoredAnnouncements,
   exportApplicationsToExcel,
-  syncApplicationsWithSupabase 
+  syncApplicationsWithSupabase
 } from '@/lib/storage';
-import { isSupabaseConfigured } from '@/lib/supabase';
+import { isSupabaseConfigured, checkIsSupabaseConfigured } from '@/lib/supabase';
 import { Application } from '@/lib/types';
 
-type ActivePageKey = 
+type ActivePageKey =
   | 'dashboard'
-  | 'anasayfa' 
-  | 'hakkimizda' 
-  | 'komisyonlar' 
-  | 'ekip' 
-  | 'program' 
+  | 'anasayfa'
+  | 'hakkimizda'
+  | 'komisyonlar'
+  | 'ekip'
+  | 'program'
   | 'basvuru'
   | 'galeri-cms'
-  | 'galeri' 
-  | 'iletisim' 
-  | 'duyurular' 
-  | 'delegeler' 
-  | 'yoklama' 
+  | 'galeri'
+  | 'iletisim'
+  | 'duyurular'
+  | 'delegeler'
+  | 'yoklama'
   | 'raporlar'
   | 'kullanicilar';
 
@@ -121,6 +122,13 @@ export default function ModernCMSAdminDashboard() {
   const [delegeQrUrl, setDelegeQrUrl] = useState<string>('');
   const [notificationsModalOpen, setNotificationsModalOpen] = useState(false);
   const [adminUserModalOpen, setAdminUserModalOpen] = useState(false);
+  const [supabaseModalOpen, setSupabaseModalOpen] = useState(false);
+  const [cloudConfigured, setCloudConfigured] = useState(isSupabaseConfigured);
+  const [reportInitialFilters, setReportInitialFilters] = useState<{
+    day?: string;
+    commission?: string;
+    status?: 'all' | 'attended' | 'absent';
+  } | null>(null);
 
   // Load and subscribe to live data
   const loadDashboardData = () => {
@@ -152,21 +160,32 @@ export default function ModernCMSAdminDashboard() {
       if (auth === 'true') {
         setIsAuthenticated(true);
       }
+      setCloudConfigured(checkIsSupabaseConfigured());
       loadDashboardData();
     }
 
     const handleUpdate = () => loadDashboardData();
+    const handleConfigUpdate = () => {
+      setCloudConfigured(checkIsSupabaseConfigured());
+      loadDashboardData();
+    };
+
     window.addEventListener('igm_auth_change', handleUpdate);
     window.addEventListener('igm_applications_updated', handleUpdate);
     window.addEventListener('igm_announcements_updated', handleUpdate);
     window.addEventListener('igm_gallery_updated', handleUpdate);
+    window.addEventListener('igm_supabase_config_updated', handleConfigUpdate);
+    window.addEventListener('storage', handleConfigUpdate);
     return () => {
       window.removeEventListener('igm_auth_change', handleUpdate);
       window.removeEventListener('igm_applications_updated', handleUpdate);
       window.removeEventListener('igm_announcements_updated', handleUpdate);
       window.removeEventListener('igm_gallery_updated', handleUpdate);
+      window.removeEventListener('igm_supabase_config_updated', handleConfigUpdate);
+      window.removeEventListener('storage', handleConfigUpdate);
     };
   }, []);
+
 
   // Generate QR for modal
   useEffect(() => {
@@ -187,7 +206,7 @@ export default function ModernCMSAdminDashboard() {
     e.preventDefault();
     setAuthError(null);
     if (
-      (adminEmail === 'admin@onder.org.tr' || adminEmail === 'admin@timav.org.tr' || adminEmail === 'admin@irfanmeclisi.org' || adminEmail === 'admin') &&
+      (adminEmail === 'admin@onder.org.tr' || adminEmail === 'irf' || adminEmail === 'irfanmeclisi@gmail.com' || adminEmail === 'admin') &&
       (adminPassword === 'onder2026' || adminPassword === 'timav2026' || adminPassword === 'admin123' || adminPassword === 'igm2026')
     ) {
       setIsAuthenticated(true);
@@ -306,9 +325,9 @@ export default function ModernCMSAdminDashboard() {
 
   // MAIN LAYOUT
   return (
-    <div className="min-h-screen bg-[#F0F4F8] flex flex-col font-sans">
+    <div className="h-screen flex flex-col overflow-hidden bg-[#F0F4F8] font-sans print:h-auto print:min-h-0 print:overflow-visible print:bg-white print:block">
       {/* 1. TOP HEADER (Dark Navy Matching Image) */}
-      <header className="sticky top-0 z-40 bg-[#0A1628] border-b border-slate-800/80 px-4 sm:px-6 py-3 flex items-center justify-between shadow-md">
+      <header className="h-16 shrink-0 bg-[#0A1628] border-b border-slate-800/80 px-4 sm:px-6 flex items-center justify-between shadow-md z-40 print:hidden">
         {/* Left: Brand Logo & Title + Mobile Menu Toggle */}
         <div className="flex items-center gap-3">
           <button
@@ -348,23 +367,27 @@ export default function ModernCMSAdminDashboard() {
         <div className="flex items-center gap-3">
           {/* Supabase Bulut Bağlantı Durumu */}
           <div className="hidden sm:flex items-center">
-            {isSupabaseConfigured ? (
-              <div 
-                className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[11px] font-semibold"
-                title="Supabase bulut veritabanı aktif, tüm cihazlarla canlı senkronize"
-              >
-                <Database className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Supabase Bulut: Aktif</span>
-              </div>
-            ) : (
-              <div 
-                className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 text-[11px] font-semibold"
-                title="Render ortamında NEXT_PUBLIC_SUPABASE_URL ve NEXT_PUBLIC_SUPABASE_ANON_KEY tanımlanmalıdır"
-              >
-                <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
-                <span>Bulut Bekleniyor (Yerel Mod)</span>
-              </div>
-            )}
+            <button
+              onClick={() => setSupabaseModalOpen(true)}
+              className="cursor-pointer transition-transform hover:scale-[1.03] focus:outline-none"
+              title="Bulut Veritabanı Yapılandırması ve Senkronizasyon"
+            >
+              {cloudConfigured ? (
+                <div 
+                  className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[11px] font-semibold"
+                >
+                  <Database className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Supabase Bulut: Aktif</span>
+                </div>
+              ) : (
+                <div 
+                  className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 text-[11px] font-semibold animate-pulse"
+                >
+                  <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Buluta Bağla (Yerel Mod)</span>
+                </div>
+              )}
+            </button>
           </div>
 
           {/* Notification Bell with Badge */}
@@ -382,13 +405,13 @@ export default function ModernCMSAdminDashboard() {
           </button>
 
           {/* Admin Profile User */}
-          <div 
+          <div
             onClick={() => setAdminUserModalOpen(true)}
             className="flex items-center gap-2.5 pl-3 border-l border-slate-800 cursor-pointer hover:opacity-90 transition-opacity"
           >
-            <div className="w-9 h-9 rounded-full overflow-hidden bg-slate-700 relative border border-slate-600">
+            <div className="w-9 h-9 rounded-full overflow-hidden bg-[#0A1628] relative border border-slate-600 shadow-inner">
               <img
-                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80"
+                src="/logo.png"
                 alt="Admin"
                 className="w-full h-full object-cover"
               />
@@ -403,30 +426,31 @@ export default function ModernCMSAdminDashboard() {
 
       {/* Mobile Drawer Backdrop */}
       {mobileMenuOpen && (
-        <div 
+        <div
           onClick={() => setMobileMenuOpen(false)}
           className="fixed inset-0 bg-black/60 z-40 md:hidden backdrop-blur-xs"
         />
       )}
 
       {/* 2. BODY CONTAINER: Sidebar + Main Canvas */}
-      <div className="flex-1 flex relative">
+      <div className="flex-1 flex overflow-hidden relative print:block print:overflow-visible print:h-auto">
         {/* LEFT SIDEBAR (Dark Navy Matching Image) */}
-        <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-[#0A1628] border-r border-slate-800/80 p-4 shrink-0 flex flex-col justify-between text-xs select-none transition-transform duration-300 md:static md:translate-x-0 ${
-          mobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
-        }`}>
-          <div className="space-y-6 overflow-y-auto">
+        <aside
+          className={`fixed inset-y-0 left-0 z-50 w-64 bg-[#0A1628] border-r border-slate-800/80 p-4 shrink-0 flex flex-col justify-between text-xs select-none transition-transform duration-300 md:static md:translate-x-0 md:h-full md:z-30 print:hidden ${
+            mobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+          }`}
+        >
+          <div className="space-y-6 overflow-y-auto flex-1 min-h-0 pr-1 select-none">
             {/* Top: Dashboard Main Button (Solid Vibrant Blue) */}
             <button
               onClick={() => {
                 setActivePage('dashboard');
                 setMobileMenuOpen(false);
               }}
-              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl font-bold transition-all cursor-pointer ${
-                activePage === 'dashboard'
+              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl font-bold transition-all cursor-pointer ${activePage === 'dashboard'
                   ? 'bg-[#1E6FFB] text-white shadow-lg shadow-blue-900/30'
                   : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
-              }`}
+                }`}
             >
               <LayoutDashboard className="w-4 h-4" />
               <span>Dashboard</span>
@@ -441,11 +465,10 @@ export default function ModernCMSAdminDashboard() {
                 {/* Sayfa Yönetimi (CMS) Dropdown Toggle */}
                 <button
                   onClick={() => setCmsDropdownOpen(!cmsDropdownOpen)}
-                  className={`w-full flex items-center justify-between px-3.5 py-2 rounded-xl font-medium transition-all cursor-pointer ${
-                    ['anasayfa', 'hakkimizda', 'komisyonlar', 'ekip', 'program', 'basvuru', 'galeri-cms', 'iletisim'].includes(activePage)
+                  className={`w-full flex items-center justify-between px-3.5 py-2 rounded-xl font-medium transition-all cursor-pointer ${['anasayfa', 'hakkimizda', 'komisyonlar', 'ekip', 'program', 'basvuru', 'galeri-cms', 'iletisim'].includes(activePage)
                       ? 'text-[#1E6FFB] bg-[#1E6FFB]/10'
                       : 'text-slate-300 hover:text-white hover:bg-slate-800/40'
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center gap-2.5">
                     <FileText className="w-4 h-4" />
@@ -473,11 +496,10 @@ export default function ModernCMSAdminDashboard() {
                           setActivePage(item.key as ActivePageKey);
                           setMobileMenuOpen(false);
                         }}
-                        className={`w-full text-left px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors cursor-pointer block ${
-                          activePage === item.key
+                        className={`w-full text-left px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors cursor-pointer block ${activePage === item.key
                             ? 'text-white font-bold bg-slate-800/80'
                             : 'hover:text-slate-200 hover:bg-slate-800/30'
-                        }`}
+                          }`}
                       >
                         {item.label}
                       </button>
@@ -491,11 +513,10 @@ export default function ModernCMSAdminDashboard() {
                     setActivePage('duyurular');
                     setMobileMenuOpen(false);
                   }}
-                  className={`w-full flex items-center gap-2.5 px-3.5 py-2 rounded-xl font-medium transition-all cursor-pointer ${
-                    activePage === 'duyurular'
+                  className={`w-full flex items-center gap-2.5 px-3.5 py-2 rounded-xl font-medium transition-all cursor-pointer ${activePage === 'duyurular'
                       ? 'bg-[#1E6FFB] text-white font-bold'
                       : 'text-slate-300 hover:text-white hover:bg-slate-800/40'
-                  }`}
+                    }`}
                 >
                   <Bell className="w-4 h-4" />
                   <span>Duyurular ve Bildirimler</span>
@@ -514,11 +535,10 @@ export default function ModernCMSAdminDashboard() {
                     setActivePage('delegeler');
                     setMobileMenuOpen(false);
                   }}
-                  className={`w-full flex items-center justify-between px-3.5 py-2 rounded-xl font-medium transition-all cursor-pointer ${
-                    activePage === 'delegeler'
+                  className={`w-full flex items-center justify-between px-3.5 py-2 rounded-xl font-medium transition-all cursor-pointer ${activePage === 'delegeler'
                       ? 'bg-[#1E6FFB] text-white font-bold shadow-sm'
                       : 'text-slate-300 hover:text-white hover:bg-slate-800/40'
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center gap-2.5">
                     <Users className="w-4 h-4" />
@@ -532,11 +552,10 @@ export default function ModernCMSAdminDashboard() {
                     setActivePage('kullanicilar');
                     setMobileMenuOpen(false);
                   }}
-                  className={`w-full flex items-center justify-between px-3.5 py-2 rounded-xl font-medium transition-all cursor-pointer ${
-                    activePage === 'kullanicilar'
+                  className={`w-full flex items-center justify-between px-3.5 py-2 rounded-xl font-medium transition-all cursor-pointer ${activePage === 'kullanicilar'
                       ? 'bg-[#1E6FFB] text-white font-bold shadow-sm'
                       : 'text-slate-300 hover:text-white hover:bg-slate-800/40'
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center gap-2.5">
                     <UserCheck className="w-4 h-4" />
@@ -558,11 +577,10 @@ export default function ModernCMSAdminDashboard() {
                     setActivePage('galeri');
                     setMobileMenuOpen(false);
                   }}
-                  className={`w-full flex items-center justify-between px-3.5 py-2 rounded-xl font-medium transition-all cursor-pointer ${
-                    activePage === 'galeri'
+                  className={`w-full flex items-center justify-between px-3.5 py-2 rounded-xl font-medium transition-all cursor-pointer ${activePage === 'galeri'
                       ? 'bg-[#1E6FFB] text-white font-bold shadow-sm'
                       : 'text-slate-300 hover:text-white hover:bg-slate-800/40'
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center gap-2.5">
                     <ImageIcon className="w-4 h-4" />
@@ -598,11 +616,10 @@ export default function ModernCMSAdminDashboard() {
                     setActivePage('yoklama');
                     setMobileMenuOpen(false);
                   }}
-                  className={`w-full flex items-center justify-between px-3.5 py-2 rounded-xl font-medium transition-all cursor-pointer ${
-                    activePage === 'yoklama'
+                  className={`w-full flex items-center justify-between px-3.5 py-2 rounded-xl font-medium transition-all cursor-pointer ${activePage === 'yoklama'
                       ? 'bg-[#1E6FFB] text-white font-bold shadow-sm'
                       : 'text-slate-300 hover:text-white hover:bg-slate-800/40'
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center gap-2.5">
                     <QrCode className="w-4 h-4" />
@@ -616,11 +633,10 @@ export default function ModernCMSAdminDashboard() {
                     setActivePage('raporlar');
                     setMobileMenuOpen(false);
                   }}
-                  className={`w-full flex items-center justify-between px-3.5 py-2 rounded-xl font-medium transition-all cursor-pointer ${
-                    activePage === 'raporlar'
+                  className={`w-full flex items-center justify-between px-3.5 py-2 rounded-xl font-medium transition-all cursor-pointer ${activePage === 'raporlar'
                       ? 'bg-[#1E6FFB] text-white font-bold shadow-sm'
                       : 'text-slate-300 hover:text-white hover:bg-slate-800/40'
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center gap-2.5">
                     <FileText className="w-4 h-4" />
@@ -642,11 +658,10 @@ export default function ModernCMSAdminDashboard() {
                     setActivePage('kullanicilar');
                     setMobileMenuOpen(false);
                   }}
-                  className={`w-full flex items-center gap-2.5 px-3.5 py-2 rounded-xl font-medium transition-all cursor-pointer ${
-                    activePage === 'kullanicilar'
+                  className={`w-full flex items-center gap-2.5 px-3.5 py-2 rounded-xl font-medium transition-all cursor-pointer ${activePage === 'kullanicilar'
                       ? 'bg-[#1E6FFB] text-white font-bold shadow-sm'
                       : 'text-slate-300 hover:text-white hover:bg-slate-800/40'
-                  }`}
+                    }`}
                 >
                   <Users className="w-4 h-4" />
                   <span>Kullanıcılar</span>
@@ -663,13 +678,13 @@ export default function ModernCMSAdminDashboard() {
             </div>
           </div>
 
-          <div className="pt-4 border-t border-slate-800/80 text-[10px] text-slate-500 text-center">
+          <div className="pt-4 border-t border-slate-800/80 text-[10px] text-slate-500 text-center shrink-0">
             İrfanMeclis Admin v3.2
           </div>
         </aside>
 
         {/* MAIN CONTENT AREA */}
-        <main className="flex-1 p-6 sm:p-8 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto p-6 sm:p-8 min-w-0 print:p-0 print:m-0 print:overflow-visible print:h-auto print:block">
           {/* ========================================================================= */}
           {/* VIEW: MAIN DASHBOARD (PIXEL-PERFECT MATCH TO USER SCREENSHOT)              */}
           {/* ========================================================================= */}
@@ -848,13 +863,12 @@ export default function ModernCMSAdminDashboard() {
                                 10.09.2026 14:32
                               </td>
                               <td className="py-2.5 px-2">
-                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                                  app.status === 'approved'
+                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${app.status === 'approved'
                                     ? 'bg-emerald-100 text-emerald-700'
                                     : app.status === 'rejected'
-                                    ? 'bg-rose-100 text-rose-700'
-                                    : 'bg-amber-100 text-amber-700'
-                                }`}>
+                                      ? 'bg-rose-100 text-rose-700'
+                                      : 'bg-amber-100 text-amber-700'
+                                  }`}>
                                   {app.status === 'approved' ? 'Onaylandı' : app.status === 'rejected' ? 'Reddedildi' : 'Beklemede'}
                                 </span>
                               </td>
@@ -1237,9 +1251,9 @@ export default function ModernCMSAdminDashboard() {
           {/* SUBPAGE VIEWS: BREADCRUMB + RENDERED MODULE                                */}
           {/* ========================================================================= */}
           {activePage !== 'dashboard' && (
-            <div className="space-y-6">
+            <div className="space-y-6 print:space-y-0 print:block">
               {/* Back to Dashboard Nav Header */}
-              <div className="flex items-center justify-between bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+              <div className="flex items-center justify-between bg-white p-4 rounded-2xl border border-slate-200 shadow-sm print:hidden">
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => setActivePage('dashboard')}
@@ -1266,10 +1280,18 @@ export default function ModernCMSAdminDashboard() {
 
               {/* RENDER ACTIVE MODULE */}
               {activePage === 'kullanicilar' && <UsersManager />}
-              {activePage === 'raporlar' && <PdfReportGenerator onBack={() => setActivePage('dashboard')} />}
+              {activePage === 'raporlar' && (
+                <PdfReportGenerator 
+                  initialFilters={reportInitialFilters}
+                  onBack={() => setActivePage('dashboard')} 
+                />
+              )}
               {activePage === 'delegeler' && <DelegatesManager />}
               {activePage === 'yoklama' && (
-                <AttendanceManager onGoToReports={() => setActivePage('raporlar')} />
+                <AttendanceManager onGoToReports={(filters) => {
+                  setReportInitialFilters(filters || null);
+                  setActivePage('raporlar');
+                }} />
               )}
               {activePage === 'duyurular' && <AnnouncementsManager />}
               {activePage === 'galeri' && <GalleryManager />}
@@ -1431,6 +1453,13 @@ export default function ModernCMSAdminDashboard() {
           </div>
         </div>
       )}
+
+      {/* Supabase Bulut Bağlantısı ve Yapılandırma Modalı */}
+      <SupabaseConfigModal 
+        isOpen={supabaseModalOpen} 
+        onClose={() => setSupabaseModalOpen(false)} 
+        onConfigUpdated={() => setCloudConfigured(checkIsSupabaseConfigured())} 
+      />
     </div>
   );
 }

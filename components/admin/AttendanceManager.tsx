@@ -47,7 +47,15 @@ interface ScanHistoryItem {
 const EVENT_DAYS = ['23 Ekim', '24 Ekim', '25 Ekim'] as const;
 type EventDay = typeof EVENT_DAYS[number];
 
-export default function AttendanceManager({ onGoToReports }: { onGoToReports?: () => void }) {
+interface AttendanceManagerProps {
+  onGoToReports?: (filters?: {
+    day?: string;
+    commission?: string;
+    status?: 'all' | 'attended' | 'absent';
+  }) => void;
+}
+
+export default function AttendanceManager({ onGoToReports }: AttendanceManagerProps) {
   const [applications, setApplications] = useState<Application[]>([]);
   const [selectedDay, setSelectedDay] = useState<EventDay>('23 Ekim');
   const [selectedSession, setSelectedSession] = useState<string>('Genel Oturum');
@@ -317,11 +325,15 @@ export default function AttendanceManager({ onGoToReports }: { onGoToReports?: (
           {/* Go to PDF Reports */}
           {onGoToReports && (
             <button
-              onClick={onGoToReports}
+              onClick={() => onGoToReports({
+                day: selectedDay,
+                commission: commissionFilter !== 'ALL' ? commissionFilter : 'all',
+                status: attendanceFilter === 'ATTENDED' ? 'attended' : attendanceFilter === 'ABSENT' ? 'absent' : 'all'
+              })}
               className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold flex items-center gap-2 shadow-sm transition-all cursor-pointer"
             >
               <FileText className="w-4 h-4 text-blue-400" />
-              PDF Raporu Oluştur
+              <span>Yoklama Durumu PDF Raporu ({selectedDay})</span>
             </button>
           )}
         </div>
@@ -648,8 +660,24 @@ export default function AttendanceManager({ onGoToReports }: { onGoToReports?: (
               </select>
             </div>
 
-            <div className="text-right text-slate-500">
-              Bulunan: <strong className="text-slate-800">{filteredDelegates.length}</strong> Delege
+            <div className="flex items-center gap-3">
+              {onGoToReports && (
+                <button
+                  onClick={() => onGoToReports({
+                    day: selectedDay,
+                    commission: commissionFilter !== 'ALL' ? commissionFilter : 'all',
+                    status: attendanceFilter === 'ATTENDED' ? 'attended' : attendanceFilter === 'ABSENT' ? 'absent' : 'all'
+                  })}
+                  className="px-3 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all cursor-pointer whitespace-nowrap"
+                  title="Filtrelenmiş Yoklama Durumu Listesini PDF Olarak Oluştur"
+                >
+                  <Printer className="w-3.5 h-3.5 text-blue-400" />
+                  <span>Yoklama Durumunu PDF Yap</span>
+                </button>
+              )}
+              <div className="text-right text-slate-500 whitespace-nowrap">
+                Bulunan: <strong className="text-slate-800">{filteredDelegates.length}</strong> Delege
+              </div>
             </div>
           </div>
 

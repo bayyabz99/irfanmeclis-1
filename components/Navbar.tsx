@@ -19,7 +19,8 @@ import {
   QrCode,
   ArrowRight,
   User as UserIcon,
-  LogOut
+  LogOut,
+  Flag
 } from 'lucide-react';
 import { getCurrentUser, logoutParticipant } from '@/lib/storage';
 import { Application } from '@/lib/types';
@@ -58,6 +59,7 @@ export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [commissionDropdown, setCommissionDropdown] = useState(false);
+  const [mobileCommissionOpen, setMobileCommissionOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState<Application | null>(null);
   const pathname = usePathname();
 
@@ -116,6 +118,11 @@ export default function Navbar() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  // Admin panelinde sitenin ana navigasyon barını gizle
+  if (pathname?.startsWith('/admin-igm-secret-dashboard') || pathname?.startsWith('/admin')) {
+    return null;
+  }
+
   // Desktop navigation links matching reference
   const navLinks = [
     { name: 'Ana Sayfa', href: '/' },
@@ -125,8 +132,22 @@ export default function Navbar() {
       href: '/komisyonlar',
       hasDropdown: true,
       subLinks: [
-        { name: '8 İhtisas Masası', href: '/komisyonlar', desc: 'Adalet, Savunma, Dışişleri ve diğerleri' },
-        { name: 'Komisyonlar & 100 Kişilik Ekip', href: '/komisyonlar-ve-ekip', desc: 'Detaylı birleşik çalışma tablosu' },
+        { 
+          name: 'İhtisas Komisyonları', 
+          href: '/komisyonlar#komisyonlar', 
+          targetId: 'komisyonlar',
+          desc: '8 Masada Kanun ve Politika Müzakereleri',
+          badge: '8 Komisyon',
+          icon: Layers
+        },
+        { 
+          name: 'Meclis Partileri', 
+          href: '/komisyonlar#partiler', 
+          targetId: 'partiler',
+          desc: 'Temsil Grupları, Tüzük & Koltuk Dağılımı',
+          badge: 'Parti Grupları',
+          icon: Flag
+        },
       ]
     },
     { name: 'Ekip', href: '/ekip' },
@@ -168,7 +189,7 @@ export default function Navbar() {
         }`}
       >
         <div
-          className={`pointer-events-auto relative w-full max-w-[1380px] mx-auto transition-all duration-300 overflow-hidden ${
+          className={`pointer-events-auto relative w-full max-w-[1380px] mx-auto transition-all duration-300 ${
             /* Curved corners matching reference design */
             'rounded-2xl sm:rounded-3xl'
           } ${
@@ -179,7 +200,7 @@ export default function Navbar() {
         >
           {/* Subtle Authentic Islamic Geometric / Seljuk Pattern Texture Overlay */}
           <div 
-            className="absolute inset-0 pointer-events-none opacity-[0.09] mix-blend-screen bg-repeat"
+            className="absolute inset-0 pointer-events-none opacity-[0.09] mix-blend-screen bg-repeat rounded-2xl sm:rounded-3xl overflow-hidden"
             style={{
               backgroundImage: `url('/images/nav-pattern.svg')`,
               backgroundSize: '54px 54px',
@@ -191,14 +212,14 @@ export default function Navbar() {
 
           {/* Soft ambient center glow behind navigation items */}
           <div 
-            className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-8 pointer-events-none opacity-40 bg-gradient-to-b from-[#2dd4bf]/20 to-transparent blur-md"
+            className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-8 pointer-events-none opacity-40 bg-gradient-to-b from-[#2dd4bf]/20 to-transparent blur-md rounded-full overflow-hidden"
             aria-hidden="true"
           />
 
           {/* Inner Header Content Container */}
           <div className="relative w-full mx-auto px-3 sm:px-5 lg:px-6 py-2.5 sm:py-3 flex items-center justify-between">
             
-            {/* Left: Emblem Logo + "ÖNDERLİĞİNDE / İRFAN MECLİSİ" */}
+            {/* Left: Emblem Logo + "İRFAN MECLİSİ" */}
             <Link href="/" className="flex items-center gap-2.5 sm:gap-3 group shrink-0 select-none">
               {/* Circular Emblem with Golden Border Ring */}
               <div className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-full p-0.5 border border-[#dfbe7a]/80 shadow-[0_0_14px_rgba(223,190,122,0.25)] bg-[#08242f] group-hover:border-[#f3d99d] group-hover:shadow-[0_0_18px_rgba(223,190,122,0.4)] transition-all duration-300 shrink-0">
@@ -214,12 +235,9 @@ export default function Navbar() {
                 </div>
               </div>
 
-              {/* Title & Slogan in Elegant Serif / Sand Gold */}
-              <div className="flex flex-col shrink-0">
-                <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.22em] text-[#dfbe7a] font-medium leading-none mb-1 drop-shadow-sm whitespace-nowrap">
-                  ÖNDERLİĞİNDE
-                </span>
-                <span className="text-sm sm:text-base lg:text-[16px] xl:text-[17px] font-serif font-bold tracking-wide text-white leading-tight whitespace-nowrap drop-shadow-sm group-hover:text-[#f8f9fa] transition-colors">
+              {/* Title in Elegant Serif */}
+              <div className="flex items-center shrink-0">
+                <span className="text-base sm:text-lg lg:text-[18px] xl:text-[19px] font-serif font-black tracking-wide text-white leading-tight whitespace-nowrap drop-shadow-sm group-hover:text-[#f8f9fa] transition-colors">
                   İRFAN MECLİSİ
                 </span>
               </div>
@@ -234,12 +252,18 @@ export default function Navbar() {
                   return (
                     <div 
                       key={link.name} 
-                      className="relative"
+                      className="relative group"
                       onMouseEnter={() => setCommissionDropdown(true)}
                       onMouseLeave={() => setCommissionDropdown(false)}
                     >
                       <Link
                         href={link.href}
+                        onClick={(e) => {
+                          if (pathname === '/komisyonlar') {
+                            e.preventDefault();
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                          }
+                        }}
                         className={`relative px-2.5 xl:px-3.5 py-1.5 xl:py-2 text-[13.5px] xl:text-[14px] font-serif transition-all inline-flex items-center gap-1.5 whitespace-nowrap ${
                           active
                             ? 'text-white font-semibold'
@@ -247,35 +271,87 @@ export default function Navbar() {
                         }`}
                       >
                         <span className="tracking-wide">{link.name}</span>
-                        <ChevronDown className={`w-3.5 h-3.5 text-[#dfbe7a] transition-transform duration-200 ${commissionDropdown ? 'rotate-180' : ''}`} />
+                        <ChevronDown className={`w-3.5 h-3.5 text-[#dfbe7a] transition-transform duration-200 ${commissionDropdown ? 'rotate-180 text-[#cca663]' : ''}`} />
                         {active && <GoldActiveOrnament />}
                       </Link>
 
                       {commissionDropdown && (
-                        <div className="absolute top-full left-1/2 -translate-x-1/2 w-64 pt-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-                          <div className="relative p-2 rounded-2xl bg-gradient-to-b from-[#092530]/98 to-[#04161e]/98 border border-[#cca663]/40 shadow-2xl backdrop-blur-xl space-y-1 overflow-hidden">
+                        <div className="absolute top-full left-1/2 -translate-x-1/2 w-80 pt-2.5 z-[100] animate-in fade-in slide-in-from-top-2 duration-150">
+                          <div className="relative p-2.5 rounded-2xl bg-gradient-to-b from-[#092530]/98 via-[#061d26]/98 to-[#04161e]/98 border border-[#cca663]/40 shadow-2xl shadow-[#020b10]/90 backdrop-blur-2xl space-y-1.5 overflow-hidden">
                             {/* Texture inside dropdown */}
                             <div 
-                              className="absolute inset-0 pointer-events-none opacity-10 bg-repeat"
+                              className="absolute inset-0 pointer-events-none opacity-10 bg-repeat rounded-2xl"
                               style={{
                                 backgroundImage: `url('/images/nav-pattern.svg')`,
                                 backgroundSize: '40px 40px',
                               }}
                             />
-                            {link.subLinks?.map((sub) => (
+                            
+                            {/* Dropdown Header Accent */}
+                            <div className="relative px-3 pt-1.5 pb-2 border-b border-[#cca663]/20 flex items-center justify-between">
+                              <span className="text-[10.5px] font-semibold uppercase tracking-wider text-[#dfbe7a]">
+                                Komisyonlar Sayfası
+                              </span>
+                              <span className="text-[10px] text-slate-400">Hızlı Bölüm Seçimi</span>
+                            </div>
+
+                            {/* Section Items: 1. Komisyonlar, 2. Partiler */}
+                            {link.subLinks?.map((sub) => {
+                              const SubIcon = sub.icon || Layers;
+                              return (
+                                <Link
+                                  key={sub.href}
+                                  href={sub.href}
+                                  onClick={(e) => {
+                                    setCommissionDropdown(false);
+                                    if (pathname === '/komisyonlar' && sub.targetId) {
+                                      e.preventDefault();
+                                      const el = document.getElementById(sub.targetId);
+                                      if (el) {
+                                        el.scrollIntoView({ behavior: 'smooth' });
+                                        window.history.pushState(null, '', sub.href);
+                                      }
+                                    }
+                                  }}
+                                  className="relative flex items-center gap-3 p-2.5 rounded-xl bg-transparent hover:bg-[#0e3b4b]/80 border border-transparent hover:border-[#cca663]/30 transition-all duration-200 group/sub cursor-pointer"
+                                >
+                                  <div className="w-9 h-9 rounded-xl bg-[#07212b] border border-[#dfbe7a]/30 group-hover/sub:border-[#dfbe7a] group-hover/sub:bg-[#0c3544] flex items-center justify-center shrink-0 transition-colors shadow-sm">
+                                    <SubIcon className="w-4 h-4 text-[#dfbe7a] group-hover/sub:scale-110 transition-transform" />
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-xs font-bold text-white group-hover/sub:text-[#dfbe7a] transition-colors truncate">
+                                        {sub.name}
+                                      </span>
+                                      {sub.badge && (
+                                        <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-[#dfbe7a]/15 text-[#dfbe7a] border border-[#dfbe7a]/30">
+                                          {sub.badge}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <span className="text-[11px] text-slate-300 block mt-0.5 leading-snug">
+                                      {sub.desc}
+                                    </span>
+                                  </div>
+                                  <ChevronRight className="w-4 h-4 text-slate-500 group-hover/sub:text-[#dfbe7a] group-hover/sub:translate-x-0.5 transition-all shrink-0" />
+                                </Link>
+                              );
+                            })}
+
+                            {/* Extra Quick Link */}
+                            <div className="pt-1.5 border-t border-[#cca663]/15">
                               <Link
-                                key={sub.href}
-                                href={sub.href}
-                                className="relative block p-2.5 rounded-xl hover:bg-[#0e3b4b]/60 transition-colors group/sub"
+                                href="/komisyonlar-ve-ekip"
+                                onClick={() => setCommissionDropdown(false)}
+                                className="flex items-center justify-between px-3 py-1.5 rounded-lg text-[11px] text-slate-400 hover:text-white hover:bg-white/5 transition-colors group/all"
                               >
-                                <span className="text-xs font-semibold text-white block group-hover/sub:text-[#dfbe7a] transition-colors">
-                                  {sub.name}
+                                <span className="flex items-center gap-1.5">
+                                  <Users className="w-3 h-3 text-[#dfbe7a]" />
+                                  <span>100 Kişilik Ekip & Çalışma Tablosu</span>
                                 </span>
-                                <span className="text-[11px] text-slate-300 block mt-0.5">
-                                  {sub.desc}
-                                </span>
+                                <ArrowRight className="w-3 h-3 text-slate-500 group-hover/all:text-[#dfbe7a] group-hover/all:translate-x-0.5 transition-all" />
                               </Link>
-                            ))}
+                            </div>
                           </div>
                         </div>
                       )}
@@ -428,12 +504,9 @@ export default function Navbar() {
                 />
               </div>
             </div>
-            <div className="flex flex-col min-w-0">
-              <span className="text-sm font-serif font-black tracking-tight text-white leading-tight truncate">
+            <div className="flex items-center min-w-0">
+              <span className="text-base sm:text-lg font-serif font-black tracking-wide text-white leading-tight truncate">
                 İRFAN MECLİSİ
-              </span>
-              <span className="text-[10px] uppercase tracking-wider text-[#dfbe7a] font-semibold mt-0.5 truncate">
-                ÖNDER DERNEĞİ ÖNCÜLÜĞÜNDE
               </span>
             </div>
           </div>
@@ -452,6 +525,67 @@ export default function Navbar() {
           {mobileNavLinks.map((link) => {
             const active = isActive(link.href);
             const Icon = link.icon;
+
+            if (link.href === '/komisyonlar') {
+              return (
+                <div key={link.name} className="space-y-1">
+                  <div className={`flex items-center justify-between px-3.5 py-3 rounded-2xl text-sm transition-all ${
+                    active
+                      ? 'bg-[#0e3b4b]/90 border border-[#dfbe7a]/50 text-[#dfbe7a] shadow-md font-semibold'
+                      : 'text-slate-200 hover:text-white hover:bg-[#0c3340]/60 border border-transparent'
+                  }`}>
+                    <Link
+                      href="/komisyonlar"
+                      onClick={() => setMobileOpen(false)}
+                      className="flex items-center gap-3 min-w-0 flex-1"
+                    >
+                      <Icon className={`w-5 h-5 shrink-0 ${active ? 'text-[#dfbe7a]' : 'text-slate-400'}`} />
+                      <span className={`truncate font-serif ${active ? 'text-white font-semibold' : 'text-slate-200'}`}>
+                        {link.name}
+                      </span>
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => setMobileCommissionOpen(!mobileCommissionOpen)}
+                      className="p-1.5 text-[#dfbe7a] hover:bg-white/10 rounded-lg transition-colors cursor-pointer"
+                      aria-label="Komisyon Bölümleri"
+                    >
+                      <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${mobileCommissionOpen ? 'rotate-180' : ''}`} />
+                    </button>
+                  </div>
+
+                  {mobileCommissionOpen && (
+                    <div className="pl-6 pr-2 py-1 space-y-1 border-l-2 border-[#dfbe7a]/30 ml-4 animate-in fade-in slide-in-from-top-1 duration-150">
+                      <Link
+                        href="/komisyonlar#komisyonlar"
+                        onClick={() => setMobileOpen(false)}
+                        className="flex items-center gap-2.5 p-2 rounded-xl text-xs text-slate-200 hover:text-white hover:bg-[#0c3340]/60 transition-colors"
+                      >
+                        <Layers className="w-3.5 h-3.5 text-[#dfbe7a]" />
+                        <span>İhtisas Komisyonları (8 Masa)</span>
+                      </Link>
+                      <Link
+                        href="/komisyonlar#partiler"
+                        onClick={() => setMobileOpen(false)}
+                        className="flex items-center gap-2.5 p-2 rounded-xl text-xs text-slate-200 hover:text-white hover:bg-[#0c3340]/60 transition-colors"
+                      >
+                        <Flag className="w-3.5 h-3.5 text-cyan-400" />
+                        <span>Meclis Partileri</span>
+                      </Link>
+                      <Link
+                        href="/komisyonlar-ve-ekip"
+                        onClick={() => setMobileOpen(false)}
+                        className="flex items-center gap-2.5 p-2 rounded-xl text-[11px] text-slate-400 hover:text-slate-200 transition-colors"
+                      >
+                        <Users className="w-3.5 h-3.5 text-slate-400" />
+                        <span>100 Kişilik Ekip Tablosu</span>
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              );
+            }
+
             return (
               <Link
                 key={link.name}

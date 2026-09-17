@@ -20,6 +20,26 @@ export interface SliderItem {
   isActive: boolean;
 }
 
+export interface PartyGroup {
+  id: string;
+  name: string;
+  shortName: string;
+  slogan: string;
+  description: string;
+  logoUrl?: string;
+  color?: string;
+  seatsCount?: number;
+  leaderName?: string;
+  principles?: string[];
+}
+
+export interface PartiesSectionCMS {
+  tag: string;
+  heading: string;
+  description: string;
+  parties: PartyGroup[];
+}
+
 export interface CMSData {
   siteSettings: {
     siteName: string;
@@ -57,11 +77,17 @@ export interface CMSData {
         subtitle: string;
       }[];
     };
+    statsSection?: {
+      tag: string;
+      heading: string;
+      description: string;
+    };
     stats: {
       value: string;
       suffix: string;
       label: string;
       description: string;
+      imageUrl?: string;
     }[];
     commissionsSection: {
       tag: string;
@@ -134,6 +160,12 @@ export interface CMSData {
   team: typeof TEAM_MEMBERS;
   program: typeof PROGRAM_DAYS;
   gallery: typeof GALLERY_ITEMS;
+  ekipPage: {
+    heroBadge: string;
+    heroTitle: string;
+    heroDesc: string;
+    defaultAffiliation: string;
+  };
   basvuruPage: {
     heroBadge: string;
     heroTitle: string;
@@ -159,6 +191,7 @@ export interface CMSData {
       car: string;
     };
   };
+  partiesSection: PartiesSectionCMS;
 }
 
 export const INITIAL_CMS_DATA: CMSData = {
@@ -166,21 +199,21 @@ export const INITIAL_CMS_DATA: CMSData = {
     siteName: 'İrfan Meclisi',
     organizationName: 'ÖNDER Derneği Öncülüğünde',
     slogan: 'KÖKÜMÜZ İRFAN, SÖZÜMÜZ İSTİKBAL',
-    countdownText: 'Yeni fikirler, güçlü sesler ve kararlı adımlar için geri sayım başladı.',
+    countdownText: '',
     targetDate: '2026-10-23T09:00:00+03:00',
     status: 'online'
   },
   homepage: {
     badge: 'KÖKÜMÜZ İRFAN • SÖZÜMÜZ İSTİKBAL',
-    heroPrefix: 'ÖNDER DERNEĞİ ÖNCÜLÜĞÜNDE',
+    heroPrefix: 'ÖNDER DERNEĞİ KATKILARIYLA',
     heroTitle: 'İRFAN MECLİSİ',
-    heroDesc: '“Kökümüz İrfan, Sözümüz İstikbal” anlayışıyla; gençlerin fikir gücüyle, daha adil, daha güçlü ve daha yaşanabilir bir gelecek için buluşuyoruz.',
+    heroDesc: '“Kökümüz İrfan, Sözümüz İstikbal”',
     heroBgImage: '/images/anasayfa-arkaplan.png',
     editorialQuote: 'Fikir\nÜreten\nGençlik\nMeclisi',
     aboutSummary: {
-      tag: '— Neden İrfan Meclisi?',
-      heading: 'Sadece Dinleyen Değil, Geleceği Şekillendiren Gençlik',
-      paragraph: 'ÖNDER İmam Hatipliler Derneği öncülüğünde gerçekleştirilen İrfan Meclisi; gençlerin Türkiye\'nin temel meseleleri üzerinde derinlemesine düşünmelerini, analitik argüman geliştirmelerini ve uzlaşma kültürüyle kanun teklifleri hazırlamalarını sağlayan öncü bir meclis simülasyonudur.',
+      tag: '~ NEDEN İRFAN MECLİSİ? ~',
+      heading: 'Sadece Dinleyen Değil,\nGeleceği Şekillendiren',
+      paragraph: 'İrfan Meclisi, gençlerin fikirlerini, değerlerini ve potansiyelini bir araya getirerek daha güçlü bir gelecek inşa etmeyi amaçlar.',
       quote: '“Daha iyi bir gelecek, gençlerin fikirleriyle mümkün.”',
       imageUrl: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1000&q=80'
     },
@@ -229,30 +262,32 @@ export const INITIAL_CMS_DATA: CMSData = {
         }
       ]
     },
+    statsSection: {
+      tag: 'RAKAMLARLA MECLİS',
+      heading: 'Sayılarla İrfan Meclisi 2026',
+      description: "Dünya Selçuklu Kongre Merkezi'nde gerçekleşecek tarihi buluşmanın organizasyon gücü ve delege kapasitesi."
+    },
     stats: [
       {
         value: '250',
         suffix: '+',
         label: 'Asil Delege',
-        description: 'Türkiye genelinden mülakatla seçilen lise ve üniversite delegesi'
+        description: 'Türkiye genelinden nitelikattta seçilen lise ve üniversite delegesi',
+        imageUrl: '/images/stats-delege.jpg'
       },
       {
         value: '8',
         suffix: '',
         label: 'İhtisas Komisyonu',
-        description: 'Adaletten Dışişlerine, Savunmadan Eğitime stratejik masalar'
+        description: 'Adaletten Dışişlerine, Savunmadan Eğitime stratejik masalar',
+        imageUrl: '/images/stats-komisyon.jpg'
       },
       {
         value: '100',
         suffix: '+',
         label: 'Organizasyon Ekibi',
-        description: 'Akademik danışmanlar, divan heyeti ve koordinatörler'
-      },
-      {
-        value: '3',
-        suffix: ' Gün',
-        label: 'Meclis Zirvesi',
-        description: '23-24-25 Ekim 2026 Selçuklu Kongre Merkezi (SKM) Konya'
+        description: 'Akademik danışmanlar, divan heyeti ve koordinatörler',
+        imageUrl: '/images/stats-ekip.jpg'
       }
     ],
     commissionsSection: {
@@ -346,6 +381,12 @@ export const INITIAL_CMS_DATA: CMSData = {
   team: TEAM_MEMBERS,
   program: PROGRAM_DAYS,
   gallery: GALLERY_ITEMS,
+  ekipPage: {
+    heroBadge: 'GÖNÜLLÜ VE PROFESYONEL KADRO',
+    heroTitle: '100 Kişilik Organizasyon Ekibi',
+    heroDesc: '“Kökümüz İrfan, Sözümüz İstikbal” — İrfan Meclisi\'nin planlanmasından oturumların yönetilmesine kadar 3 gün boyunca sahada görev yapan divan heyeti, komisyon başkanları ve koordinasyon birimlerimiz.',
+    defaultAffiliation: 'ÖNDER Ekibi'
+  },
   basvuruPage: {
     heroBadge: 'MECLİS DELEGE SEÇİMLERİ',
     heroTitle: '2026 Delege Başvuru Formu',
@@ -369,6 +410,61 @@ export const INITIAL_CMS_DATA: CMSData = {
       tram: 'Alaaddin - Selçuk Üniversitesi tramvay hattında seyreden tramvaylarla doğrudan Kongre Merkezi durağında inebilirsiniz.',
       car: 'Ankara, İstanbul ve Antalya çevre yollarından Selçuklu / SKM tabelalarını takip ederek 950 araç kapasiteli kapalı otoparka ulaşabilirsiniz.'
     }
+  },
+  partiesSection: {
+    tag: '— MECLİS GRUPLARI & SİYASİ YAPILANMA',
+    heading: 'Temsil Edilen Meclis Partileri',
+    description: 'İrfan Meclisi simülasyonunda 250 asil delegenin fikirlerini, kanun tekliflerini ve Genel Kurul müzakerelerini yürüttüğü temsil grupları.',
+    parties: [
+      {
+        id: 'parti-1',
+        name: 'Adalet ve İrfan Grubu',
+        shortName: 'AİG',
+        slogan: 'Adalet Mülkün Temeli, İrfan İstikbalin Güvencesidir',
+        description: 'Hukuk devleti prensibi, ahlaki liyakat, adil bölüşüm ve şeffaf yönetim ilkelerini meclis komisyonlarında ve Genel Kurul yasama süreçlerinde kararlılıkla savunur.',
+        color: '#00B4D8',
+        seatsCount: 68,
+        leaderName: 'M. Enes Demir • Grup Başkanı',
+        principles: ['Hukukun Üstünlüğü', 'Ahlaki Liyakat', 'Sosyal Adalet'],
+        logoUrl: ''
+      },
+      {
+        id: 'parti-2',
+        name: 'İstikbal ve Maarif Birliği',
+        shortName: 'İMB',
+        slogan: 'İlimle Dirilen, Maarifle Yükselen Genç Nesil',
+        description: 'Milli maarif reformu, fırsat eşitliği, köklü medeniyet müktesebatımızın çağdaş bilim ve teknoloji ile harmanlandığı nitelikli eğitim politikalarını meclise taşır.',
+        color: '#10B981',
+        seatsCount: 62,
+        leaderName: 'Ayşe Zülal Yıldız • Grup Başkanı',
+        principles: ['Milli Maarif', 'Kültürel Derinlik', 'Gençlik ve İlim'],
+        logoUrl: ''
+      },
+      {
+        id: 'parti-3',
+        name: 'Medeniyet ve Kalkınma İttifakı',
+        shortName: 'MKİ',
+        slogan: 'Üreten Sanayi, Bağımsız ve Güçlü Türkiye',
+        description: 'Yerli ve milli teknoloji hamlesi, sürdürülebilir kalkınma modelleri, yeşil ekonomi ve küresel ölçekte rekabetçi genç girişimcilik ekosistemini inşa etmeyi amaçlar.',
+        color: '#F59E0B',
+        seatsCount: 60,
+        leaderName: 'Hakan Selim Karaca • Grup Sözcüsü',
+        principles: ['Milli Teknoloji', 'Sürdürülebilir Kalkınma', 'Genç Girişimcilik'],
+        logoUrl: ''
+      },
+      {
+        id: 'parti-4',
+        name: 'Hür Düşünce ve Dayanışma Hareketi',
+        shortName: 'HDH',
+        slogan: 'Hür İrade, Ortak Akıl ve Mazluma Kalkan',
+        description: 'Uluslararası hak ve diplomasi sahasında Türkiye’nin vicdani liderliğini, sivil toplumun etkinliğini ve temel insan haklarının küresel ölçekte korunmasını savunur.',
+        color: '#8B5CF6',
+        seatsCount: 60,
+        leaderName: 'Zeynep Sare Koç • Grup Başkanı',
+        principles: ['İnsani Diplomasi', 'Fikir Hürriyeti', 'Sivil İrade'],
+        logoUrl: ''
+      }
+    ]
   }
 };
 
@@ -393,22 +489,121 @@ export function getStoredCMSData(): CMSData {
       team: Array.isArray(parsed.team) ? parsed.team : INITIAL_CMS_DATA.team,
       program: Array.isArray(parsed.program) ? parsed.program : INITIAL_CMS_DATA.program,
       gallery: Array.isArray(parsed.gallery) ? parsed.gallery : INITIAL_CMS_DATA.gallery,
+      ekipPage: { ...INITIAL_CMS_DATA.ekipPage, ...(parsed.ekipPage || {}) },
       basvuruPage: { ...INITIAL_CMS_DATA.basvuruPage, ...(parsed.basvuruPage || {}) },
       galeriPage: { ...INITIAL_CMS_DATA.galeriPage, ...(parsed.galeriPage || {}) },
-      contact: { ...INITIAL_CMS_DATA.contact, ...(parsed.contact || {}) }
+      contact: { ...INITIAL_CMS_DATA.contact, ...(parsed.contact || {}) },
+      partiesSection: parsed.partiesSection && Array.isArray(parsed.partiesSection?.parties)
+        ? {
+            ...INITIAL_CMS_DATA.partiesSection,
+            ...parsed.partiesSection,
+            parties: parsed.partiesSection.parties
+          }
+        : INITIAL_CMS_DATA.partiesSection
     };
   } catch {
     return INITIAL_CMS_DATA;
   }
 }
 
+/**
+ * Sunucu API'sinden (/api/cms) en güncel veriyi çeker, localStorage'a yazar ve günceller.
+ */
+export async function fetchServerCMSData(): Promise<CMSData> {
+  if (typeof window === 'undefined') return INITIAL_CMS_DATA;
+  try {
+    const res = await fetch('/api/cms', {
+      method: 'GET',
+      cache: 'no-store',
+      headers: {
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache'
+      }
+    });
+    if (res.ok) {
+      const serverData = await res.json();
+      if (serverData && typeof serverData === 'object') {
+        const merged: CMSData = {
+          ...INITIAL_CMS_DATA,
+          ...serverData,
+          siteSettings: { ...INITIAL_CMS_DATA.siteSettings, ...(serverData.siteSettings || {}) },
+          homepage: { ...INITIAL_CMS_DATA.homepage, ...(serverData.homepage || {}) },
+          aboutPage: { ...INITIAL_CMS_DATA.aboutPage, ...(serverData.aboutPage || {}) },
+          commissions: Array.isArray(serverData.commissions) ? serverData.commissions : INITIAL_CMS_DATA.commissions,
+          team: Array.isArray(serverData.team) ? serverData.team : INITIAL_CMS_DATA.team,
+          program: Array.isArray(serverData.program) ? serverData.program : INITIAL_CMS_DATA.program,
+          gallery: Array.isArray(serverData.gallery) ? serverData.gallery : INITIAL_CMS_DATA.gallery,
+          ekipPage: { ...INITIAL_CMS_DATA.ekipPage, ...(serverData.ekipPage || {}) },
+          basvuruPage: { ...INITIAL_CMS_DATA.basvuruPage, ...(serverData.basvuruPage || {}) },
+          galeriPage: { ...INITIAL_CMS_DATA.galeriPage, ...(serverData.galeriPage || {}) },
+          contact: { ...INITIAL_CMS_DATA.contact, ...(serverData.contact || {}) },
+          partiesSection: serverData.partiesSection && Array.isArray(serverData.partiesSection?.parties)
+            ? {
+                ...INITIAL_CMS_DATA.partiesSection,
+                ...serverData.partiesSection,
+                parties: serverData.partiesSection.parties
+              }
+            : INITIAL_CMS_DATA.partiesSection
+        };
+        localStorage.setItem(CMS_STORAGE_KEY, JSON.stringify(merged));
+        window.dispatchEvent(new Event('igm_cms_updated'));
+        return merged;
+      }
+    }
+  } catch (err) {
+    console.warn('Could not fetch CMS from server, using local fallback:', err);
+  }
+  return getStoredCMSData();
+}
+
+/**
+ * CMS verilerini hem yerel tarayıcı belleğine hem de sunucu diskine (/api/cms) kalıcı olarak kaydeder.
+ */
 export function saveStoredCMSData(data: CMSData): void {
   if (typeof window === 'undefined') return;
   try {
     localStorage.setItem(CMS_STORAGE_KEY, JSON.stringify(data));
     window.dispatchEvent(new Event('igm_cms_updated'));
+
+    // Sunucu diskine asenkron kaydet
+    fetch('/api/cms', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    }).catch((err) => {
+      console.error('Failed to persist CMS data to server:', err);
+    });
   } catch (err) {
     console.error('Failed to save CMS data:', err);
+  }
+}
+
+/**
+ * CMS verilerini hem yerel belleğe hem sunucu diskine kaydeder ve sunucu sonucunu bekler.
+ */
+export async function saveStoredCMSDataAsync(data: CMSData): Promise<{ success: boolean; error?: string }> {
+  if (typeof window === 'undefined') return { success: false, error: 'No window context' };
+  try {
+    // 1. Yerel belleğe anında yaz
+    localStorage.setItem(CMS_STORAGE_KEY, JSON.stringify(data));
+    window.dispatchEvent(new Event('igm_cms_updated'));
+
+    // 2. Sunucuya gönder
+    const res = await fetch('/api/cms', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+
+    if (!res.ok) {
+      const errJson = await res.json().catch(() => ({}));
+      return { success: false, error: errJson.error || `Server returned ${res.status}` };
+    }
+
+    return { success: true };
+  } catch (err: any) {
+    console.error('saveStoredCMSDataAsync error:', err);
+    return { success: false, error: err?.message || 'Sunucuya kaydedilemedi' };
   }
 }
 
@@ -416,9 +611,16 @@ export function resetCMSData(): CMSData {
   if (typeof window !== 'undefined') {
     localStorage.setItem(CMS_STORAGE_KEY, JSON.stringify(INITIAL_CMS_DATA));
     window.dispatchEvent(new Event('igm_cms_updated'));
+
+    fetch('/api/cms', {
+      method: 'DELETE'
+    }).catch((err) => {
+      console.error('Failed to reset CMS data on server:', err);
+    });
   }
   return INITIAL_CMS_DATA;
 }
+
 
 // -------------------------------------------------------------
 // CMS CRUD HELPERS (Direct mutations with event trigger)
@@ -534,4 +736,44 @@ export function deleteProgramSessionItem(dayNumber: number, sessionId: string): 
   saveStoredCMSData(updated);
   return updated;
 }
+
+export function addPartyItem(party: PartyGroup): CMSData {
+  const current = getStoredCMSData();
+  const updated = {
+    ...current,
+    partiesSection: {
+      ...current.partiesSection,
+      parties: [...(current.partiesSection?.parties || []), party]
+    }
+  };
+  saveStoredCMSData(updated);
+  return updated;
+}
+
+export function updatePartyItem(id: string, updates: Partial<PartyGroup>): CMSData {
+  const current = getStoredCMSData();
+  const updated = {
+    ...current,
+    partiesSection: {
+      ...current.partiesSection,
+      parties: (current.partiesSection?.parties || []).map((p) => (p.id === id ? { ...p, ...updates } : p))
+    }
+  };
+  saveStoredCMSData(updated);
+  return updated;
+}
+
+export function deletePartyItem(id: string): CMSData {
+  const current = getStoredCMSData();
+  const updated = {
+    ...current,
+    partiesSection: {
+      ...current.partiesSection,
+      parties: (current.partiesSection?.parties || []).filter((p) => p.id !== id)
+    }
+  };
+  saveStoredCMSData(updated);
+  return updated;
+}
+
 

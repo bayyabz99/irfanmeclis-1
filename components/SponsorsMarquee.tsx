@@ -15,7 +15,13 @@ const SPONSORS_LIST = [
   { name: 'T.C. GENÇLİK VE SPOR BAKANLIĞI', role: 'Kurumsal Destek' }
 ];
 
-export default function SponsorsMarquee() {
+interface SponsorsMarqueeProps {
+  sponsors?: { name: string; role: string }[];
+}
+
+export default function SponsorsMarquee({ sponsors }: SponsorsMarqueeProps) {
+  const activeSponsors = sponsors && sponsors.length > 0 ? sponsors : SPONSORS_LIST;
+
   return (
     <section className="py-12 bg-[#041224] border-y border-[#4DA3FF]/15 overflow-hidden relative select-none">
       {/* Title matching reference screenshot */}
@@ -36,7 +42,7 @@ export default function SponsorsMarquee() {
         {/* Scrolling Strip */}
         <div className="animate-marquee py-2 flex items-center gap-4 sm:gap-6">
           {/* Render twice for continuous loop */}
-          {[...SPONSORS_LIST, ...SPONSORS_LIST].map((item, idx) => (
+          {[...activeSponsors, ...activeSponsors].map((item, idx) => (
             <div
               key={idx}
               className="inline-flex items-center gap-2.5 px-5 sm:px-6 py-2.5 sm:py-3 rounded-full bg-[#081e3a]/90 border border-[#4DA3FF]/30 hover:border-[#4DA3FF] hover:bg-[#0c2f57] shadow-lg shadow-black/30 transition-all duration-300 group shrink-0"

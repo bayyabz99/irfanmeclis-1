@@ -175,7 +175,9 @@ export default function CommissionsAndTeamPage() {
                 <span className="text-[10px] uppercase font-bold tracking-wider text-[#4DA3FF] bg-[#061A33] px-2 py-0.5 rounded-full border border-[#4DA3FF]/20">
                   {member.category.replace('_', ' ')}
                 </span>
-                <span className="text-[10px] text-slate-400 font-medium">ÖNDER Kadrosu</span>
+                <span className="text-[10px] text-slate-400 font-medium">
+                  {member.affiliation || 'ÖNDER Kadrosu'}
+                </span>
               </div>
             </div>
           ))}

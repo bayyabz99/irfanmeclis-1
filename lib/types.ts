@@ -19,6 +19,7 @@ export type TeamMember = {
   imageUrl: string;
   university?: string;
   bio?: string;
+  affiliation?: string;
 };
 
 export type ProgramSession = {

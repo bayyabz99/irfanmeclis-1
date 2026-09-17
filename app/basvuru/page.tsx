@@ -24,6 +24,7 @@ import {
   EyeOff
 } from 'lucide-react';
 import { COMMISSIONS } from '@/lib/data';
+import { getStoredCMSData, fetchServerCMSData, CMSData, INITIAL_CMS_DATA } from '@/lib/cmsStorage';
 import { createApplication } from '@/lib/storage';
 import { Application } from '@/lib/types';
 import QrTicketModal from '@/components/QrTicketModal';
@@ -31,7 +32,7 @@ import InnerPageHero from '@/components/InnerPageHero';
 
 const TOTAL_STEPS = 8;
 
-function ApplicationFormContent() {
+function ApplicationFormContent({ cmsData }: { cmsData: CMSData }) {
   const searchParams = useSearchParams();
   const preSelectedCommission = searchParams.get('commission') || '';
 
@@ -184,8 +185,9 @@ function ApplicationFormContent() {
     }
   };
 
-  const selectedCommission = COMMISSIONS.find(c => c.id === formData.commissionId);
-  const selectedSecondCommission = COMMISSIONS.find(c => c.id === formData.secondChoiceId);
+  const commissionsList = cmsData?.commissions && cmsData.commissions.length > 0 ? cmsData.commissions : COMMISSIONS;
+  const selectedCommission = commissionsList.find((c: any) => c.id === formData.commissionId);
+  const selectedSecondCommission = commissionsList.find((c: any) => c.id === formData.secondChoiceId);
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -255,6 +257,14 @@ function ApplicationFormContent() {
               style={{ width: `${(currentStep / TOTAL_STEPS) * 100}%` }}
             />
           </div>
+
+          {/* Quota notice from CMS */}
+          {cmsData?.basvuruPage?.quotaNotice && (
+            <div className="mt-4 p-3.5 rounded-xl bg-[#4DA3FF]/10 border border-[#4DA3FF]/30 flex items-center gap-2.5 text-xs text-sky-200">
+              <Sparkles className="w-4 h-4 text-[#4DA3FF] shrink-0" />
+              <span>{cmsData.basvuruPage.quotaNotice}</span>
+            </div>
+          )}
         </div>
 
         {/* Error Alert Box */}
@@ -530,7 +540,7 @@ function ApplicationFormContent() {
                       onChange={handleChange}
                       className="w-full bg-[#061A33] border border-[#4DA3FF]/30 rounded-xl pl-10 pr-4 py-3 text-sm text-white focus:outline-none focus:border-[#4DA3FF] transition-all cursor-pointer"
                     >
-                      {COMMISSIONS.map((com) => (
+                      {commissionsList.map((com: any) => (
                         <option key={com.id} value={com.id}>
                           {com.name}
                         </option>
@@ -552,7 +562,7 @@ function ApplicationFormContent() {
                       className="w-full bg-[#061A33] border border-[#4DA3FF]/30 rounded-xl pl-10 pr-4 py-3 text-sm text-white focus:outline-none focus:border-[#4DA3FF] transition-all cursor-pointer"
                     >
                       <option value="">Seçiniz (İkinci tercih opsiyonel)</option>
-                      {COMMISSIONS.map((com) => (
+                      {commissionsList.map((com: any) => (
                         <option key={com.id} value={com.id}>
                           {com.name}
                         </option>
@@ -703,13 +713,31 @@ function ApplicationFormContent() {
 }
 
 export default function ApplicationPage() {
+  const [cmsData, setCmsData] = useState<CMSData>(INITIAL_CMS_DATA);
+
+  useEffect(() => {
+    setCmsData(getStoredCMSData());
+    fetchServerCMSData().then((serverData) => {
+      if (serverData) setCmsData(serverData);
+    });
+    const handleUpdate = () => setCmsData(getStoredCMSData());
+    window.addEventListener('igm_cms_updated', handleUpdate);
+    window.addEventListener('storage', handleUpdate);
+    return () => {
+      window.removeEventListener('igm_cms_updated', handleUpdate);
+      window.removeEventListener('storage', handleUpdate);
+    };
+  }, []);
+
+  const bp = cmsData.basvuruPage || INITIAL_CMS_DATA.basvuruPage;
+
   return (
     <div className="min-h-screen bg-[#061A33] text-white">
       {/* 1. HERO BANNER */}
       <InnerPageHero
-        badge="RESMİ KAYIT MASASI"
-        title="İrfan Meclisi Delege Başvurusu"
-        description="“Kökümüz İrfan, Sözümüz İstikbal” anlayışıyla; 23-24-25 Ekim 2026 tarihlerinde Selçuklu Kongre Merkezi'nde 250 asil delege arasında yerinizi almak için adım adım başvuru formunu tamamlayınız."
+        badge={bp.heroBadge || "RESMİ KAYIT MASASI"}
+        title={bp.heroTitle || "İrfan Meclisi Delege Başvurusu"}
+        description={bp.heroDesc || "“Kökümüz İrfan, Sözümüz İstikbal” anlayışıyla; 23-24-25 Ekim 2026 tarihlerinde Selçuklu Kongre Merkezi'nde 250 asil delege arasında yerinizi almak için adım adım başvuru formunu tamamlayınız."}
         breadcrumbs={[
           { label: 'Ana Sayfa', href: '/' },
           { label: 'Delege Başvurusu' }
@@ -717,7 +745,7 @@ export default function ApplicationPage() {
       />
 
       <Suspense fallback={<div className="text-center text-slate-400 py-16">Yükleniyor...</div>}>
-        <ApplicationFormContent />
+        <ApplicationFormContent cmsData={cmsData} />
       </Suspense>
 
     </div>

@@ -149,28 +149,123 @@ body {
   animation-play-state: paused;
 }
 
-/* Print utility for QR tickets */
+/* Multi-page document printing (official PDF report, schedule & tickets) */
 @media print {
-  body * {
-    visibility: hidden;
+  @page {
+    size: landscape;
+    margin: 6mm 8mm;
   }
 
-  #printable-ticket,
-  #printable-ticket *,
-  #printable-program,
-  #printable-program * {
-    visibility: visible;
-  }
-
-  #printable-ticket,
-  #printable-program {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    margin: 0;
-    padding: 20px;
+  html, body {
+    overflow: visible !important;
+    height: auto !important;
+    min-height: auto !important;
     background: white !important;
     color: black !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Reset layout constraints so multi-page content flows naturally */
+  .h-screen, .min-h-screen, .overflow-hidden, .overflow-y-auto {
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    display: block !important;
+  }
+
+  /* Hide admin header, sidebar and buttons when printing */
+  header,
+  aside,
+  nav,
+  button,
+  .print\:hidden {
+    display: none !important;
+  }
+
+  /* Specific single-badge ticket printing on profile page */
+  #printable-ticket,
+  #printable-program {
+    display: block !important;
+    visibility: visible !important;
+    position: relative !important;
+    width: 100% !important;
+    margin: 0 auto !important;
+    padding: 16px !important;
+    background: white !important;
+    color: black !important;
+  }
+
+  /* Official PDF multi-page report: MUST NOT be absolute so it paginates across pages */
+  #igm-official-pdf-report {
+    display: block !important;
+    visibility: visible !important;
+    position: static !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+    color: black !important;
+    box-shadow: none !important;
+    border: none !important;
+    overflow: visible !important;
+    height: auto !important;
+    float: none !important;
+    page-break-before: auto !important;
+    page-break-after: auto !important;
+    page-break-inside: auto !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  #igm-official-pdf-report * {
+    visibility: visible !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Table multi-page rules: repeat header on each new page and prevent row slicing */
+  #igm-official-pdf-report table {
+    width: 100% !important;
+    max-width: 100% !important;
+    border-collapse: collapse !important;
+    page-break-inside: auto !important;
+    break-inside: auto !important;
+    table-layout: auto !important;
+    font-size: 10px !important;
+  }
+
+  #igm-official-pdf-report thead {
+    display: table-header-group !important;
+  }
+
+  #igm-official-pdf-report tbody {
+    display: table-row-group !important;
+  }
+
+  #igm-official-pdf-report tr {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  #igm-official-pdf-report th,
+  #igm-official-pdf-report td {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    padding: 6px 6px !important;
+    font-size: 10px !important;
+  }
+
+  #igm-official-pdf-report th {
+    white-space: nowrap !important;
+  }
+
+  /* Prevent official signature footer from splitting */
+  .report-signature-block {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    margin-top: 24px !important;
   }
 }

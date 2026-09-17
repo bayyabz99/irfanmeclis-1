@@ -14,20 +14,28 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { PROGRAM_DAYS } from '@/lib/data';
-import { getStoredCMSData, CMSData } from '@/lib/cmsStorage';
+import { getStoredCMSData, fetchServerCMSData, CMSData, INITIAL_CMS_DATA } from '@/lib/cmsStorage';
 import { ProgramSession } from '@/lib/types';
 import InnerPageHero from '@/components/InnerPageHero';
 
 export default function ProgramPage() {
   const [activeDay, setActiveDay] = useState<number>(1);
-  const [cmsData, setCmsData] = useState<CMSData>(getStoredCMSData());
+  const [cmsData, setCmsData] = useState<CMSData>(INITIAL_CMS_DATA);
 
   React.useEffect(() => {
+    setCmsData(getStoredCMSData());
+    fetchServerCMSData().then((serverData) => {
+      if (serverData) setCmsData(serverData);
+    });
     const handleUpdate = () => {
       setCmsData(getStoredCMSData());
     };
     window.addEventListener('igm_cms_updated', handleUpdate);
-    return () => window.removeEventListener('igm_cms_updated', handleUpdate);
+    window.addEventListener('storage', handleUpdate);
+    return () => {
+      window.removeEventListener('igm_cms_updated', handleUpdate);
+      window.removeEventListener('storage', handleUpdate);
+    };
   }, []);
 
   const programDays = cmsData.program && cmsData.program.length > 0 ? cmsData.program : PROGRAM_DAYS;

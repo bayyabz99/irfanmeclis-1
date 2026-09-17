@@ -14,20 +14,28 @@ import {
   Award
 } from 'lucide-react';
 import { TEAM_MEMBERS } from '@/lib/data';
-import { getStoredCMSData, CMSData } from '@/lib/cmsStorage';
+import { getStoredCMSData, fetchServerCMSData, CMSData, INITIAL_CMS_DATA } from '@/lib/cmsStorage';
 import InnerPageHero from '@/components/InnerPageHero';
 
 export default function TeamPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [cmsData, setCmsData] = useState<CMSData>(getStoredCMSData());
+  const [cmsData, setCmsData] = useState<CMSData>(INITIAL_CMS_DATA);
 
   React.useEffect(() => {
+    setCmsData(getStoredCMSData());
+    fetchServerCMSData().then((serverData) => {
+      if (serverData) setCmsData(serverData);
+    });
     const handleUpdate = () => {
       setCmsData(getStoredCMSData());
     };
     window.addEventListener('igm_cms_updated', handleUpdate);
-    return () => window.removeEventListener('igm_cms_updated', handleUpdate);
+    window.addEventListener('storage', handleUpdate);
+    return () => {
+      window.removeEventListener('igm_cms_updated', handleUpdate);
+      window.removeEventListener('storage', handleUpdate);
+    };
   }, []);
 
   const categories = [
@@ -57,9 +65,9 @@ export default function TeamPage() {
     <div className="igm-page">
       {/* 1. HERO BANNER */}
       <InnerPageHero
-        badge="GÖNÜLLÜ VE PROFESYONEL KADRO"
-        title="100 Kişilik Organizasyon Ekibi"
-        description="“Kökümüz İrfan, Sözümüz İstikbal” — İrfan Meclisi'nin planlanmasından oturumların yönetilmesine kadar 3 gün boyunca sahada görev yapan divan heyeti, komisyon başkanları ve koordinasyon birimlerimiz."
+        badge={cmsData.ekipPage?.heroBadge || "GÖNÜLLÜ VE PROFESYONEL KADRO"}
+        title={cmsData.ekipPage?.heroTitle || "100 Kişilik Organizasyon Ekibi"}
+        description={cmsData.ekipPage?.heroDesc || "“Kökümüz İrfan, Sözümüz İstikbal” — İrfan Meclisi'nin planlanmasından oturumların yönetilmesine kadar 3 gün boyunca sahada görev yapan divan heyeti, komisyon başkanları ve koordinasyon birimlerimiz."}
         breadcrumbs={[
           { label: 'Ana Sayfa', href: '/' },
           { label: 'Organizasyon Ekibi' }
@@ -155,7 +163,9 @@ export default function TeamPage() {
                 <span className="text-[10px] uppercase font-bold tracking-wider text-[#4DA3FF] bg-[#061A33] px-2.5 py-1 rounded-full border border-[#4DA3FF]/20">
                   {member.category.replace('_', ' ')}
                 </span>
-                <span className="text-[10px] text-slate-400 font-medium">ÖNDER Ekibi</span>
+                <span className="text-[10px] text-slate-400 font-medium">
+                  {member.affiliation || cmsData.ekipPage?.defaultAffiliation || 'ÖNDER Ekibi'}
+                </span>
               </div>
             </div>
           ))}

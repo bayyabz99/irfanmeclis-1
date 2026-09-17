@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 
 import InnerPageHero from '@/components/InnerPageHero';
-import { getStoredCMSData, CMSData, INITIAL_CMS_DATA } from '@/lib/cmsStorage';
+import { getStoredCMSData, fetchServerCMSData, CMSData, INITIAL_CMS_DATA } from '@/lib/cmsStorage';
 
 export default function ContactPage() {
   const [cmsData, setCmsData] = useState<CMSData>(INITIAL_CMS_DATA);
@@ -32,9 +32,16 @@ export default function ContactPage() {
 
   useEffect(() => {
     setCmsData(getStoredCMSData());
+    fetchServerCMSData().then((serverData) => {
+      if (serverData) setCmsData(serverData);
+    });
     const handleUpdate = () => setCmsData(getStoredCMSData());
     window.addEventListener('igm_cms_updated', handleUpdate);
-    return () => window.removeEventListener('igm_cms_updated', handleUpdate);
+    window.addEventListener('storage', handleUpdate);
+    return () => {
+      window.removeEventListener('igm_cms_updated', handleUpdate);
+      window.removeEventListener('storage', handleUpdate);
+    };
   }, []);
 
   const contact = cmsData.contact || INITIAL_CMS_DATA.contact;

@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import TimavLogo from './TimavLogo';
 import { COMMISSIONS } from '@/lib/data';
+import { getStoredCMSData, fetchServerCMSData, CMSData, INITIAL_CMS_DATA } from '@/lib/cmsStorage';
 
 // Custom X (Twitter) icon
 function XIcon({ className = "w-4 h-4" }: { className?: string }) {
@@ -48,9 +49,29 @@ function YoutubeIcon({ className = "w-4 h-4" }: { className?: string }) {
 
 export default function Footer() {
   const pathname = usePathname();
-  if (pathname?.startsWith('/profil')) {
+  const [cmsData, setCmsData] = useState<CMSData>(INITIAL_CMS_DATA);
+
+  useEffect(() => {
+    setCmsData(getStoredCMSData());
+    fetchServerCMSData().then((serverData) => {
+      if (serverData) setCmsData(serverData);
+    });
+    const handleUpdate = () => setCmsData(getStoredCMSData());
+    window.addEventListener('igm_cms_updated', handleUpdate);
+    window.addEventListener('storage', handleUpdate);
+    return () => {
+      window.removeEventListener('igm_cms_updated', handleUpdate);
+      window.removeEventListener('storage', handleUpdate);
+    };
+  }, []);
+
+  if (pathname?.startsWith('/profil') || pathname?.startsWith('/admin-igm-secret-dashboard') || pathname?.startsWith('/admin')) {
     return null;
   }
+
+  const contact = cmsData.contact || INITIAL_CMS_DATA.contact;
+  const settings = cmsData.siteSettings || INITIAL_CMS_DATA.siteSettings;
+  const commissionsList = cmsData.commissions && cmsData.commissions.length > 0 ? cmsData.commissions : COMMISSIONS;
 
   return (
     <footer className="bg-[#030D1A] border-t border-blue-900/30 text-slate-400 relative overflow-hidden">
@@ -78,10 +99,10 @@ export default function Footer() {
               </div>
               <div className="flex flex-col">
                 <span className="text-[10px] uppercase tracking-[0.2em] text-[#4DA3FF] font-medium leading-none mb-1">
-                  ÖNDERLİĞİNDE
+                  {settings.organizationName ? `${settings.organizationName.toUpperCase()}` : 'ÖNDER DERNEĞİ ÖNCÜLÜĞÜNDE'}
                 </span>
                 <span className="text-xl font-serif font-black tracking-tight text-white leading-tight">
-                  İRFAN MECLİSİ
+                  {settings.siteName ? settings.siteName.toUpperCase() : 'İRFAN MECLİSİ'}
                 </span>
               </div>
             </Link>
@@ -116,31 +137,39 @@ export default function Footer() {
             </h4>
             
             <div className="space-y-3 text-xs text-slate-300">
-              <a 
-                href="tel:+905551234567" 
-                className="flex items-center gap-2.5 hover:text-white transition-colors"
-              >
-                <Phone className="w-3.5 h-3.5 text-[#4DA3FF] shrink-0" />
-                <span>+90 555 123 45 67</span>
-              </a>
-              <a 
-                href="tel:+903323502040" 
-                className="flex items-center gap-2.5 hover:text-white transition-colors text-slate-400"
-              >
-                <Phone className="w-3.5 h-3.5 text-slate-500 shrink-0" />
-                <span>+90 (212) 521 19 58 (ÖNDER)</span>
-              </a>
-              <a 
-                href="mailto:info@irfanmeclisi.org" 
-                className="flex items-center gap-2.5 hover:text-white transition-colors break-all"
-              >
-                <Mail className="w-3.5 h-3.5 text-[#4DA3FF] shrink-0" />
-                <span className="truncate">info@irfanmeclisi.org</span>
-              </a>
-              <div className="flex items-start gap-2.5 text-slate-400 leading-relaxed">
-                <MapPin className="w-3.5 h-3.5 text-[#4DA3FF] shrink-0 mt-0.5" />
-                <span>Selçuklu Kongre Merkezi / Karatay, Konya / Türkiye</span>
-              </div>
+              {contact.phoneCoord && (
+                <a 
+                  href={`tel:${contact.phoneCoord.replace(/\s+/g, '')}`} 
+                  className="flex items-center gap-2.5 hover:text-white transition-colors"
+                >
+                  <Phone className="w-3.5 h-3.5 text-[#4DA3FF] shrink-0" />
+                  <span>{contact.phoneCoord}</span>
+                </a>
+              )}
+              {contact.phoneTimav && (
+                <a 
+                  href={`tel:${contact.phoneTimav.replace(/\s+/g, '')}`} 
+                  className="flex items-center gap-2.5 hover:text-white transition-colors text-slate-400"
+                >
+                  <Phone className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                  <span>{contact.phoneTimav}</span>
+                </a>
+              )}
+              {contact.email && (
+                <a 
+                  href={`mailto:${contact.email.split('/')[0].trim()}`} 
+                  className="flex items-center gap-2.5 hover:text-white transition-colors break-all"
+                >
+                  <Mail className="w-3.5 h-3.5 text-[#4DA3FF] shrink-0" />
+                  <span className="truncate">{contact.email}</span>
+                </a>
+              )}
+              {contact.address && (
+                <div className="flex items-start gap-2.5 text-slate-400 leading-relaxed">
+                  <MapPin className="w-3.5 h-3.5 text-[#4DA3FF] shrink-0 mt-0.5" />
+                  <span>{contact.address}</span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -148,8 +177,8 @@ export default function Footer() {
           <div className="md:col-span-4 flex flex-col justify-between space-y-6 md:pl-4">
             <div>
               <p className="font-serif italic text-xl sm:text-2xl text-white font-normal leading-snug">
-                “Kökümüz İrfan, <br />
-                <span className="text-[#4DA3FF] font-semibold">Sözümüz İstikbal”</span>
+                “{settings.slogan ? settings.slogan.split(',')[0] || 'Kökümüz İrfan' : 'Kökümüz İrfan'}, <br />
+                <span className="text-[#4DA3FF] font-semibold">{settings.slogan ? settings.slogan.split(',')[1] || 'Sözümüz İstikbal' : 'Sözümüz İstikbal'}”</span>
               </p>
               <div className="w-16 h-0.5 bg-[#4DA3FF] mt-3" />
             </div>
@@ -199,7 +228,7 @@ export default function Footer() {
 
         {/* Secondary Navigation Strip: All 8 Commissions & Quick Links (Preserved content) */}
         <div className="py-6 border-b border-slate-800/40 grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 text-[11px] text-slate-400">
-          {COMMISSIONS.map((c) => (
+          {commissionsList.map((c: any) => (
             <Link
               key={c.id}
               href={`/komisyonlar#${c.id}`}

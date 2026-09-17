@@ -1,7 +1,11 @@
 import { Application, ApplicationStatus, GalleryItem, GalleryItemStatus, Announcement, AttendanceRecord } from './types';
 import { MOCK_APPLICATIONS, GALLERY_ITEMS, MOCK_ANNOUNCEMENTS } from './data';
-import { supabase } from './supabase';
+import { supabase, refreshSupabaseClient } from './supabase';
 import * as XLSX from 'xlsx';
+
+function getSupabaseClient() {
+  return supabase || refreshSupabaseClient();
+}
 
 const APPLICATIONS_KEY = 'igm_applications_v2';
 const GALLERY_KEY = 'igm_gallery_v2';
@@ -196,10 +200,11 @@ export function saveStoredApplications(apps: Application[]): void {
  */
 export async function syncApplicationsWithSupabase(): Promise<Application[]> {
   const localApps = getStoredApplications();
-  if (!supabase) return localApps;
+  const client = getSupabaseClient();
+  if (!client) return localApps;
 
   try {
-    const { data, error } = await supabase
+    const { data, error } = await client
       .from('applications')
       .select('*')
       .order('created_at', { ascending: false });
@@ -260,10 +265,11 @@ export async function createApplication(
   saveStoredApplications(updated);
 
   // 2. Supabase bulut veritabanına kaydet (tüm cihazlar için)
-  if (supabase) {
+  const client = getSupabaseClient();
+  if (client) {
     try {
       const row = mapApplicationToRow(newApp);
-      const { error } = await supabase.from('applications').insert(row);
+      const { error } = await client.from('applications').insert(row);
       if (error) {
         console.error('Supabase başvuru kaydetme hatası:', error);
       } else {
@@ -603,7 +609,62 @@ export function adminAddGalleryItem(
   };
   const updated = [newItem, ...items];
   saveStoredGallery(updated);
+
+  if (supabase) {
+    supabase.from('gallery_photos').insert({
+      title: newItem.title,
+      media_url: newItem.mediaUrl,
+      media_type: newItem.mediaType,
+      category: newItem.category,
+      uploader_name: newItem.uploaderName || 'Divan Heyeti (Admin)',
+      is_approved: newItem.isApproved
+    }).then(({ error }) => {
+      if (error) console.error('Supabase gallery insert error:', error);
+    });
+  }
+
   return newItem;
+}
+
+// Admin directly adds multiple media items at once (atomic batch write)
+export function adminAddGalleryItems(
+  newItemsData: Array<Omit<GalleryItem, 'id' | 'createdAt' | 'isApproved' | 'status'> & {
+    visibility?: 'public' | 'members';
+    isApproved?: boolean;
+  }>
+): GalleryItem[] {
+  if (!newItemsData || newItemsData.length === 0) return [];
+  const existingItems = getStoredGallery();
+  const createdItems: GalleryItem[] = newItemsData.map((item, idx) => ({
+    ...item,
+    id: `g-${Date.now()}-${idx}-${Math.random().toString(36).substr(2, 4)}`,
+    createdAt: new Date().toISOString().split('T')[0],
+    isApproved: item.isApproved !== false,
+    status: item.isApproved !== false ? 'approved' : 'pending',
+    visibility: item.visibility || 'public',
+    order: (item.order || existingItems.length + 1) + idx,
+    approvedBy: 'Admin',
+    approvedAt: new Date().toISOString()
+  }));
+
+  const updated = [...createdItems, ...existingItems];
+  saveStoredGallery(updated);
+
+  if (supabase) {
+    const rows = createdItems.map((item) => ({
+      title: item.title,
+      media_url: item.mediaUrl,
+      media_type: item.mediaType,
+      category: item.category,
+      uploader_name: item.uploaderName || 'Divan Heyeti (Admin)',
+      is_approved: item.isApproved
+    }));
+    supabase.from('gallery_photos').insert(rows).then(({ error }) => {
+      if (error) console.error('Supabase bulk gallery insert error:', error);
+    });
+  }
+
+  return createdItems;
 }
 
 export const addGalleryPhoto = adminAddGalleryItem;

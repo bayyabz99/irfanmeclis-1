@@ -122,6 +122,7 @@ export default function Lightbox({
               src={currentItem.mediaUrl}
               alt={currentItem.title}
               fill
+              unoptimized={currentItem.mediaUrl.startsWith('data:')}
               className="object-contain"
               priority
             />

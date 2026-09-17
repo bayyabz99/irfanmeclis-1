@@ -23,21 +23,28 @@ import {
   AlertTriangle,
   Globe,
   Lock,
-  Maximize2
+  Maximize2,
+  LayoutGrid,
+  List,
+  Loader2
 } from 'lucide-react';
 import { GalleryItem, GalleryItemStatus } from '@/lib/types';
 import { 
   getStoredGallery, 
   saveStoredGallery, 
   adminAddGalleryItem, 
+  adminAddGalleryItems,
   moderateGalleryItem, 
   bulkModerateGallery, 
-  deleteGalleryItem 
+  deleteGalleryItem,
+  compressImageFile
 } from '@/lib/storage';
+import { isSupabaseConfigured, uploadImageToSupabaseStorage } from '@/lib/supabase';
 
 export default function GalleryManager() {
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
   const [activeTab, setActiveTab] = useState<'admin_upload' | 'user_submissions' | 'published'>('admin_upload');
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
 
   // Filters & Search
   const [searchQuery, setSearchQuery] = useState('');
@@ -64,6 +71,7 @@ export default function GalleryManager() {
   const [adminUploadFiles, setAdminUploadFiles] = useState<string[]>([]);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploadSuccess, setUploadSuccess] = useState(false);
+  const [isProcessingFiles, setIsProcessingFiles] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Rejection note modal
@@ -98,41 +106,65 @@ export default function GalleryManager() {
       return true;
     });
 
-  // Handle local file selection with safety validations (Rule 14)
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Handle local multiple file selection with canvas compression to prevent localStorage quota exhaustion
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     setUploadError(null);
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-    const maxSizeBytes = 5 * 1024 * 1024; // 5 MB
+    const maxSizeBytes = 15 * 1024 * 1024; // 15 MB
 
-    const validUrls: string[] = [];
+    setIsProcessingFiles(true);
 
-    Array.from(files).forEach((file) => {
-      if (!allowedTypes.includes(file.type)) {
-        setUploadError(`"${file.name}" desteklenmeyen dosya türü! Sadece JPEG, PNG, WEBP ve GIF yükleyebilirsiniz.`);
-        return;
-      }
-      if (file.size > maxSizeBytes) {
-        setUploadError(`"${file.name}" çok büyük! Maksimum dosya boyutu 5 MB'dir.`);
-        return;
-      }
+    try {
+      const validProcessedUrls: string[] = [];
 
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          validUrls.push(event.target.result as string);
-          if (validUrls.length === files.length) {
-            setAdminUploadFiles((prev) => [...prev, ...validUrls]);
-            if (!adminUploadData.mediaUrl && validUrls.length > 0) {
-              setAdminUploadData((prev) => ({ ...prev, mediaUrl: validUrls[0] }));
+      for (const file of Array.from(files)) {
+        if (!allowedTypes.includes(file.type) && !file.name.match(/\.(jpg|jpeg|png|webp|gif)$/i)) {
+          setUploadError(`"${file.name}" desteklenmeyen dosya türü! Sadece JPEG, PNG, WEBP ve GIF yükleyebilirsiniz.`);
+          continue;
+        }
+        if (file.size > maxSizeBytes) {
+          setUploadError(`"${file.name}" çok büyük! Maksimum dosya boyutu 15 MB'dir.`);
+          continue;
+        }
+
+        // Compress image using canvas: scales large images down to 1200px and JPEG quality 0.82
+        // This drops file size from ~5MB down to ~90KB, easily fitting tens of images into storage!
+        const { blob, dataUrl } = await compressImageFile(file, 1200, 0.82);
+        let finalUrl = dataUrl;
+
+        // If Supabase cloud storage is configured, upload for cloud permanence
+        if (isSupabaseConfigured) {
+          try {
+            const ext = file.name.split('.').pop() || 'jpg';
+            const cleanName = `gallery-${Date.now()}-${Math.random().toString(36).slice(2, 6)}.${ext}`;
+            const uploadRes = await uploadImageToSupabaseStorage('gallery', cleanName, blob);
+            if (uploadRes.url) {
+              finalUrl = uploadRes.url;
             }
+          } catch (cloudErr) {
+            console.warn('Supabase cloud upload fallback to dataUrl:', cloudErr);
           }
         }
-      };
-      reader.readAsDataURL(file);
-    });
+
+        validProcessedUrls.push(finalUrl);
+      }
+
+      if (validProcessedUrls.length > 0) {
+        setAdminUploadFiles((prev) => [...prev, ...validProcessedUrls]);
+        if (!adminUploadData.mediaUrl) {
+          setAdminUploadData((prev) => ({ ...prev, mediaUrl: validProcessedUrls[0] }));
+        }
+      }
+    } catch (err: any) {
+      console.error('Error processing files:', err);
+      setUploadError(err?.message || 'Görseller işlenirken bir sorun oluştu.');
+    } finally {
+      setIsProcessingFiles(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
   };
 
   // Submit Admin Direct Upload Form (Rule 11)
@@ -152,20 +184,20 @@ export default function GalleryManager() {
       return;
     }
 
-    // Add each image
-    targetUrls.forEach((url, idx) => {
-      adminAddGalleryItem({
-        title: targetUrls.length > 1 ? `${adminUploadData.title} (${idx + 1})` : adminUploadData.title,
-        description: adminUploadData.description,
-        mediaUrl: url,
-        category: adminUploadData.category,
-        mediaType: adminUploadData.mediaType,
-        visibility: adminUploadData.visibility,
-        order: Number(adminUploadData.order) + idx,
-        uploaderName: 'Divan Heyeti (Admin)',
-        isApproved: adminUploadData.isPublished
-      });
-    });
+    // Add ALL images in an atomic batch
+    const itemsToAdd = targetUrls.map((url, idx) => ({
+      title: targetUrls.length > 1 ? `${adminUploadData.title} (${idx + 1})` : adminUploadData.title,
+      description: adminUploadData.description,
+      mediaUrl: url,
+      category: adminUploadData.category,
+      mediaType: adminUploadData.mediaType,
+      visibility: adminUploadData.visibility,
+      order: Number(adminUploadData.order) + idx,
+      uploaderName: 'Divan Heyeti (Admin)',
+      isApproved: adminUploadData.isPublished
+    }));
+
+    adminAddGalleryItems(itemsToAdd);
 
     setUploadSuccess(true);
     setAdminUploadFiles([]);
@@ -176,7 +208,7 @@ export default function GalleryManager() {
       mediaType: 'image',
       mediaUrl: '',
       visibility: 'public',
-      order: gallery.length + 1,
+      order: gallery.length + itemsToAdd.length + 1,
       isPublished: true
     });
     if (fileInputRef.current) fileInputRef.current.value = '';
@@ -184,7 +216,7 @@ export default function GalleryManager() {
     setTimeout(() => {
       setUploadSuccess(false);
       setActiveTab('published');
-    }, 1500);
+    }, 1200);
   };
 
   // Moderation Handlers (Rules 12 & 13)
@@ -342,12 +374,23 @@ export default function GalleryManager() {
           <form onSubmit={handleAdminUploadSubmit} className="space-y-5 text-xs">
             {/* File Dropzone Area */}
             <div>
-              <label className="block font-bold text-slate-700 mb-2">
-                Görselleri Seçin veya Sürükleyin * (JPEG, PNG, WEBP - Maks. 5MB)
-              </label>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block font-bold text-slate-700">
+                  Görselleri Seçin veya Sürükleyin * (JPEG, PNG, WEBP - Maks. 15MB)
+                </label>
+                {adminUploadFiles.length > 0 && (
+                  <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200">
+                    {adminUploadFiles.length} Görsel Seçildi
+                  </span>
+                )}
+              </div>
               <div 
-                onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-slate-300 hover:border-[#1E6FFB] hover:bg-blue-50/20 p-8 rounded-2xl text-center cursor-pointer transition-all"
+                onClick={() => !isProcessingFiles && fileInputRef.current?.click()}
+                className={`border-2 border-dashed rounded-2xl p-8 text-center transition-all ${
+                  isProcessingFiles 
+                    ? 'border-blue-400 bg-blue-50/40 cursor-wait'
+                    : 'border-slate-300 hover:border-[#1E6FFB] hover:bg-blue-50/20 cursor-pointer'
+                }`}
               >
                 <input
                   ref={fileInputRef}
@@ -357,31 +400,60 @@ export default function GalleryManager() {
                   onChange={handleFileChange}
                   className="hidden"
                 />
-                <div className="w-12 h-12 rounded-full bg-blue-50 text-[#1E6FFB] flex items-center justify-center mx-auto mb-3">
-                  <Upload className="w-6 h-6" />
-                </div>
-                <p className="font-bold text-slate-800 text-sm">
-                  Bilgisayarınızdan Görsel Seçmek İçin Tıklayın
-                </p>
-                <p className="text-slate-400 text-xs mt-1">
-                  Birden fazla dosya seçebilir veya doğrudan sürükleyip bırakabilirsiniz.
-                </p>
+                {isProcessingFiles ? (
+                  <div className="py-2 space-y-2">
+                    <Loader2 className="w-8 h-8 text-[#1E6FFB] animate-spin mx-auto" />
+                    <p className="font-bold text-slate-800 text-sm">Görseller Optimize Ediliyor...</p>
+                    <p className="text-slate-400 text-xs">Yüksek çözünürlüklü fotoğraflar işleniyor ve sıkıştırılıyor, lütfen bekleyin.</p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="w-12 h-12 rounded-full bg-blue-50 text-[#1E6FFB] flex items-center justify-center mx-auto mb-3">
+                      <Upload className="w-6 h-6" />
+                    </div>
+                    <p className="font-bold text-slate-800 text-sm">
+                      Bilgisayarınızdan Görselleri Seçmek İçin Tıklayın
+                    </p>
+                    <p className="text-slate-400 text-xs mt-1">
+                      Tek seferde birden fazla fotoğraf seçebilir veya sürükleyip bırakabilirsiniz.
+                    </p>
+                  </>
+                )}
               </div>
 
-              {/* Previews of Selected Files */}
+              {/* Previews of Selected Files - Side by Side (Yan Yana) */}
               {adminUploadFiles.length > 0 && (
-                <div className="mt-4">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase block mb-2">
-                    Yüklenecek Görseller ({adminUploadFiles.length} Adet Önizleme):
-                  </span>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3">
+                <div className="mt-4 p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-xs font-bold text-slate-700">
+                      Yüklenecek Görseller ({adminUploadFiles.length} Adet - Yan Yana Önizleme):
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAdminUploadFiles([]);
+                        setAdminUploadData((prev) => ({ ...prev, mediaUrl: '' }));
+                      }}
+                      className="text-xs text-rose-500 hover:text-rose-700 font-semibold cursor-pointer"
+                    >
+                      Tümünü Temizle
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
                     {adminUploadFiles.map((url, i) => (
-                      <div key={i} className="relative group rounded-xl overflow-hidden border border-slate-200 aspect-video bg-slate-100">
-                        <img src={url} alt={`Preview ${i}`} className="w-full h-full object-cover" />
+                      <div key={i} className="relative group rounded-xl overflow-hidden border border-slate-200 aspect-[4/3] bg-slate-100 shadow-2xs">
+                        <img src={url} alt={`Preview ${i + 1}`} className="w-full h-full object-cover" />
+                        <span className="absolute bottom-1 left-1 bg-black/70 text-white text-[10px] font-mono px-1.5 py-0.2 rounded font-bold">
+                          #{i + 1}
+                        </span>
                         <button
                           type="button"
-                          onClick={() => setAdminUploadFiles((prev) => prev.filter((_, idx) => idx !== i))}
-                          className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/70 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setAdminUploadFiles((prev) => prev.filter((_, idx) => idx !== i));
+                          }}
+                          className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/75 text-white flex items-center justify-center opacity-80 group-hover:opacity-100 hover:bg-rose-600 transition-all cursor-pointer"
+                          title="Bu görseli kaldır"
                         >
                           <X className="w-3.5 h-3.5" />
                         </button>
@@ -541,6 +613,36 @@ export default function GalleryManager() {
                   className="pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-[#1E6FFB] text-slate-800"
                 />
               </div>
+
+              {/* View Mode Toggle: Yan Yana (Izgara) vs Tablo */}
+              <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => setViewMode('grid')}
+                  className={`px-3 py-1.5 rounded-lg font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer ${
+                    viewMode === 'grid'
+                      ? 'bg-white text-slate-900 shadow-sm'
+                      : 'text-slate-500 hover:text-slate-800'
+                  }`}
+                  title="Görselleri Yan Yana Göster"
+                >
+                  <LayoutGrid className="w-3.5 h-3.5 text-[#1E6FFB]" />
+                  <span>Yan Yana ({filteredItems.length})</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewMode('table')}
+                  className={`px-3 py-1.5 rounded-lg font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer ${
+                    viewMode === 'table'
+                      ? 'bg-white text-slate-900 shadow-sm'
+                      : 'text-slate-500 hover:text-slate-800'
+                  }`}
+                  title="Tablo Listesi Görünümü"
+                >
+                  <List className="w-3.5 h-3.5 text-slate-600" />
+                  <span>Tablo</span>
+                </button>
+              </div>
             </div>
 
             {/* Bulk Action Controls */}
@@ -571,147 +673,272 @@ export default function GalleryManager() {
             )}
           </div>
 
-          {/* Media Table */}
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse text-xs">
-                <thead>
-                  <tr className="border-b border-slate-200 bg-slate-50 text-[11px] font-bold text-slate-600">
-                    <th className="py-3 px-4 w-10 text-center">
-                      <input
-                        type="checkbox"
-                        checked={selectedIds.length === filteredItems.length && filteredItems.length > 0}
-                        onChange={handleSelectAll}
-                        className="rounded text-blue-600 cursor-pointer"
-                      />
-                    </th>
-                    <th className="py-3 px-4 w-28">Görsel</th>
-                    <th className="py-3 px-4">Başlık ve Kategori</th>
-                    <th className="py-3 px-4">Yükleyen Kişi</th>
-                    <th className="py-3 px-4">Yükleme Tarihi</th>
-                    <th className="py-3 px-4 text-center">Durum</th>
-                    <th className="py-3 px-4 text-right">İşlemler</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {filteredItems.length === 0 ? (
-                    <tr>
-                      <td colSpan={7} className="py-12 text-center text-slate-400 italic">
-                        Bu alanda görüntülenecek medya ögesi bulunamadı.
-                      </td>
-                    </tr>
-                  ) : (
-                    filteredItems.map((item) => {
-                      const isSelected = selectedIds.includes(item.id);
-                      return (
-                        <tr key={item.id} className="hover:bg-slate-50/80 transition-colors">
-                          <td className="py-3 px-4 text-center">
+          {/* Grid View (Yan Yana Kartlar) */}
+          {viewMode === 'grid' && (
+            <div>
+              {filteredItems.length === 0 ? (
+                <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center text-slate-400 italic">
+                  Bu alanda görüntülenecek medya ögesi bulunamadı.
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                  {filteredItems.map((item) => {
+                    const isSelected = selectedIds.includes(item.id);
+                    return (
+                      <div
+                        key={item.id}
+                        className={`group bg-white rounded-2xl border transition-all overflow-hidden flex flex-col justify-between relative shadow-2xs hover:shadow-md ${
+                          isSelected ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-slate-200 hover:border-slate-300'
+                        }`}
+                      >
+                        {/* Card Image Area */}
+                        <div 
+                          className="relative aspect-[4/3] bg-slate-900 overflow-hidden cursor-pointer flex items-center justify-center"
+                          onClick={() => setPreviewItem(item)}
+                        >
+                          <img
+                            src={item.mediaUrl}
+                            alt=""
+                            className="absolute inset-0 w-full h-full object-cover blur-md opacity-25 scale-110 pointer-events-none"
+                          />
+                          <img
+                            src={item.mediaUrl}
+                            alt={item.title}
+                            className="w-full h-full object-contain p-1 relative z-10 group-hover:scale-105 transition-transform duration-300"
+                          />
+                          {/* Checkbox overlay */}
+                          <div 
+                            className="absolute top-2 left-2 z-20" 
+                            onClick={(e) => e.stopPropagation()}
+                          >
                             <input
                               type="checkbox"
                               checked={isSelected}
                               onChange={() => handleToggleSelect(item.id)}
-                              className="rounded text-blue-600 cursor-pointer"
+                              className="rounded text-blue-600 w-4 h-4 cursor-pointer bg-white/90 shadow-sm"
                             />
-                          </td>
+                          </div>
 
-                          {/* Thumbnail with Click to Expand Modal */}
-                          <td className="py-3 px-4">
-                            <div 
-                              onClick={() => setPreviewItem(item)}
-                              className="w-20 h-14 rounded-lg overflow-hidden bg-slate-100 border border-slate-200 relative cursor-pointer group shadow-2xs"
-                            >
-                              <img
-                                src={item.mediaUrl}
-                                alt={item.title}
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                              />
-                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
-                                <Maximize2 className="w-4 h-4" />
-                              </div>
-                            </div>
-                          </td>
+                          {/* Category Badge */}
+                          <div className="absolute top-2 right-2">
+                            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-black/65 backdrop-blur-xs text-white uppercase">
+                              {item.category}
+                            </span>
+                          </div>
 
-                          {/* Title & Category */}
-                          <td className="py-3 px-4">
-                            <span className="font-bold text-slate-900 block">{item.title}</span>
-                            <div className="flex items-center gap-2 mt-0.5">
-                              <span className="text-[10px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">
-                                {item.category.toUpperCase()}
-                              </span>
-                              {item.visibility && (
-                                <span className="text-[10px] text-slate-400">
-                                  {item.visibility === 'public' ? 'Herkese Açık' : 'Delegelere Özel'}
-                                </span>
-                              )}
-                            </div>
-                          </td>
+                          {/* Zoom Hover Overlay */}
+                          <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
+                            <Maximize2 className="w-5 h-5" />
+                          </div>
+                        </div>
 
-                          {/* Uploader */}
-                          <td className="py-3 px-4 text-slate-700">
-                            <span className="font-medium block">{item.uploaderName || 'Bilinmiyor'}</span>
-                            <span className="text-[10px] text-slate-400">{item.uploaderEmail || '-'}</span>
-                          </td>
+                        {/* Card Details */}
+                        <div className="p-3 flex-1 flex flex-col justify-between">
+                          <div>
+                            <h4 className="font-bold text-slate-900 text-xs line-clamp-1" title={item.title}>
+                              {item.title}
+                            </h4>
+                            <p className="text-[10px] text-slate-400 mt-0.5 truncate">
+                              {item.uploaderName || 'Admin'} • {item.createdAt}
+                            </p>
+                          </div>
 
-                          {/* Date */}
-                          <td className="py-3 px-4 text-slate-500 font-mono text-[11px]">
-                            {item.createdAt}
-                          </td>
-
-                          {/* Status */}
-                          <td className="py-3 px-4 text-center">
-                            <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold ${
+                          <div className="pt-2.5 mt-2 border-t border-slate-100 flex items-center justify-between gap-1">
+                            <span className={`inline-block px-2 py-0.5 rounded-full text-[9px] font-bold ${
                               item.status === 'approved' || item.isApproved
                                 ? 'bg-emerald-100 text-emerald-800'
                                 : item.status === 'rejected'
                                 ? 'bg-rose-100 text-rose-800'
                                 : 'bg-amber-100 text-amber-800'
                             }`}>
-                              {item.isApproved ? 'Yayında' : item.status === 'rejected' ? 'Reddedildi' : 'Onay Bekliyor'}
+                              {item.isApproved ? 'Yayında' : item.status === 'rejected' ? 'Red' : 'Bekliyor'}
                             </span>
-                          </td>
 
-                          {/* Actions */}
-                          <td className="py-3 px-4 text-right">
-                            <div className="flex items-center justify-end gap-1.5">
+                            <div className="flex items-center gap-1">
                               {(!item.isApproved || item.status !== 'approved') && (
                                 <button
+                                  type="button"
                                   onClick={() => handleApprove(item.id)}
-                                  className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-[11px] flex items-center gap-1 cursor-pointer transition-colors shadow-2xs"
+                                  className="p-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg cursor-pointer transition-colors"
                                   title="Görseli Onayla ve Galeriye Al"
                                 >
-                                  <Check className="w-3 h-3" />
-                                  Onayla
+                                  <Check className="w-3.5 h-3.5" />
                                 </button>
                               )}
 
                               {item.status !== 'rejected' && (
                                 <button
+                                  type="button"
                                   onClick={() => handleOpenReject(item)}
-                                  className="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-bold text-[11px] flex items-center gap-1 cursor-pointer transition-colors"
+                                  className="p-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-lg cursor-pointer transition-colors"
                                   title="Görseli Reddet"
                                 >
-                                  <X className="w-3 h-3" />
-                                  Reddet
+                                  <X className="w-3.5 h-3.5" />
                                 </button>
                               )}
 
                               <button
+                                type="button"
                                 onClick={() => handleDelete(item.id)}
-                                className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                                className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg cursor-pointer transition-colors"
                                 title="Sil"
                               >
-                                <Trash2 className="w-4 h-4" />
+                                <Trash2 className="w-3.5 h-3.5" />
                               </button>
                             </div>
-                          </td>
-                        </tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
-          </div>
+          )}
+
+          {/* Table View */}
+          {viewMode === 'table' && (
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="border-b border-slate-200 bg-slate-50 text-[11px] font-bold text-slate-600">
+                      <th className="py-3 px-4 w-10 text-center">
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.length === filteredItems.length && filteredItems.length > 0}
+                          onChange={handleSelectAll}
+                          className="rounded text-blue-600 cursor-pointer"
+                        />
+                      </th>
+                      <th className="py-3 px-4 w-28">Görsel</th>
+                      <th className="py-3 px-4">Başlık ve Kategori</th>
+                      <th className="py-3 px-4">Yükleyen Kişi</th>
+                      <th className="py-3 px-4">Yükleme Tarihi</th>
+                      <th className="py-3 px-4 text-center">Durum</th>
+                      <th className="py-3 px-4 text-right">İşlemler</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {filteredItems.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} className="py-12 text-center text-slate-400 italic">
+                          Bu alanda görüntülenecek medya ögesi bulunamadı.
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredItems.map((item) => {
+                        const isSelected = selectedIds.includes(item.id);
+                        return (
+                          <tr key={item.id} className="hover:bg-slate-50/80 transition-colors">
+                            <td className="py-3 px-4 text-center">
+                              <input
+                                type="checkbox"
+                                checked={isSelected}
+                                onChange={() => handleToggleSelect(item.id)}
+                                className="rounded text-blue-600 cursor-pointer"
+                              />
+                            </td>
+
+                            {/* Thumbnail with Click to Expand Modal */}
+                            <td className="py-3 px-4">
+                              <div 
+                                onClick={() => setPreviewItem(item)}
+                                className="w-20 h-14 rounded-lg overflow-hidden bg-slate-100 border border-slate-200 relative cursor-pointer group shadow-2xs"
+                              >
+                                <img
+                                  src={item.mediaUrl}
+                                  alt={item.title}
+                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                                />
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
+                                  <Maximize2 className="w-4 h-4" />
+                                </div>
+                              </div>
+                            </td>
+
+                            {/* Title & Category */}
+                            <td className="py-3 px-4">
+                              <span className="font-bold text-slate-900 block">{item.title}</span>
+                              <div className="flex items-center gap-2 mt-0.5">
+                                <span className="text-[10px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">
+                                  {item.category.toUpperCase()}
+                                </span>
+                                {item.visibility && (
+                                  <span className="text-[10px] text-slate-400">
+                                    {item.visibility === 'public' ? 'Herkese Açık' : 'Delegelere Özel'}
+                                  </span>
+                                )}
+                              </div>
+                            </td>
+
+                            {/* Uploader */}
+                            <td className="py-3 px-4 text-slate-700">
+                              <span className="font-medium block">{item.uploaderName || 'Bilinmiyor'}</span>
+                              <span className="text-[10px] text-slate-400">{item.uploaderEmail || '-'}</span>
+                            </td>
+
+                            {/* Date */}
+                            <td className="py-3 px-4 text-slate-500 font-mono text-[11px]">
+                              {item.createdAt}
+                            </td>
+
+                            {/* Status */}
+                            <td className="py-3 px-4 text-center">
+                              <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold ${
+                                item.status === 'approved' || item.isApproved
+                                  ? 'bg-emerald-100 text-emerald-800'
+                                  : item.status === 'rejected'
+                                  ? 'bg-rose-100 text-rose-800'
+                                  : 'bg-amber-100 text-amber-800'
+                              }`}>
+                                {item.isApproved ? 'Yayında' : item.status === 'rejected' ? 'Reddedildi' : 'Onay Bekliyor'}
+                              </span>
+                            </td>
+
+                            {/* Actions */}
+                            <td className="py-3 px-4 text-right">
+                              <div className="flex items-center justify-end gap-1.5">
+                                {(!item.isApproved || item.status !== 'approved') && (
+                                  <button
+                                    onClick={() => handleApprove(item.id)}
+                                    className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-[11px] flex items-center gap-1 cursor-pointer transition-colors shadow-2xs"
+                                    title="Görseli Onayla ve Galeriye Al"
+                                  >
+                                    <Check className="w-3 h-3" />
+                                    Onayla
+                                  </button>
+                                )}
+
+                                {item.status !== 'rejected' && (
+                                  <button
+                                    onClick={() => handleOpenReject(item)}
+                                    className="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-bold text-[11px] flex items-center gap-1 cursor-pointer transition-colors"
+                                    title="Görseli Reddet"
+                                  >
+                                    <X className="w-3 h-3" />
+                                    Reddet
+                                  </button>
+                                )}
+
+                                <button
+                                  onClick={() => handleDelete(item.id)}
+                                  className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                                  title="Sil"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

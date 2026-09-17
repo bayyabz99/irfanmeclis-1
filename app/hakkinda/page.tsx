@@ -19,7 +19,7 @@ import {
   Layers,
   Users
 } from 'lucide-react';
-import { getStoredCMSData, CMSData, INITIAL_CMS_DATA } from '@/lib/cmsStorage';
+import { getStoredCMSData, fetchServerCMSData, CMSData, INITIAL_CMS_DATA } from '@/lib/cmsStorage';
 import VideoModal from '@/components/VideoModal';
 import InnerPageHero from '@/components/InnerPageHero';
 import Lightbox from '@/components/Lightbox';
@@ -32,11 +32,18 @@ export default function AboutPage() {
 
   useEffect(() => {
     setCmsData(getStoredCMSData());
+    fetchServerCMSData().then((serverData) => {
+      if (serverData) setCmsData(serverData);
+    });
     const handleUpdate = () => {
       setCmsData(getStoredCMSData());
     };
     window.addEventListener('igm_cms_updated', handleUpdate);
-    return () => window.removeEventListener('igm_cms_updated', handleUpdate);
+    window.addEventListener('storage', handleUpdate);
+    return () => {
+      window.removeEventListener('igm_cms_updated', handleUpdate);
+      window.removeEventListener('storage', handleUpdate);
+    };
   }, []);
 
   const about = cmsData.aboutPage || INITIAL_CMS_DATA.aboutPage;
@@ -443,6 +450,7 @@ export default function AboutPage() {
       <VideoModal
         isOpen={isVideoOpen}
         onClose={() => setIsVideoOpen(false)}
+        videoUrl={activeMediaUrl || about.timav?.videoUrl}
         title="ÖNDER Gençlik Vizyonu ve İrfan Meclisi"
       />
 

@@ -25,17 +25,32 @@ import { COMMISSIONS } from '@/lib/data';
 
 interface PdfReportGeneratorProps {
   onBack?: () => void;
+  initialFilters?: {
+    day?: string;
+    commission?: string;
+    status?: 'all' | 'attended' | 'absent';
+  } | null;
 }
 
-export default function PdfReportGenerator({ onBack }: PdfReportGeneratorProps) {
+export default function PdfReportGenerator({ onBack, initialFilters }: PdfReportGeneratorProps) {
   const [applications, setApplications] = useState<Application[]>([]);
-  const [selectedDay, setSelectedDay] = useState<string>('all'); // 'all' | '23 Ekim' | '24 Ekim' | '25 Ekim'
-  const [selectedCommission, setSelectedCommission] = useState<string>('all');
-  const [selectedStatus, setSelectedStatus] = useState<'all' | 'attended' | 'absent'>('all');
+  const [selectedDay, setSelectedDay] = useState<string>(initialFilters?.day || 'all'); // 'all' | '23 Ekim' | '24 Ekim' | '25 Ekim'
+  const [selectedCommission, setSelectedCommission] = useState<string>(initialFilters?.commission || 'all');
+  const [selectedStatus, setSelectedStatus] = useState<'all' | 'attended' | 'absent'>(initialFilters?.status || 'all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
+  const [printOrientation, setPrintOrientation] = useState<'landscape' | 'portrait'>('landscape');
 
   const printAreaRef = useRef<HTMLDivElement>(null);
+
+  // Sync initial filters when received from AttendanceManager
+  useEffect(() => {
+    if (initialFilters) {
+      if (initialFilters.day) setSelectedDay(initialFilters.day);
+      if (initialFilters.commission) setSelectedCommission(initialFilters.commission);
+      if (initialFilters.status) setSelectedStatus(initialFilters.status);
+    }
+  }, [initialFilters]);
 
   const loadData = () => {
     const apps = getStoredApplications();
@@ -124,7 +139,7 @@ export default function PdfReportGenerator({ onBack }: PdfReportGeneratorProps) 
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 print:space-y-0 print:block">
       {/* 1. SCREEN VIEW HEADER & CONTROLS (Hidden during print) */}
       <div className="print:hidden space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
@@ -144,7 +159,37 @@ export default function PdfReportGenerator({ onBack }: PdfReportGeneratorProps) 
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Page Orientation Selector */}
+            <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs">
+              <span className="text-[11px] font-semibold text-slate-500 px-2">Sayfa Yönü:</span>
+              <button
+                type="button"
+                onClick={() => setPrintOrientation('landscape')}
+                className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                  printOrientation === 'landscape'
+                    ? 'bg-white text-blue-600 shadow-xs border border-slate-200'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+                title="Tüm 10 sütunun sıkışmadan ve taşmadan sığması için önerilir"
+              >
+                <span className="w-3.5 h-2.5 border-2 border-current rounded-xs inline-block" />
+                Yatay (Önerilen)
+              </button>
+              <button
+                type="button"
+                onClick={() => setPrintOrientation('portrait')}
+                className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                  printOrientation === 'portrait'
+                    ? 'bg-white text-blue-600 shadow-xs border border-slate-200'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <span className="w-2.5 h-3.5 border-2 border-current rounded-xs inline-block" />
+                Dikey
+              </button>
+            </div>
+
             <button
               onClick={handlePrintPdf}
               disabled={isGenerating || filteredDelegates.length === 0}
@@ -158,6 +203,14 @@ export default function PdfReportGenerator({ onBack }: PdfReportGeneratorProps) 
               PDF Raporu Oluştur / Yazdır
             </button>
           </div>
+        </div>
+
+        {/* Informative Tip Box */}
+        <div className="flex items-center gap-2.5 text-xs text-blue-800 bg-blue-50/80 border border-blue-200/70 px-4 py-2.5 rounded-xl">
+          <Sparkles className="w-4 h-4 text-blue-600 shrink-0" />
+          <span>
+            <strong>Geniş Sayfa Düzeni (Yatay):</strong> Delege bilgileri, QR kod, komisyon, 3 günlük katılım ve son okutma saatlerinin <strong>sıkışmadan ve taşmadan</strong> sığması için Yatay (Landscape) düzen aktiftir. Tarayıcı yazdırma ekranında da &quot;Yatay&quot; olarak görüntülenecektir.
+          </span>
         </div>
 
         {/* Filter Controls Card */}
@@ -274,7 +327,7 @@ export default function PdfReportGenerator({ onBack }: PdfReportGeneratorProps) 
       <div 
         ref={printAreaRef}
         id="igm-official-pdf-report"
-        className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 sm:p-10 print:p-0 print:border-none print:shadow-none print:m-0"
+        className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 sm:p-10 print:p-0 print:border-none print:shadow-none print:m-0 print:w-full print:block print:overflow-visible"
       >
         {/* PDF Header with ÖNDER & İrfan Meclisi Branding */}
         <div className="border-b-2 border-slate-800 pb-6 mb-6">
@@ -322,9 +375,9 @@ export default function PdfReportGenerator({ onBack }: PdfReportGeneratorProps) 
               </span>
             </div>
             <div>
-              <span className="text-[10px] text-slate-400 block uppercase font-bold">Filtre Durumu</span>
+              <span className="text-[10px] text-slate-400 block uppercase font-bold">Yoklama Durumu Filtresi</span>
               <span className="font-semibold text-slate-800">
-                {selectedStatus === 'all' ? 'Tüm Kayıtlar' : selectedStatus === 'attended' ? 'Katılanlar' : 'Katılmayanlar'}
+                {selectedStatus === 'all' ? 'Tümü (Katılan & Katılmayan)' : selectedStatus === 'attended' ? 'Yalnızca Katılanlar' : 'Yalnızca Gelmeyenler (Devamsız)'}
               </span>
             </div>
             <div>
@@ -352,100 +405,150 @@ export default function PdfReportGenerator({ onBack }: PdfReportGeneratorProps) 
           </div>
         </div>
 
-        {/* Detailed Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse text-xs">
-            <thead>
-              <tr className="border-b-2 border-slate-800 bg-slate-100 text-[11px] font-bold text-slate-800">
-                <th className="py-2.5 px-3 w-10 text-center">No</th>
-                <th className="py-2.5 px-3">Delege Adı Soyadı</th>
-                <th className="py-2.5 px-3">QR / Delege No</th>
-                <th className="py-2.5 px-3">İhtisas Komisyonu</th>
-                <th className="py-2.5 px-3">Üniversite / Şehir</th>
-                <th className="py-2.5 px-3 text-center">23 Ekim</th>
-                <th className="py-2.5 px-3 text-center">24 Ekim</th>
-                <th className="py-2.5 px-3 text-center">25 Ekim</th>
-                <th className="py-2.5 px-3 text-center">Son Yoklama Saati</th>
+      {/* Dynamic Print CSS for chosen Orientation */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        @media print {
+          @page {
+            size: ${printOrientation === 'landscape' ? 'landscape' : 'portrait'} !important;
+            margin: 6mm 8mm !important;
+          }
+        }
+      `}} />
+
+      {/* Detailed Table */}
+      <div className="overflow-x-auto print:overflow-visible print:w-full">
+        <table className="w-full text-left border-collapse text-xs print:text-[9.5px]">
+          <thead>
+            <tr className="border-b-2 border-slate-800 bg-slate-100 text-[11px] print:text-[9.5px] font-bold text-slate-800">
+              <th className="py-2.5 px-2 w-8 text-center print:py-1.5 print:px-1">No</th>
+              <th className="py-2.5 px-2.5 print:py-1.5 print:px-1.5">Delege Adı Soyadı</th>
+              <th className="py-2.5 px-2 text-left whitespace-nowrap print:py-1.5 print:px-1.5">QR / Delege No</th>
+              <th className="py-2.5 px-2 text-left whitespace-nowrap print:py-1.5 print:px-1.5">İhtisas Komisyonu</th>
+              <th className="py-2.5 px-2.5 text-left print:py-1.5 print:px-1.5">Üniversite / Şehir</th>
+              <th className="py-2.5 px-2 text-center bg-blue-50/80 border-x border-slate-300 font-bold text-blue-950 whitespace-nowrap print:py-1.5 print:px-1">
+                Yoklama Durumu
+                <span className="block text-[9px] print:text-[8px] font-normal text-slate-500">
+                  {selectedDay === 'all' ? '(Genel Katılım)' : `(${selectedDay})`}
+                </span>
+              </th>
+              <th className="py-2.5 px-1.5 text-center whitespace-nowrap w-16 print:py-1.5 print:px-1">23 Ekim</th>
+              <th className="py-2.5 px-1.5 text-center whitespace-nowrap w-16 print:py-1.5 print:px-1">24 Ekim</th>
+              <th className="py-2.5 px-1.5 text-center whitespace-nowrap w-16 print:py-1.5 print:px-1">25 Ekim</th>
+              <th className="py-2.5 px-2 text-center whitespace-nowrap w-20 print:py-1.5 print:px-1">Son Saat</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-200">
+            {filteredDelegates.length === 0 ? (
+              <tr>
+                <td colSpan={10} className="py-8 text-center text-slate-400 italic">
+                  Seçilen filtre kriterlerine uygun delege yoklama kaydı bulunamadı.
+                </td>
               </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-200">
-              {filteredDelegates.length === 0 ? (
-                <tr>
-                  <td colSpan={9} className="py-8 text-center text-slate-400 italic">
-                    Seçilen filtre kriterlerine uygun delege yoklama kaydı bulunamadı.
-                  </td>
-                </tr>
-              ) : (
-                filteredDelegates.map((app, index) => {
-                  const days = app.attendanceDays || [];
-                  const has23 = days.includes('23 Ekim');
-                  const has24 = days.includes('24 Ekim');
-                  const has25 = days.includes('25 Ekim');
+            ) : (
+              filteredDelegates.map((app, index) => {
+                const days = app.attendanceDays || [];
+                const has23 = days.includes('23 Ekim');
+                const has24 = days.includes('24 Ekim');
+                const has25 = days.includes('25 Ekim');
 
-                  const lastLog = app.attendanceLogs && app.attendanceLogs.length > 0 
-                    ? app.attendanceLogs[app.attendanceLogs.length - 1] 
-                    : null;
+                // Yoklama Durumu Badge Hesabı
+                let statusBadgeText = '';
+                let statusBadgeClasses = '';
 
-                  const lastTime = lastLog 
-                    ? new Intl.DateTimeFormat('tr-TR', { hour: '2-digit', minute: '2-digit' }).format(new Date(lastLog.scannedAt))
-                    : '-';
+                if (selectedDay !== 'all') {
+                  const isPresent = days.includes(selectedDay);
+                  if (isPresent) {
+                    statusBadgeText = 'KATILDI';
+                    statusBadgeClasses = 'bg-emerald-100 text-emerald-800 border-emerald-300';
+                  } else {
+                    statusBadgeText = 'GELMEDİ';
+                    statusBadgeClasses = 'bg-rose-100 text-rose-800 border-rose-300';
+                  }
+                } else {
+                  if (days.length === 3) {
+                    statusBadgeText = 'TAM KATILDI (3/3)';
+                    statusBadgeClasses = 'bg-emerald-100 text-emerald-800 border-emerald-300';
+                  } else if (days.length > 0) {
+                    statusBadgeText = `KISMİ (${days.length}/3 GÜN)`;
+                    statusBadgeClasses = 'bg-amber-100 text-amber-800 border-amber-300';
+                  } else {
+                    statusBadgeText = 'KATILMADI (0/3)';
+                    statusBadgeClasses = 'bg-rose-100 text-rose-800 border-rose-300';
+                  }
+                }
 
-                  return (
-                    <tr 
-                      key={app.id} 
-                      className={`hover:bg-slate-50/80 transition-colors ${index % 2 === 1 ? 'bg-slate-50/40' : ''}`}
-                    >
-                      <td className="py-2.5 px-3 text-center font-medium text-slate-400">
-                        {index + 1}
-                      </td>
-                      <td className="py-2.5 px-3">
-                        <span className="font-bold text-slate-900 block">{app.fullName}</span>
-                        <span className="text-[10px] text-slate-400">{app.email} • {app.phone}</span>
-                      </td>
-                      <td className="py-2.5 px-3 font-mono text-[11px] text-slate-600">
-                        {app.qrCodeId}
-                      </td>
-                      <td className="py-2.5 px-3 font-medium text-slate-700">
+                const lastLog = app.attendanceLogs && app.attendanceLogs.length > 0 
+                  ? app.attendanceLogs[app.attendanceLogs.length - 1] 
+                  : null;
+
+                const lastTime = lastLog 
+                  ? new Intl.DateTimeFormat('tr-TR', { hour: '2-digit', minute: '2-digit' }).format(new Date(lastLog.scannedAt))
+                  : '-';
+
+                return (
+                  <tr 
+                    key={app.id} 
+                    className={`hover:bg-slate-50/80 transition-colors print:break-inside-avoid ${index % 2 === 1 ? 'bg-slate-50/40' : ''}`}
+                  >
+                    <td className="py-2 px-2 text-center font-semibold text-slate-400 print:py-1.5 print:px-1">
+                      {index + 1}
+                    </td>
+                    <td className="py-2 px-2.5 print:py-1.5 print:px-1.5">
+                      <span className="font-bold text-slate-900 block text-xs print:text-[10px] leading-tight">{app.fullName}</span>
+                      <span className="text-[10px] print:text-[8px] text-slate-400 block whitespace-nowrap mt-0.5">{app.email} • {app.phone}</span>
+                    </td>
+                    <td className="py-2 px-2 font-mono text-[11px] print:text-[9.5px] font-semibold text-slate-700 whitespace-nowrap print:py-1.5 print:px-1.5">
+                      {app.qrCodeId}
+                    </td>
+                    <td className="py-2 px-2 whitespace-nowrap print:py-1.5 print:px-1.5">
+                      <span className="px-1.5 py-0.5 rounded text-[10px] print:text-[8.5px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
                         {app.commissionId.toUpperCase()}
-                      </td>
-                      <td className="py-2.5 px-3 text-slate-600">
-                        <span className="block truncate max-w-[140px]">{app.school}</span>
-                        <span className="text-[10px] text-slate-400">{app.city || 'Konya'}</span>
-                      </td>
-                      <td className="py-2.5 px-3 text-center">
-                        <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold ${
-                          has23 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
-                        }`}>
-                          {has23 ? 'GELDİ' : 'YOK'}
-                        </span>
-                      </td>
-                      <td className="py-2.5 px-3 text-center">
-                        <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold ${
-                          has24 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
-                        }`}>
-                          {has24 ? 'GELDİ' : 'YOK'}
-                        </span>
-                      </td>
-                      <td className="py-2.5 px-3 text-center">
-                        <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold ${
-                          has25 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
-                        }`}>
-                          {has25 ? 'GELDİ' : 'YOK'}
-                        </span>
-                      </td>
-                      <td className="py-2.5 px-3 text-center font-mono text-[11px] text-slate-600">
-                        {lastTime}
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
+                      </span>
+                    </td>
+                    <td className="py-2 px-2.5 text-slate-600 print:py-1.5 print:px-1.5">
+                      <span className="block truncate max-w-[140px] text-xs print:text-[9px] font-medium leading-tight">{app.school || '-'}</span>
+                      <span className="text-[10px] print:text-[8px] text-slate-400 block">{app.city || 'Konya'}</span>
+                    </td>
+                    {/* YOKLAMA DURUMU VURGU SÜTUNU */}
+                    <td className="py-2 px-2 text-center whitespace-nowrap bg-blue-50/30 border-x border-slate-200 print:py-1.5 print:px-1">
+                      <span className={`inline-block px-2 py-0.5 rounded text-[10px] print:text-[8.5px] font-bold border tracking-tight ${statusBadgeClasses}`}>
+                        {statusBadgeText}
+                      </span>
+                    </td>
+                    <td className="py-2 px-1.5 text-center whitespace-nowrap print:py-1.5 print:px-1">
+                      <span className={`inline-block px-1.5 py-0.5 rounded text-[9.5px] print:text-[8.5px] font-bold ${
+                        has23 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
+                      }`}>
+                        {has23 ? 'GELDİ' : 'YOK'}
+                      </span>
+                    </td>
+                    <td className="py-2 px-1.5 text-center whitespace-nowrap print:py-1.5 print:px-1">
+                      <span className={`inline-block px-1.5 py-0.5 rounded text-[9.5px] print:text-[8.5px] font-bold ${
+                        has24 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
+                      }`}>
+                        {has24 ? 'GELDİ' : 'YOK'}
+                      </span>
+                    </td>
+                    <td className="py-2 px-1.5 text-center whitespace-nowrap print:py-1.5 print:px-1">
+                      <span className={`inline-block px-1.5 py-0.5 rounded text-[9.5px] print:text-[8.5px] font-bold ${
+                        has25 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
+                      }`}>
+                        {has25 ? 'GELDİ' : 'YOK'}
+                      </span>
+                    </td>
+                    <td className="py-2 px-2 text-center font-mono text-[10.5px] print:text-[9px] text-slate-600 whitespace-nowrap print:py-1.5 print:px-1">
+                      {lastTime}
+                    </td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
+      </div>
 
         {/* PDF Footer & Official Signatures */}
-        <div className="mt-10 pt-6 border-t border-slate-300 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
+        <div className="mt-10 pt-6 border-t border-slate-300 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4 report-signature-block print:break-inside-avoid">
           <div>
             <p className="font-semibold text-slate-700">ÖNDER İrfan Genç Meclisi Divan Başkanlığı</p>
             <p className="text-[10px]">Bu belge dijital yoklama takip sisteminden otomatik üretilmiştir.</p>
