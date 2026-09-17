@@ -24,7 +24,9 @@ import {
   ChevronDown,
   SwitchCamera,
   Upload,
-  Zap
+  Zap,
+  Barcode,
+  Keyboard
 } from 'lucide-react';
 import jsQR from 'jsqr';
 import { BrowserMultiFormatReader, BarcodeFormat, DecodeHintType } from '@zxing/library';
@@ -92,6 +94,10 @@ export default function AttendanceManager({ onGoToReports }: AttendanceManagerPr
   // Scan History Logs
   const [scanHistory, setScanHistory] = useState<ScanHistoryItem[]>([]);
 
+  // Reader Type: 'qr' (Camera Scanner) or 'code' (Manual / Barcode Reader)
+  const [readingMethod, setReadingMethod] = useState<'qr' | 'code'>('qr');
+  const manualInputRef = useRef<HTMLInputElement | null>(null);
+
   // Video & Scanner Refs
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -142,6 +148,14 @@ export default function AttendanceManager({ onGoToReports }: AttendanceManagerPr
       stopCamera();
     };
   }, []);
+
+  useEffect(() => {
+    if (readingMethod === 'code') {
+      setTimeout(() => {
+        manualInputRef.current?.focus();
+      }, 100);
+    }
+  }, [readingMethod]);
 
   // Web Audio Synthesizer Tone Feedback
   const playTone = (type: 'success' | 'duplicate' | 'error') => {
@@ -593,157 +607,307 @@ export default function AttendanceManager({ onGoToReports }: AttendanceManagerPr
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left / Top: Scanner Controls (7 cols) */}
           <div className="lg:col-span-7 space-y-4">
-            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <h3 className="font-bold text-slate-900 text-sm flex items-center gap-2">
-                  <Camera className="w-4 h-4 text-blue-600" />
-                  Kamera ile Canlı QR Okuma
-                </h3>
+            {/* 1. READER SELECTION TABS: QR KOD OKUYUCU vs KOD OKUYUCU */}
+            <div className="bg-white p-1.5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => setReadingMethod('qr')}
+                className={`flex-1 py-3 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                  readingMethod === 'qr'
+                    ? 'bg-[#1E6FFB] text-white shadow-md shadow-blue-500/20 ring-2 ring-blue-500/20'
+                    : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-slate-200/60'
+                }`}
+              >
+                <QrCode className="w-4 h-4" />
+                <span>QR Kod Okuyucu (Kamera)</span>
+              </button>
 
-                <div className="flex flex-wrap items-center gap-2">
-                  {/* Switch Front/Rear Camera if multiple cameras available */}
-                  {isCameraActive && hasMultipleCameras && (
+              <button
+                type="button"
+                onClick={() => {
+                  stopCamera();
+                  setReadingMethod('code');
+                }}
+                className={`flex-1 py-3 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                  readingMethod === 'code'
+                    ? 'bg-[#1E6FFB] text-white shadow-md shadow-blue-500/20 ring-2 ring-blue-500/20'
+                    : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-slate-200/60'
+                }`}
+              >
+                <Barcode className="w-4 h-4" />
+                <span>Kod Okuyucu (Manuel / Barkod)</span>
+              </button>
+            </div>
+
+            {/* 2. MODE A: QR KOD OKUYUCU (KAMERA İLE OKUMA) */}
+            {readingMethod === 'qr' && (
+              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <h3 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                      <Camera className="w-4 h-4 text-blue-600" />
+                      Kamera ile Canlı QR Okuma
+                    </h3>
+                    <p className="text-[11px] text-slate-500 mt-0.5">
+                      Delege kartındaki QR kodu kameraya tutunuz.
+                    </p>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2">
+                    {/* Switch Front/Rear Camera if multiple cameras available */}
+                    {isCameraActive && hasMultipleCameras && (
+                      <button
+                        onClick={switchCamera}
+                        title="Kamerayı Değiştir (Ön / Arka)"
+                        className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+                      >
+                        <SwitchCamera className="w-3.5 h-3.5 text-slate-600" />
+                        <span className="hidden sm:inline">Kamerayı Çevir</span>
+                      </button>
+                    )}
+
+                    {/* Hidden Image File Input */}
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                    />
+
+                    {/* Upload QR Image / Screenshot */}
                     <button
-                      onClick={switchCamera}
-                      title="Kamerayı Değiştir (Ön / Arka)"
-                      className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={isFileProcessing}
+                      title="QR Kod Fotoğrafı veya Ekran Görüntüsü Yükle"
+                      className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
                     >
-                      <SwitchCamera className="w-3.5 h-3.5 text-slate-600" />
-                      <span className="hidden sm:inline">Kamerayı Çevir</span>
+                      <Upload className="w-3.5 h-3.5 text-slate-600" />
+                      <span>{isFileProcessing ? 'Taranıyor...' : 'Görselden Oku'}</span>
                     </button>
-                  )}
 
-                  {/* Hidden Image File Input */}
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="hidden"
+                    {/* Camera Start / Stop Button */}
+                    {isCameraActive ? (
+                      <button
+                        onClick={stopCamera}
+                        className="px-3.5 py-1.5 bg-rose-50 text-rose-700 hover:bg-rose-100 rounded-xl text-xs font-bold transition-colors cursor-pointer border border-rose-200"
+                      >
+                        Kamerayı Durdur
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => startCamera()}
+                        className="px-4 py-2 bg-[#1E6FFB] hover:bg-blue-600 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors shadow-sm cursor-pointer"
+                      >
+                        <Camera className="w-4 h-4" />
+                        <span>Kamerayı Başlat</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {cameraError && (
+                  <div className="p-3 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-xs flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+                    <span>{cameraError}</span>
+                  </div>
+                )}
+
+                {/* Video Scanner Canvas */}
+                <div className="relative rounded-2xl overflow-hidden bg-slate-950 aspect-video sm:h-[340px] w-full flex items-center justify-center border border-slate-800 shadow-inner">
+                  <video
+                    ref={videoRef}
+                    playsInline
+                    muted
+                    autoPlay
+                    className={`w-full h-full object-cover transition-opacity duration-300 ${!isCameraActive ? 'opacity-0 absolute pointer-events-none' : 'opacity-100'}`}
                   />
 
-                  {/* Upload QR Image / Screenshot */}
-                  <button
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={isFileProcessing}
-                    title="QR Kod Fotoğrafı veya Ekran Görüntüsü Yükle"
-                    className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
-                  >
-                    <Upload className="w-3.5 h-3.5 text-slate-600" />
-                    <span>{isFileProcessing ? 'Taranıyor...' : 'Görselden Oku'}</span>
-                  </button>
+                  {!isCameraActive && (
+                    <div className="text-center p-6 text-slate-400 z-10 flex flex-col items-center">
+                      <div className="w-16 h-16 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center mb-3 shadow-lg">
+                        <QrCode className="w-8 h-8 text-slate-500" />
+                      </div>
+                      <p className="text-sm font-semibold text-slate-300">Kamera Şu Anda Kapalı</p>
+                      <p className="text-xs text-slate-500 mt-1 max-w-xs">
+                        Canlı QR taramak için “Kamerayı Başlat” butonuna tıklayınız veya görsel dosyasından okutunuz.
+                      </p>
+                      <button
+                        onClick={() => startCamera()}
+                        className="mt-4 px-5 py-2.5 bg-[#1E6FFB] hover:bg-blue-600 text-white rounded-xl text-xs font-bold flex items-center gap-2 transition-all shadow-md cursor-pointer"
+                      >
+                        <Camera className="w-4 h-4" />
+                        <span>Kamerayı Başlat</span>
+                      </button>
+                    </div>
+                  )}
 
-                  {/* Camera Start / Stop Button */}
-                  {isCameraActive ? (
-                    <button
-                      onClick={stopCamera}
-                      className="px-3.5 py-1.5 bg-rose-50 text-rose-700 hover:bg-rose-100 rounded-xl text-xs font-bold transition-colors cursor-pointer border border-rose-200"
-                    >
-                      Kamerayı Durdur
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => startCamera()}
-                      className="px-4 py-2 bg-[#1E6FFB] hover:bg-blue-600 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors shadow-sm cursor-pointer"
-                    >
-                      <Camera className="w-4 h-4" />
-                      <span>Kamerayı Başlat</span>
-                    </button>
+                  {/* Target overlay guide with corner brackets & animated laser line */}
+                  {isCameraActive && (
+                    <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center">
+                      <div
+                        className={`relative w-56 h-56 sm:w-64 sm:h-64 rounded-2xl border-2 transition-all duration-300 ${
+                          isScanSuccessFlash
+                            ? 'border-emerald-400 ring-8 ring-emerald-500/50 bg-emerald-500/10'
+                            : 'border-blue-400/80 ring-4 ring-black/40'
+                        }`}
+                      >
+                        {/* 4 Corner Markers */}
+                        <div className="absolute -top-1 -left-1 w-6 h-6 border-t-4 border-l-4 border-[#1E6FFB] rounded-tl-lg" />
+                        <div className="absolute -top-1 -right-1 w-6 h-6 border-t-4 border-r-4 border-[#1E6FFB] rounded-tr-lg" />
+                        <div className="absolute -bottom-1 -left-1 w-6 h-6 border-b-4 border-l-4 border-[#1E6FFB] rounded-bl-lg" />
+                        <div className="absolute -bottom-1 -right-1 w-6 h-6 border-b-4 border-r-4 border-[#1E6FFB] rounded-br-lg" />
+
+                        {/* Animated Laser Scanning Line */}
+                        <div className="absolute left-2 right-2 h-0.5 bg-gradient-to-r from-transparent via-[#4DA3FF] to-transparent shadow-[0_0_10px_#4DA3FF] animate-scan-laser" />
+                      </div>
+
+                      <div className="mt-4 px-3 py-1 rounded-full bg-black/60 backdrop-blur-sm border border-white/10 text-[11px] font-medium text-white shadow">
+                        {isScanSuccessFlash ? '✅ QR Kod Okundu!' : 'QR Kodu Çerçeveye Hizalayınız'}
+                      </div>
+                    </div>
                   )}
                 </div>
               </div>
+            )}
 
-              {cameraError && (
-                <div className="p-3 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-xs flex items-center gap-2">
-                  <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
-                  <span>{cameraError}</span>
-                </div>
-              )}
-
-              {/* Video Scanner Canvas */}
-              <div className="relative rounded-2xl overflow-hidden bg-slate-950 aspect-video sm:h-[340px] w-full flex items-center justify-center border border-slate-800 shadow-inner">
-                <video
-                  ref={videoRef}
-                  playsInline
-                  muted
-                  autoPlay
-                  className={`w-full h-full object-cover transition-opacity duration-300 ${!isCameraActive ? 'opacity-0 absolute pointer-events-none' : 'opacity-100'}`}
-                />
-
-                {!isCameraActive && (
-                  <div className="text-center p-6 text-slate-400 z-10 flex flex-col items-center">
-                    <div className="w-16 h-16 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center mb-3 shadow-lg">
-                      <QrCode className="w-8 h-8 text-slate-500" />
-                    </div>
-                    <p className="text-sm font-semibold text-slate-300">Kamera Şu Anda Kapalı</p>
-                    <p className="text-xs text-slate-500 mt-1 max-w-xs">
-                      Canlı QR taramak için “Kamerayı Başlat” butonuna tıklayınız veya görsel dosyasından okutunuz.
+            {/* 3. MODE B: KOD OKUYUCU (MANUEL & BARKOD / EL TERMİNALİ İLE OKUMA) */}
+            {readingMethod === 'code' && (
+              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+                  <div>
+                    <h3 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                      <Barcode className="w-5 h-5 text-blue-600" />
+                      Delege Kodu & Barkod Okuyucu İstasyonu
+                    </h3>
+                    <p className="text-[11px] text-slate-500 mt-0.5">
+                      El terminali (USB/Bluetooth barkod okuyucu), klavye veya delege kodu ile hızlı yoklama alınız.
                     </p>
-                    <button
-                      onClick={() => startCamera()}
-                      className="mt-4 px-5 py-2.5 bg-[#1E6FFB] hover:bg-blue-600 text-white rounded-xl text-xs font-bold flex items-center gap-2 transition-all shadow-md cursor-pointer"
-                    >
-                      <Camera className="w-4 h-4" />
-                      <span>Kamerayı Başlat</span>
-                    </button>
                   </div>
-                )}
+                  <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200 flex items-center gap-1">
+                    <Keyboard className="w-3 h-3 text-blue-600" />
+                    Enter ile Otomatik Kayıt
+                  </span>
+                </div>
 
-                {/* Target overlay guide with corner brackets & animated laser line */}
-                {isCameraActive && (
-                  <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center">
-                    <div
-                      className={`relative w-56 h-56 sm:w-64 sm:h-64 rounded-2xl border-2 transition-all duration-300 ${
-                        isScanSuccessFlash
-                          ? 'border-emerald-400 ring-8 ring-emerald-500/50 bg-emerald-500/10'
-                          : 'border-blue-400/80 ring-4 ring-black/40'
-                      }`}
-                    >
-                      {/* 4 Corner Markers */}
-                      <div className="absolute -top-1 -left-1 w-6 h-6 border-t-4 border-l-4 border-[#1E6FFB] rounded-tl-lg" />
-                      <div className="absolute -top-1 -right-1 w-6 h-6 border-t-4 border-r-4 border-[#1E6FFB] rounded-tr-lg" />
-                      <div className="absolute -bottom-1 -left-1 w-6 h-6 border-b-4 border-l-4 border-[#1E6FFB] rounded-bl-lg" />
-                      <div className="absolute -bottom-1 -right-1 w-6 h-6 border-b-4 border-r-4 border-[#1E6FFB] rounded-br-lg" />
-
-                      {/* Animated Laser Scanning Line */}
-                      <div className="absolute left-2 right-2 h-0.5 bg-gradient-to-r from-transparent via-[#4DA3FF] to-transparent shadow-[0_0_10px_#4DA3FF] animate-scan-laser" />
-                    </div>
-
-                    <div className="mt-4 px-3 py-1 rounded-full bg-black/60 backdrop-blur-sm border border-white/10 text-[11px] font-medium text-white shadow">
-                      {isScanSuccessFlash ? '✅ QR Kod Okundu!' : 'QR Kodu Çerçeveye Hizalayınız'}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Manual Code / Barcode Scanner Input */}
-              <div className="pt-2">
-                <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1.5">
-                  Veya Barkod Okuyucu / Manuel QR Kodu Girişi
-                </label>
+                {/* Big Input Area */}
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
                     handleProcessCode(manualCodeInput);
                   }}
-                  className="flex gap-2"
+                  className="space-y-3"
                 >
-                  <input
-                    type="text"
-                    placeholder="Örn: IGM26-ADA-1234 veya T.C. No / E-Posta..."
-                    value={manualCodeInput}
-                    onChange={(e) => setManualCodeInput(e.target.value)}
-                    className="flex-1 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#1E6FFB]"
-                  />
-                  <button
-                    type="submit"
-                    className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-xs transition-colors cursor-pointer"
-                  >
-                    Yoklama Al
-                  </button>
+                  <div className="relative">
+                    <Barcode className="w-5 h-5 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    <input
+                      ref={manualInputRef}
+                      type="text"
+                      placeholder="Delege Kodu (Örn: IGM26-ADA-5296) veya T.C. No / E-Posta..."
+                      value={manualCodeInput}
+                      onChange={(e) => setManualCodeInput(e.target.value)}
+                      className="w-full pl-11 pr-24 py-3.5 bg-slate-50 border-2 border-slate-200 focus:border-[#1E6FFB] rounded-2xl text-sm font-mono text-slate-900 placeholder:text-slate-400 placeholder:font-sans focus:outline-none transition-all shadow-inner"
+                    />
+                    {manualCodeInput && (
+                      <button
+                        type="button"
+                        onClick={() => setManualCodeInput('')}
+                        className="absolute right-24 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 cursor-pointer"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    )}
+                    <button
+                      type="submit"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-2 bg-[#1E6FFB] hover:bg-blue-600 text-white font-bold rounded-xl text-xs transition-colors shadow-sm cursor-pointer"
+                    >
+                      Yoklama Al
+                    </button>
+                  </div>
+
+                  {/* Quick helper chips */}
+                  <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-slate-500 pt-1">
+                    <span className="font-semibold text-slate-400">Hızlı Kod Ekle:</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setManualCodeInput('IGM26-');
+                        manualInputRef.current?.focus();
+                      }}
+                      className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-mono font-semibold transition-colors cursor-pointer border border-slate-200"
+                    >
+                      + IGM26-
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setManualCodeInput('IGM26-SEC-');
+                        manualInputRef.current?.focus();
+                      }}
+                      className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-mono font-semibold transition-colors cursor-pointer border border-slate-200"
+                    >
+                      + IGM26-SEC-
+                    </button>
+                  </div>
                 </form>
+
+                {/* Live Matching Delegates while typing */}
+                {manualCodeInput.trim().length >= 2 && (
+                  <div className="border border-slate-200 rounded-2xl p-3 bg-slate-50/70 space-y-2 animate-in fade-in duration-200">
+                    <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                      Eşleşen Delege Adayları ({
+                        applications.filter((a) => {
+                          const q = manualCodeInput.trim().toLowerCase();
+                          return (
+                            (a.qrCodeId && a.qrCodeId.toLowerCase().includes(q)) ||
+                            (a.secureQrToken && a.secureQrToken.toLowerCase().includes(q)) ||
+                            (a.fullName && a.fullName.toLowerCase().includes(q)) ||
+                            (a.identityNo && a.identityNo.includes(q)) ||
+                            (a.email && a.email.toLowerCase().includes(q))
+                          );
+                        }).length
+                      })
+                    </div>
+                    <div className="space-y-1.5">
+                      {applications
+                        .filter((a) => {
+                          const q = manualCodeInput.trim().toLowerCase();
+                          return (
+                            (a.qrCodeId && a.qrCodeId.toLowerCase().includes(q)) ||
+                            (a.secureQrToken && a.secureQrToken.toLowerCase().includes(q)) ||
+                            (a.fullName && a.fullName.toLowerCase().includes(q)) ||
+                            (a.identityNo && a.identityNo.includes(q)) ||
+                            (a.email && a.email.toLowerCase().includes(q))
+                          );
+                        })
+                        .slice(0, 3)
+                        .map((match) => (
+                          <div
+                            key={match.id}
+                            className="p-2.5 bg-white rounded-xl border border-slate-200/80 flex items-center justify-between text-xs hover:border-blue-300 transition-all"
+                          >
+                            <div>
+                              <span className="font-bold text-slate-900 block">{match.fullName}</span>
+                              <div className="flex items-center gap-2 text-[10px] text-slate-500 mt-0.5">
+                                <span className="font-semibold text-blue-600">{match.commissionId.toUpperCase()}</span>
+                                <span>•</span>
+                                <span className="font-mono text-slate-600">{match.qrCodeId}</span>
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleProcessCode(match.qrCodeId)}
+                              className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-bold transition-all shadow-sm cursor-pointer"
+                            >
+                              Yoklama Al
+                            </button>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                )}
               </div>
-            </div>
+            )}
 
             {/* Instant Result Box */}
             {lastScannedResult && (
