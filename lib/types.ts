@@ -15,6 +15,7 @@ export type TeamMember = {
   fullName: string;
   role: string;
   category: 'genel_koordinasyon' | 'komisyon_baskani' | 'basin_medya' | 'lojistik' | 'delege_iliskileri' | 'divan' | 'yonetim' | 'akademik' | 'koordinasyon' | string;
+  teamType?: 'organizasyon' | 'akademi';
   commissionId?: string;
   imageUrl: string;
   university?: string;

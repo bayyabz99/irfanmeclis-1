@@ -20,7 +20,9 @@ import {
   ArrowRight,
   User as UserIcon,
   LogOut,
-  Flag
+  Flag,
+  GraduationCap,
+  Briefcase
 } from 'lucide-react';
 import { getCurrentUser, logoutParticipant } from '@/lib/storage';
 import { Application } from '@/lib/types';
@@ -58,8 +60,9 @@ function GoldActiveOrnament() {
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [commissionDropdown, setCommissionDropdown] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [mobileCommissionOpen, setMobileCommissionOpen] = useState(false);
+  const [mobileTeamOpen, setMobileTeamOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState<Application | null>(null);
   const pathname = usePathname();
 
@@ -123,34 +126,48 @@ export default function Navbar() {
     return null;
   }
 
+  type NavLinkItem = {
+    name: string;
+    href: string;
+    hasDropdown?: boolean;
+    subLinks?: {
+      name: string;
+      href: string;
+      targetId?: string;
+      desc?: string;
+      badge?: string;
+      icon?: any;
+    }[];
+  };
+
   // Desktop navigation links matching reference
-  const navLinks = [
+  const navLinks: NavLinkItem[] = [
     { name: 'Ana Sayfa', href: '/' },
     { name: 'Hakkımızda', href: '/hakkinda' },
+    { name: 'Komisyonlar', href: '/komisyonlar' },
     { 
-      name: 'Komisyonlar', 
-      href: '/komisyonlar',
+      name: 'Ekip', 
+      href: '/ekip',
       hasDropdown: true,
       subLinks: [
         { 
-          name: 'İhtisas Komisyonları', 
-          href: '/komisyonlar#komisyonlar', 
-          targetId: 'komisyonlar',
-          desc: '8 Masada Kanun ve Politika Müzakereleri',
-          badge: '8 Komisyon',
-          icon: Layers
+          name: 'Organizasyon Ekibi', 
+          href: '/ekip#organizasyon-ekibi', 
+          targetId: 'organizasyon-ekibi',
+          desc: 'Saha Koordinasyonu, Lojistik & Divan Heyeti',
+          badge: 'Saha Kadrosu',
+          icon: Users
         },
         { 
-          name: 'Meclis Partileri', 
-          href: '/komisyonlar#partiler', 
-          targetId: 'partiler',
-          desc: 'Temsil Grupları, Tüzük & Koltuk Dağılımı',
-          badge: 'Parti Grupları',
-          icon: Flag
+          name: 'Akademi Ekibi', 
+          href: '/ekip#akademi-ekibi', 
+          targetId: 'akademi-ekibi',
+          desc: 'Komisyon Başkanları & Akademik Danışmanlar',
+          badge: 'Akademik Masalar',
+          icon: GraduationCap
         },
       ]
     },
-    { name: 'Ekip', href: '/ekip' },
     { name: 'Program', href: '/program' },
     { name: 'Başvuru', href: '/basvuru' },
     { name: 'Galeri', href: '/galeri' },
@@ -162,7 +179,7 @@ export default function Navbar() {
     { name: 'Ana Sayfa', href: '/', icon: Home },
     { name: 'Hakkında', href: '/hakkinda', icon: Info },
     { name: 'Komisyonlar', href: '/komisyonlar', icon: Layers },
-    { name: 'Organizasyon Ekibi', href: '/ekip', icon: Users },
+    { name: 'Ekip', href: '/ekip', icon: Users },
     { name: 'Program & Akış', href: '/program', icon: Calendar },
     { name: 'Medya Galerisi', href: '/galeri', icon: ImageIcon },
     { name: 'İletişim & Ulaşım', href: '/iletisim', icon: Mail },
@@ -247,19 +264,20 @@ export default function Navbar() {
             <nav className="hidden lg:flex items-center space-x-0.5 xl:space-x-1.5 whitespace-nowrap">
               {navLinks.map((link) => {
                 const active = isActive(link.href);
-                
+
                 if (link.hasDropdown) {
+                  const isDropdownOpen = activeDropdown === link.name;
                   return (
                     <div 
                       key={link.name} 
                       className="relative group"
-                      onMouseEnter={() => setCommissionDropdown(true)}
-                      onMouseLeave={() => setCommissionDropdown(false)}
+                      onMouseEnter={() => setActiveDropdown(link.name)}
+                      onMouseLeave={() => setActiveDropdown(null)}
                     >
                       <Link
                         href={link.href}
                         onClick={(e) => {
-                          if (pathname === '/komisyonlar') {
+                          if (pathname === link.href) {
                             e.preventDefault();
                             window.scrollTo({ top: 0, behavior: 'smooth' });
                           }
@@ -271,11 +289,11 @@ export default function Navbar() {
                         }`}
                       >
                         <span className="tracking-wide">{link.name}</span>
-                        <ChevronDown className={`w-3.5 h-3.5 text-[#dfbe7a] transition-transform duration-200 ${commissionDropdown ? 'rotate-180 text-[#cca663]' : ''}`} />
+                        <ChevronDown className={`w-3.5 h-3.5 text-[#dfbe7a] transition-transform duration-200 ${isDropdownOpen ? 'rotate-180 text-[#cca663]' : ''}`} />
                         {active && <GoldActiveOrnament />}
                       </Link>
 
-                      {commissionDropdown && (
+                      {isDropdownOpen && (
                         <div className="absolute top-full left-1/2 -translate-x-1/2 w-80 pt-2.5 z-[100] animate-in fade-in slide-in-from-top-2 duration-150">
                           <div className="relative p-2.5 rounded-2xl bg-gradient-to-b from-[#092530]/98 via-[#061d26]/98 to-[#04161e]/98 border border-[#cca663]/40 shadow-2xl shadow-[#020b10]/90 backdrop-blur-2xl space-y-1.5 overflow-hidden">
                             {/* Texture inside dropdown */}
@@ -290,21 +308,21 @@ export default function Navbar() {
                             {/* Dropdown Header Accent */}
                             <div className="relative px-3 pt-1.5 pb-2 border-b border-[#cca663]/20 flex items-center justify-between">
                               <span className="text-[10.5px] font-semibold uppercase tracking-wider text-[#dfbe7a]">
-                                Komisyonlar Sayfası
+                                {link.name} Bölümleri
                               </span>
                               <span className="text-[10px] text-slate-400">Hızlı Bölüm Seçimi</span>
                             </div>
 
-                            {/* Section Items: 1. Komisyonlar, 2. Partiler */}
+                            {/* Section Items */}
                             {link.subLinks?.map((sub) => {
-                              const SubIcon = sub.icon || Layers;
+                              const SubIcon = sub.icon || Users;
                               return (
                                 <Link
                                   key={sub.href}
                                   href={sub.href}
                                   onClick={(e) => {
-                                    setCommissionDropdown(false);
-                                    if (pathname === '/komisyonlar' && sub.targetId) {
+                                    setActiveDropdown(null);
+                                    if (pathname === link.href && sub.targetId) {
                                       e.preventDefault();
                                       const el = document.getElementById(sub.targetId);
                                       if (el) {
@@ -337,21 +355,6 @@ export default function Navbar() {
                                 </Link>
                               );
                             })}
-
-                            {/* Extra Quick Link */}
-                            <div className="pt-1.5 border-t border-[#cca663]/15">
-                              <Link
-                                href="/komisyonlar-ve-ekip"
-                                onClick={() => setCommissionDropdown(false)}
-                                className="flex items-center justify-between px-3 py-1.5 rounded-lg text-[11px] text-slate-400 hover:text-white hover:bg-white/5 transition-colors group/all"
-                              >
-                                <span className="flex items-center gap-1.5">
-                                  <Users className="w-3 h-3 text-[#dfbe7a]" />
-                                  <span>100 Kişilik Ekip & Çalışma Tablosu</span>
-                                </span>
-                                <ArrowRight className="w-3 h-3 text-slate-500 group-hover/all:text-[#dfbe7a] group-hover/all:translate-x-0.5 transition-all" />
-                              </Link>
-                            </div>
                           </div>
                         </div>
                       )}
@@ -526,6 +529,58 @@ export default function Navbar() {
             const active = isActive(link.href);
             const Icon = link.icon;
 
+            if (link.href === '/ekip') {
+              return (
+                <div key={link.name} className="space-y-1">
+                  <div className={`flex items-center justify-between px-3.5 py-3 rounded-2xl text-sm transition-all ${
+                    active
+                      ? 'bg-[#0e3b4b]/90 border border-[#dfbe7a]/50 text-[#dfbe7a] shadow-md font-semibold'
+                      : 'text-slate-200 hover:text-white hover:bg-[#0c3340]/60 border border-transparent'
+                  }`}>
+                    <Link
+                      href="/ekip"
+                      onClick={() => setMobileOpen(false)}
+                      className="flex items-center gap-3 min-w-0 flex-1"
+                    >
+                      <Icon className={`w-5 h-5 shrink-0 ${active ? 'text-[#dfbe7a]' : 'text-slate-400'}`} />
+                      <span className={`truncate font-serif ${active ? 'text-white font-semibold' : 'text-slate-200'}`}>
+                        {link.name}
+                      </span>
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => setMobileTeamOpen(!mobileTeamOpen)}
+                      className="p-1.5 text-[#dfbe7a] hover:bg-white/10 rounded-lg transition-colors cursor-pointer"
+                      aria-label="Ekip Bölümleri"
+                    >
+                      <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${mobileTeamOpen ? 'rotate-180' : ''}`} />
+                    </button>
+                  </div>
+
+                  {mobileTeamOpen && (
+                    <div className="pl-6 pr-2 py-1 space-y-1 border-l-2 border-[#dfbe7a]/30 ml-4 animate-in fade-in slide-in-from-top-1 duration-150">
+                      <Link
+                        href="/ekip#organizasyon-ekibi"
+                        onClick={() => setMobileOpen(false)}
+                        className="flex items-center gap-2.5 p-2 rounded-xl text-xs text-slate-200 hover:text-white hover:bg-[#0c3340]/60 transition-colors"
+                      >
+                        <Users className="w-3.5 h-3.5 text-[#dfbe7a]" />
+                        <span>Organizasyon Ekibi</span>
+                      </Link>
+                      <Link
+                        href="/ekip#akademi-ekibi"
+                        onClick={() => setMobileOpen(false)}
+                        className="flex items-center gap-2.5 p-2 rounded-xl text-xs text-slate-200 hover:text-white hover:bg-[#0c3340]/60 transition-colors"
+                      >
+                        <GraduationCap className="w-3.5 h-3.5 text-amber-300" />
+                        <span>Akademi Ekibi</span>
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              );
+            }
+
             if (link.href === '/komisyonlar') {
               return (
                 <div key={link.name} className="space-y-1">
@@ -563,14 +618,6 @@ export default function Navbar() {
                       >
                         <Layers className="w-3.5 h-3.5 text-[#dfbe7a]" />
                         <span>İhtisas Komisyonları (8 Masa)</span>
-                      </Link>
-                      <Link
-                        href="/komisyonlar#partiler"
-                        onClick={() => setMobileOpen(false)}
-                        className="flex items-center gap-2.5 p-2 rounded-xl text-xs text-slate-200 hover:text-white hover:bg-[#0c3340]/60 transition-colors"
-                      >
-                        <Flag className="w-3.5 h-3.5 text-cyan-400" />
-                        <span>Meclis Partileri</span>
                       </Link>
                       <Link
                         href="/komisyonlar-ve-ekip"

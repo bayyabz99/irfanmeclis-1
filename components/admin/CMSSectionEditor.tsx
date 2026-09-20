@@ -38,16 +38,12 @@ import {
   Bus,
   BookOpen,
   Building2,
-  Flag,
-  ArrowUp,
-  ArrowDown,
-  Copy,
-  Landmark
+  GraduationCap,
+  Briefcase
 } from 'lucide-react';
 import { 
   CMSData, 
   SliderItem, 
-  PartyGroup,
   getStoredCMSData, 
   saveStoredCMSData,
   saveStoredCMSDataAsync,
@@ -55,6 +51,7 @@ import {
   resetCMSData,
   INITIAL_CMS_DATA 
 } from '@/lib/cmsStorage';
+import { TEAM_MEMBERS } from '@/lib/data';
 import CMSImageUploader from '@/components/admin/CMSImageUploader';
 
 interface CMSSectionEditorProps {
@@ -63,7 +60,6 @@ interface CMSSectionEditorProps {
 
 export default function CMSSectionEditor({ activeTab }: CMSSectionEditorProps) {
   const [data, setData] = useState<CMSData>(getStoredCMSData());
-  const [commissionSubTab, setCommissionSubTab] = useState<'all' | 'commissions' | 'parties'>('all');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveToast, setSaveToast] = useState(false);
@@ -124,7 +120,7 @@ export default function CMSSectionEditor({ activeTab }: CMSSectionEditorProps) {
             <span className="text-xs text-slate-400 capitalize">
               {activeTab === 'anasayfa' && 'Ana Sayfa Metin, Görsel & İçerik Yönetimi'}
               {activeTab === 'hakkimizda' && 'Hakkımızda (Vizyon, Misyon, İrfan Meclisi, Medya)'}
-              {activeTab === 'komisyonlar' && '8 İhtisas Komisyonu & Meclis Partileri Yönetimi'}
+              {activeTab === 'komisyonlar' && '8 İhtisas Komisyonu Yönetimi'}
               {activeTab === 'ekip' && 'Ekip & Divan Heyeti Yönetimi'}
               {activeTab === 'program' && '3 Günlük Etkinlik Takvimi'}
               {activeTab === 'basvuru' && 'Delege Başvuru Sayfası Ayarları'}
@@ -1288,64 +1284,11 @@ export default function CMSSectionEditor({ activeTab }: CMSSectionEditorProps) {
       )}
 
       {/* ========================================================================= */}
-      {/* TAB 3: KOMİSYONLAR & MECLİS PARTİLERİ                                    */}
+      {/* TAB 3: KOMİSYONLAR                                                        */}
       {/* ========================================================================= */}
       {activeTab === 'komisyonlar' && (
         <div className="space-y-6">
-          {/* Sub Navigation Bar for Komisyonlar & Partiler */}
-          <div className="flex flex-wrap items-center justify-between gap-3 bg-[#05101F] border border-slate-800 p-2.5 rounded-2xl">
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setCommissionSubTab('all')}
-                className={`px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer ${
-                  commissionSubTab === 'all'
-                    ? 'bg-[#00B4D8] text-[#05101F] font-bold shadow-md'
-                    : 'bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800'
-                }`}
-              >
-                <span>Tümü</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setCommissionSubTab('commissions')}
-                className={`px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer ${
-                  commissionSubTab === 'commissions'
-                    ? 'bg-[#00B4D8] text-[#05101F] font-bold shadow-md'
-                    : 'bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800'
-                }`}
-              >
-                <Layers className="w-3.5 h-3.5" />
-                <span>İhtisas Komisyonları ({data.commissions.length})</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setCommissionSubTab('parties')}
-                className={`px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer ${
-                  commissionSubTab === 'parties'
-                    ? 'bg-[#00B4D8] text-[#05101F] font-bold shadow-md'
-                    : 'bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800'
-                }`}
-              >
-                <Flag className="w-3.5 h-3.5" />
-                <span>Meclis Partileri ({data.partiesSection?.parties?.length || 0})</span>
-              </button>
-            </div>
-
-            <div className="text-xs text-slate-400 pr-2 hidden sm:flex items-center gap-2 font-mono">
-              <span className="text-cyan-400 font-bold">{data.commissions.length} Komisyon</span>
-              <span>•</span>
-              <span className="text-slate-300">
-                {(data.partiesSection?.parties || []).reduce((acc, p) => acc + (Number(p.seatsCount) || 0), 0)} / 250 Delege Koltuğu
-              </span>
-            </div>
-          </div>
-
-          {/* ================================================================= */}
-          {/* İHTİSAS KOMİSYONLARI YÖNETİMİ                                     */}
-          {/* ================================================================= */}
-          {(commissionSubTab === 'all' || commissionSubTab === 'commissions') && (
-            <div className="bg-[#05101F] border border-slate-800 rounded-2xl p-6">
+          <div className="bg-[#05101F] border border-slate-800 rounded-2xl p-6">
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h3 className="text-lg font-bold text-white flex items-center gap-2">
@@ -1490,531 +1433,8 @@ export default function CMSSectionEditor({ activeTab }: CMSSectionEditorProps) {
                     </div>
                   </div>
                 ))}
-              </div>
             </div>
-          )}
-
-          {/* ================================================================= */}
-          {/* MECLİS PARTİLERİ & TEMSİL GRUPLARI YÖNETİMİ                     */}
-          {/* ================================================================= */}
-          {(commissionSubTab === 'all' || commissionSubTab === 'parties') && (() => {
-            const partiesList = data.partiesSection?.parties || [];
-            const totalAssignedSeats = partiesList.reduce((acc, p) => acc + (Number(p.seatsCount) || 0), 0);
-
-            const moveParty = (fromIdx: number, toIdx: number) => {
-              updateCMS((prev) => {
-                const list = [...(prev.partiesSection?.parties || [])];
-                if (toIdx < 0 || toIdx >= list.length) return prev;
-                const [moved] = list.splice(fromIdx, 1);
-                list.splice(toIdx, 0, moved);
-                return {
-                  ...prev,
-                  partiesSection: {
-                    ...(prev.partiesSection || INITIAL_CMS_DATA.partiesSection),
-                    parties: list
-                  }
-                };
-              });
-            };
-
-            const duplicateParty = (idx: number) => {
-              updateCMS((prev) => {
-                const list = [...(prev.partiesSection?.parties || [])];
-                const target = list[idx];
-                if (!target) return prev;
-                const cloned: PartyGroup = {
-                  ...target,
-                  id: `parti-${Date.now()}`,
-                  name: `${target.name} (Kopya)`,
-                  shortName: `${target.shortName || 'KP'}`
-                };
-                list.splice(idx + 1, 0, cloned);
-                return {
-                  ...prev,
-                  partiesSection: {
-                    ...(prev.partiesSection || INITIAL_CMS_DATA.partiesSection),
-                    parties: list
-                  }
-                };
-              });
-            };
-
-            return (
-              <div className="bg-[#05101F] border border-slate-800 rounded-2xl p-6 space-y-6">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800/80">
-                  <div>
-                    <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                      <Flag className="w-5 h-5 text-[#00B4D8]" />
-                      Meclis Partileri & Temsil Grupları ({partiesList.length})
-                    </h3>
-                    <p className="text-xs text-slate-400">
-                      Komisyonlar sayfasında yer alan Meclis Partileri bölümünün başlığını, açıklamasını, delege sandalye sayılarını ve parti detaylarını düzenleyin.
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const id = `parti-${Date.now()}`;
-                      const newParty: PartyGroup = {
-                        id,
-                        name: 'Yeni Meclis Grubu / Partisi',
-                        shortName: 'YMG',
-                        slogan: 'Ortak Akıl ve İrade ile Geleceğe',
-                        description: 'Parti tüzüğü ve meclis simülasyonundaki temel vizyon açıklaması.',
-                        color: '#00B4D8',
-                        seatsCount: 50,
-                        leaderName: 'Grup Başkanı / Sözcüsü',
-                        principles: ['Adalet', 'İstişare', 'Kalkınma'],
-                        logoUrl: ''
-                      };
-                      updateCMS((prev) => ({
-                        ...prev,
-                        partiesSection: {
-                          ...(prev.partiesSection || INITIAL_CMS_DATA.partiesSection),
-                          parties: [...(prev.partiesSection?.parties || []), newParty]
-                        }
-                      }));
-                    }}
-                    className="px-3.5 py-2 bg-[#00B4D8] text-[#05101F] font-bold text-xs rounded-xl flex items-center gap-1.5 cursor-pointer hover:bg-[#00B4D8]/90 self-start sm:self-auto"
-                  >
-                    <Plus className="w-4 h-4" /> Yeni Parti / Grup Ekle
-                  </button>
-                </div>
-
-                {/* Meclis Sandalye Dağılım Çubuğu Önizlemesi */}
-                <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 space-y-3">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
-                    <div className="flex items-center gap-2">
-                      <Landmark className="w-4 h-4 text-[#00B4D8]" />
-                      <span className="font-bold text-slate-200">Meclis Genel Kurulu Koltuk Dağılımı Önizlemesi:</span>
-                    </div>
-                    <div className="flex items-center gap-2 font-mono">
-                      <span className="text-white font-bold">{totalAssignedSeats} / 250 Koltuk</span>
-                      {totalAssignedSeats === 250 ? (
-                        <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                          Koltuklar Tam Dağıtıldı ✅
-                        </span>
-                      ) : totalAssignedSeats < 250 ? (
-                        <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">
-                          {250 - totalAssignedSeats} Sandalye Boşta
-                        </span>
-                      ) : (
-                        <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30">
-                          {totalAssignedSeats - 250} Fazla Koltuk Var!
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="h-3 w-full rounded-full overflow-hidden bg-slate-950 flex p-0.5 border border-slate-800">
-                    {partiesList.map((p, idx) => {
-                      const seats = Number(p.seatsCount) || 0;
-                      const widthPct = totalAssignedSeats > 0 ? (seats / totalAssignedSeats) * 100 : 0;
-                      return (
-                        <div
-                          key={p.id || idx}
-                          style={{ width: `${widthPct}%`, backgroundColor: p.color || '#00B4D8' }}
-                          className="h-full first:rounded-l-full last:rounded-r-full transition-all"
-                          title={`${p.name}: ${seats} Koltuk`}
-                        />
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Bölüm Başlık & Rozet Ayarları */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-900/40 p-4 rounded-xl border border-slate-800">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1">Bölüm Üst Rozet Metni</label>
-                    <input
-                      type="text"
-                      value={data.partiesSection?.tag || ''}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        updateCMS((prev) => ({
-                          ...prev,
-                          partiesSection: {
-                            ...(prev.partiesSection || INITIAL_CMS_DATA.partiesSection),
-                            tag: val
-                          }
-                        }));
-                      }}
-                      placeholder="— MECLİS GRUPLARI & SİYASİ YAPILANMA"
-                      className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-white text-sm focus:border-[#00B4D8] focus:outline-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1">Bölüm Ana Başlığı</label>
-                    <input
-                      type="text"
-                      value={data.partiesSection?.heading || ''}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        updateCMS((prev) => ({
-                          ...prev,
-                          partiesSection: {
-                            ...(prev.partiesSection || INITIAL_CMS_DATA.partiesSection),
-                            heading: val
-                          }
-                        }));
-                      }}
-                      placeholder="Temsil Edilen Meclis Partileri"
-                      className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-white text-sm focus:border-[#00B4D8] focus:outline-none"
-                    />
-                  </div>
-
-                  <div className="md:col-span-2">
-                    <label className="block text-xs font-semibold text-slate-300 mb-1">Bölüm Açıklama Metni</label>
-                    <textarea
-                      rows={2}
-                      value={data.partiesSection?.description || ''}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        updateCMS((prev) => ({
-                          ...prev,
-                          partiesSection: {
-                            ...(prev.partiesSection || INITIAL_CMS_DATA.partiesSection),
-                            description: val
-                          }
-                        }));
-                      }}
-                      placeholder="İrfan Meclisi simülasyonunda 250 asil delegenin fikirlerini..."
-                      className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-white text-sm focus:border-[#00B4D8] focus:outline-none"
-                    />
-                  </div>
-                </div>
-
-                {/* Parti Kartları Listesi */}
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-sm font-bold text-slate-200 flex items-center gap-2">
-                      <span>Partiler Listesi ({partiesList.length})</span>
-                    </h4>
-                  </div>
-
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-                    {partiesList.map((party, pIdx) => {
-                      const partyColor = party.color || '#00B4D8';
-                      const seats = Number(party.seatsCount) || 0;
-                      const pct = totalAssignedSeats > 0 ? ((seats / totalAssignedSeats) * 100).toFixed(1) : '0';
-
-                      return (
-                        <div
-                          key={party.id || pIdx}
-                          className="p-5 bg-slate-900/70 border border-slate-800 rounded-2xl space-y-4 relative overflow-hidden"
-                          style={{ borderLeftWidth: '4px', borderLeftColor: partyColor }}
-                        >
-                          {/* Üst Bar: Kısa Ad, Renk, Sıralama, Çoğalt & Sil Butonları */}
-                          <div className="flex items-center justify-between gap-2">
-                            <div className="flex items-center gap-2">
-                              <span
-                                className="px-2.5 py-1 rounded-lg text-xs font-black text-white"
-                                style={{ backgroundColor: partyColor }}
-                              >
-                                {party.shortName || 'GRUP'}
-                              </span>
-                              <span className="text-xs text-slate-400 font-semibold font-mono">#{pIdx + 1}</span>
-                              <span className="text-[11px] text-cyan-400 font-mono bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-500/20">
-                                {seats} Sandalye (%{pct})
-                              </span>
-                            </div>
-
-                            <div className="flex items-center gap-1">
-                              <button
-                                type="button"
-                                disabled={pIdx === 0}
-                                onClick={() => moveParty(pIdx, pIdx - 1)}
-                                className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 disabled:opacity-30 disabled:hover:bg-transparent cursor-pointer"
-                                title="Yukarı Taşı"
-                              >
-                                <ArrowUp className="w-3.5 h-3.5" />
-                              </button>
-                              <button
-                                type="button"
-                                disabled={pIdx === partiesList.length - 1}
-                                onClick={() => moveParty(pIdx, pIdx + 1)}
-                                className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 disabled:opacity-30 disabled:hover:bg-transparent cursor-pointer"
-                                title="Aşağı Taşı"
-                              >
-                                <ArrowDown className="w-3.5 h-3.5" />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => duplicateParty(pIdx)}
-                                className="p-1.5 text-slate-400 hover:text-cyan-400 rounded-lg hover:bg-cyan-500/10 cursor-pointer"
-                                title="Partiyi Çoğalt"
-                              >
-                                <Copy className="w-3.5 h-3.5" />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  if (confirm(`"${party.name}" grubunu silmek istediğinize emin misiniz?`)) {
-                                    updateCMS((prev) => ({
-                                      ...prev,
-                                      partiesSection: {
-                                        ...(prev.partiesSection || INITIAL_CMS_DATA.partiesSection),
-                                        parties: (prev.partiesSection?.parties || []).filter((_, i) => i !== pIdx)
-                                      }
-                                    }));
-                                  }
-                                }}
-                                className="text-rose-400 hover:text-rose-300 p-1.5 rounded-lg hover:bg-rose-500/10 cursor-pointer transition-colors"
-                                title="Partiyi Sil"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
-                          </div>
-
-                          {/* İsim ve Kısa Ad */}
-                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                            <div className="sm:col-span-2">
-                              <label className="text-[10px] text-slate-400 uppercase font-semibold block mb-1">
-                                Parti / Grup Adı
-                              </label>
-                              <input
-                                type="text"
-                                value={party.name}
-                                onChange={(e) => {
-                                  const val = e.target.value;
-                                  updateCMS((prev) => {
-                                    const list = [...(prev.partiesSection?.parties || [])];
-                                    list[pIdx] = { ...list[pIdx], name: val };
-                                    return {
-                                      ...prev,
-                                      partiesSection: { ...(prev.partiesSection || INITIAL_CMS_DATA.partiesSection), parties: list }
-                                    };
-                                  });
-                                }}
-                                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white font-bold text-xs focus:border-[#00B4D8] focus:outline-none"
-                              />
-                            </div>
-
-                            <div>
-                              <label className="text-[10px] text-slate-400 uppercase font-semibold block mb-1">
-                                Kısaltma
-                              </label>
-                              <input
-                                type="text"
-                                value={party.shortName || ''}
-                                onChange={(e) => {
-                                  const val = e.target.value;
-                                  updateCMS((prev) => {
-                                    const list = [...(prev.partiesSection?.parties || [])];
-                                    list[pIdx] = { ...list[pIdx], shortName: val };
-                                    return {
-                                      ...prev,
-                                      partiesSection: { ...(prev.partiesSection || INITIAL_CMS_DATA.partiesSection), parties: list }
-                                    };
-                                  });
-                                }}
-                                placeholder="Örn: AİG"
-                                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white font-mono text-xs focus:border-[#00B4D8] focus:outline-none uppercase"
-                              />
-                            </div>
-                          </div>
-
-                          {/* Slogan & Başkan / Sözcü */}
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <div>
-                              <label className="text-[10px] text-slate-400 uppercase font-semibold block mb-1">
-                                Slogan / Motto
-                              </label>
-                              <input
-                                type="text"
-                                value={party.slogan || ''}
-                                onChange={(e) => {
-                                  const val = e.target.value;
-                                  updateCMS((prev) => {
-                                    const list = [...(prev.partiesSection?.parties || [])];
-                                    list[pIdx] = { ...list[pIdx], slogan: val };
-                                    return {
-                                      ...prev,
-                                      partiesSection: { ...(prev.partiesSection || INITIAL_CMS_DATA.partiesSection), parties: list }
-                                    };
-                                  });
-                                }}
-                                placeholder="Örn: Adalet Mülkün Temelidir"
-                                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white text-xs focus:border-[#00B4D8] focus:outline-none italic"
-                              />
-                            </div>
-
-                            <div>
-                              <label className="text-[10px] text-slate-400 uppercase font-semibold block mb-1">
-                                Grup Başkanı / Sözcüsü
-                              </label>
-                              <input
-                                type="text"
-                                value={party.leaderName || ''}
-                                onChange={(e) => {
-                                  const val = e.target.value;
-                                  updateCMS((prev) => {
-                                    const list = [...(prev.partiesSection?.parties || [])];
-                                    list[pIdx] = { ...list[pIdx], leaderName: val };
-                                    return {
-                                      ...prev,
-                                      partiesSection: { ...(prev.partiesSection || INITIAL_CMS_DATA.partiesSection), parties: list }
-                                    };
-                                  });
-                                }}
-                                placeholder="Örn: M. Enes Demir • Grup Başkanı"
-                                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white text-xs focus:border-[#00B4D8] focus:outline-none"
-                              />
-                            </div>
-                          </div>
-
-                          {/* Delege Koltuk Sayısı & Renk */}
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <div>
-                              <label className="text-[10px] text-slate-400 uppercase font-semibold block mb-1">
-                                Sandalye / Delege Sayısı
-                              </label>
-                              <input
-                                type="number"
-                                value={party.seatsCount ?? 0}
-                                onChange={(e) => {
-                                  const val = parseInt(e.target.value, 10) || 0;
-                                  updateCMS((prev) => {
-                                    const list = [...(prev.partiesSection?.parties || [])];
-                                    list[pIdx] = { ...list[pIdx], seatsCount: val };
-                                    return {
-                                      ...prev,
-                                      partiesSection: { ...(prev.partiesSection || INITIAL_CMS_DATA.partiesSection), parties: list }
-                                    };
-                                  });
-                                }}
-                                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white font-mono text-xs focus:border-[#00B4D8] focus:outline-none"
-                              />
-                            </div>
-
-                            <div>
-                              <label className="text-[10px] text-slate-400 uppercase font-semibold block mb-1">
-                                Tema Rengi
-                              </label>
-                              <div className="flex items-center gap-2">
-                                <input
-                                  type="color"
-                                  value={party.color || '#00B4D8'}
-                                  onChange={(e) => {
-                                    const val = e.target.value;
-                                    updateCMS((prev) => {
-                                      const list = [...(prev.partiesSection?.parties || [])];
-                                      list[pIdx] = { ...list[pIdx], color: val };
-                                      return {
-                                        ...prev,
-                                        partiesSection: { ...(prev.partiesSection || INITIAL_CMS_DATA.partiesSection), parties: list }
-                                      };
-                                    });
-                                  }}
-                                  className="w-9 h-9 p-1 bg-slate-950 border border-slate-800 rounded-xl cursor-pointer"
-                                />
-                                <div className="flex items-center gap-1">
-                                  {['#00B4D8', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#3B82F6'].map((c) => (
-                                    <button
-                                      key={c}
-                                      type="button"
-                                      onClick={() => {
-                                        updateCMS((prev) => {
-                                          const list = [...(prev.partiesSection?.parties || [])];
-                                          list[pIdx] = { ...list[pIdx], color: c };
-                                          return {
-                                            ...prev,
-                                            partiesSection: { ...(prev.partiesSection || INITIAL_CMS_DATA.partiesSection), parties: list }
-                                          };
-                                        });
-                                      }}
-                                      className="w-5 h-5 rounded-full border border-white/20 transition-transform hover:scale-125 cursor-pointer"
-                                      style={{ backgroundColor: c }}
-                                      title={c}
-                                    />
-                                  ))}
-                                </div>
-                                <span className="text-[10px] font-mono text-slate-400">{party.color || '#00B4D8'}</span>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Logo / Amblem Görseli */}
-                          <div>
-                            <label className="text-[10px] text-slate-400 uppercase font-semibold block mb-1">
-                              Parti Logosu / Amblem Görseli (Opsiyonel)
-                            </label>
-                            <CMSImageUploader
-                              value={party.logoUrl || ''}
-                              label="Parti Logosu / Amblem Yükle"
-                              helperText="Örn: 200x200 PNG/SVG parti amblemi"
-                              aspectRatio="square"
-                              compact={true}
-                              onChange={(url: string) => {
-                                updateCMS((prev) => {
-                                  const list = [...(prev.partiesSection?.parties || [])];
-                                  list[pIdx] = { ...list[pIdx], logoUrl: url };
-                                  return {
-                                    ...prev,
-                                    partiesSection: { ...(prev.partiesSection || INITIAL_CMS_DATA.partiesSection), parties: list }
-                                  };
-                                });
-                              }}
-                            />
-                          </div>
-
-                          {/* Açıklama */}
-                          <div>
-                            <label className="text-[10px] text-slate-400 uppercase font-semibold block mb-1">
-                              Parti Vizyonu & Açıklaması
-                            </label>
-                            <textarea
-                              rows={3}
-                              value={party.description}
-                              onChange={(e) => {
-                                const val = e.target.value;
-                                updateCMS((prev) => {
-                                  const list = [...(prev.partiesSection?.parties || [])];
-                                  list[pIdx] = { ...list[pIdx], description: val };
-                                  return {
-                                    ...prev,
-                                    partiesSection: { ...(prev.partiesSection || INITIAL_CMS_DATA.partiesSection), parties: list }
-                                  };
-                                });
-                              }}
-                              placeholder="Partinin komisyon ve genel kuruldaki duruşu..."
-                              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white text-xs leading-relaxed focus:border-[#00B4D8] focus:outline-none"
-                            />
-                          </div>
-
-                          {/* Temel İlkeler */}
-                          <div>
-                            <label className="text-[10px] text-slate-400 uppercase font-semibold block mb-1">
-                              Temel İlkeler / Odak Alanları (Virgülle ayırarak yazın)
-                            </label>
-                            <input
-                              type="text"
-                              value={Array.isArray(party.principles) ? party.principles.join(', ') : ''}
-                              onChange={(e) => {
-                                const val = e.target.value.split(',').map((t) => t.trim()).filter(Boolean);
-                                updateCMS((prev) => {
-                                  const list = [...(prev.partiesSection?.parties || [])];
-                                  list[pIdx] = { ...list[pIdx], principles: val };
-                                  return {
-                                    ...prev,
-                                    partiesSection: { ...(prev.partiesSection || INITIAL_CMS_DATA.partiesSection), parties: list }
-                                  };
-                                });
-                              }}
-                              placeholder="Hukukun Üstünlüğü, Ahlaki Liyakat, Sosyal Adalet"
-                              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-[#00B4D8] text-xs font-mono focus:border-[#00B4D8] focus:outline-none"
-                            />
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            );
-          })()}
+          </div>
         </div>
       )}
 
@@ -2100,207 +1520,393 @@ export default function CMSSectionEditor({ activeTab }: CMSSectionEditorProps) {
             </div>
           </div>
 
-          {/* Ekip Üyeleri Listesi */}
-          <div className="bg-[#05101F] border border-slate-800 rounded-2xl p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                  <Users className="w-5 h-5 text-[#00B4D8]" />
-                  Ekip & Divan Heyeti ({data.team.length})
-                </h3>
-                <p className="text-xs text-slate-400">
-                  Meclis başkanı, divan üyeleri ve koordinatörleri yönetin.
-                </p>
-              </div>
-              <button
-                onClick={() => {
-                  const newMember = {
-                    id: `member-${Date.now()}`,
-                    fullName: 'Yeni Ekip Üyesi',
-                    role: 'Koordinatör',
-                    bio: 'Görev tanımı ve biyografi özeti.',
-                    imageUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
-                    university: 'Selçuk Üniversitesi',
-                    category: 'divan' as const,
-                    affiliation: data.ekipPage?.defaultAffiliation || 'ÖNDER Ekibi'
-                  };
-                  updateCMS((prev) => ({
-                    ...prev,
-                    team: [...prev.team, newMember]
-                  }));
-                }}
-                className="px-3.5 py-2 bg-[#00B4D8] text-[#05101F] font-bold text-xs rounded-xl flex items-center gap-1.5 cursor-pointer"
-              >
-                <Plus className="w-4 h-4" /> Ekip Üyesi Ekle
-              </button>
-            </div>
+          {/* Helper: Ekip Üyesi Kartı Şablonu */}
+          {(() => {
+            const isAkademiMember = (m: any) =>
+              m.teamType === 'akademi' ||
+              (!m.teamType && (m.category === 'akademik' || m.category === 'komisyon_baskani' || (m.role && m.role.toLowerCase().includes('komisyon'))));
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {data.team.map((member, idx) => (
-                <div key={member.id || idx} className="p-4 bg-slate-900/60 border border-slate-800 rounded-xl space-y-3">
-                  <div className="flex items-center gap-3">
-                    <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-slate-950 border border-slate-800 shrink-0">
-                      {member.imageUrl ? (
-                        <Image src={member.imageUrl} alt={member.fullName} fill className="object-cover" unoptimized />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-slate-600">
-                          <Users className="w-5 h-5" />
-                        </div>
-                      )}
+            const orgMembers = data.team
+              .map((member, idx) => ({ member, idx }))
+              .filter(({ member }) => !isAkademiMember(member));
+
+            const acadMembers = data.team
+              .map((member, idx) => ({ member, idx }))
+              .filter(({ member }) => isAkademiMember(member));
+
+            const renderMemberCard = (member: typeof data.team[0], idx: number, teamLabel: string, badgeBg: string) => (
+              <div key={member.id || idx} className="p-4 bg-slate-900/60 border border-slate-800 rounded-xl space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-slate-950 border border-slate-800 shrink-0">
+                    {member.imageUrl ? (
+                      <Image src={member.imageUrl} alt={member.fullName} fill className="object-cover" unoptimized />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-slate-600">
+                        <Users className="w-5 h-5" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-1 mb-1">
+                      <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded uppercase ${badgeBg}`}>
+                        {teamLabel}
+                      </span>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <input
-                        type="text"
-                        value={member.fullName}
-                        placeholder="Ad Soyad"
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          updateCMS((prev) => {
-                            const updated = [...prev.team];
-                            updated[idx] = { ...updated[idx], fullName: val };
-                            return { ...prev, team: updated };
-                          });
-                        }}
-                        className="w-full px-2 py-1 bg-slate-950 border border-slate-800 rounded-lg text-white font-bold text-xs"
-                      />
-                      <input
-                        type="text"
-                        value={member.role}
-                        placeholder="Görev / Unvan"
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          updateCMS((prev) => {
-                            const updated = [...prev.team];
-                            updated[idx] = { ...updated[idx], role: val };
-                            return { ...prev, team: updated };
-                          });
-                        }}
-                        className="w-full px-2 py-0.5 bg-slate-950 border border-slate-800 rounded-lg text-[#00B4D8] text-[11px] mt-1"
-                      />
-                    </div>
-                    <button
-                      onClick={() => {
-                        if (confirm(`"${member.fullName}" isimli üyeyi silmek istediğinizden emin misiniz?`)) {
-                          updateCMS((prev) => ({
-                            ...prev,
-                            team: prev.team.filter((_, i) => i !== idx)
-                          }));
-                        }
+                    <input
+                      type="text"
+                      value={member.fullName}
+                      placeholder="Ad Soyad"
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        updateCMS((prev) => {
+                          const updated = [...prev.team];
+                          updated[idx] = { ...updated[idx], fullName: val };
+                          return { ...prev, team: updated };
+                        });
                       }}
-                      className="text-rose-400 hover:text-rose-300 p-1 cursor-pointer"
+                      className="w-full px-2 py-1 bg-slate-950 border border-slate-800 rounded-lg text-white font-bold text-xs"
+                    />
+                    <input
+                      type="text"
+                      value={member.role}
+                      placeholder="Görev / Unvan"
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        updateCMS((prev) => {
+                          const updated = [...prev.team];
+                          updated[idx] = { ...updated[idx], role: val };
+                          return { ...prev, team: updated };
+                        });
+                      }}
+                      className="w-full px-2 py-0.5 bg-slate-950 border border-slate-800 rounded-lg text-[#00B4D8] text-[11px] mt-1"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (confirm(`"${member.fullName}" isimli üyeyi silmek istediğinizden emin misiniz?`)) {
+                        updateCMS((prev) => ({
+                          ...prev,
+                          team: prev.team.filter((_, i) => i !== idx)
+                        }));
+                      }
+                    }}
+                    className="text-rose-400 hover:text-rose-300 p-1 cursor-pointer"
+                    title="Üyeyi Sil"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+
+                <div className="space-y-2.5">
+                  {/* Ekip Bölümü Seçimi */}
+                  <div>
+                    <label className="text-[10px] text-cyan-400 uppercase font-bold block mb-0.5">
+                      Ekip Bölümü (Sayfada Görüneceği Yer)
+                    </label>
+                    <select
+                      value={member.teamType || (isAkademiMember(member) ? 'akademi' : 'organizasyon')}
+                      onChange={(e) => {
+                        const val = e.target.value as 'organizasyon' | 'akademi';
+                        updateCMS((prev) => {
+                          const updated = [...prev.team];
+                          updated[idx] = { ...updated[idx], teamType: val };
+                          return { ...prev, team: updated };
+                        });
+                      }}
+                      className="w-full px-2 py-1 bg-slate-950 border border-cyan-500/40 rounded text-cyan-200 text-xs font-semibold focus:border-cyan-400"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <option value="organizasyon">Organizasyon Ekibi</option>
+                      <option value="akademi">Akademi Ekibi</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] text-slate-500 uppercase font-semibold block mb-0.5">Üniversite / Kurum</label>
+                    <input
+                      type="text"
+                      value={member.university || ''}
+                      placeholder="Örn: Selçuk Üniversitesi"
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        updateCMS((prev) => {
+                          const updated = [...prev.team];
+                          updated[idx] = { ...updated[idx], university: val };
+                          return { ...prev, team: updated };
+                        });
+                      }}
+                      className="w-full px-2 py-1 bg-slate-950 border border-slate-800 rounded text-slate-300 text-xs"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] text-slate-500 uppercase font-semibold block mb-0.5">Birim / Kategori</label>
+                    <select
+                      value={member.category || (isAkademiMember(member) ? 'komisyon_baskani' : 'divan')}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        updateCMS((prev) => {
+                          const updated = [...prev.team];
+                          updated[idx] = { ...updated[idx], category: val };
+                          return { ...prev, team: updated };
+                        });
+                      }}
+                      className="w-full px-2 py-1 bg-slate-950 border border-slate-800 rounded text-slate-300 text-xs"
+                    >
+                      <option value="divan">Genel Koordinasyon & Divan</option>
+                      <option value="komisyon_baskani">Komisyon Başkanları</option>
+                      <option value="yonetim">Yönetim Kurulu</option>
+                      <option value="akademik">Akademik Danışmanlar</option>
+                      <option value="koordinasyon">Gençlik Koordinasyonu</option>
+                      <option value="genel_koordinasyon">Genel Koordinasyon</option>
+                      <option value="basin_medya">Basın & Medya</option>
+                      <option value="lojistik">Lojistik & Protokol</option>
+                      <option value="delege_iliskileri">Delege İlişkileri</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] text-amber-400 uppercase font-semibold block mb-0.5">
+                      Görev Tanımı ve Biyografi Özeti
+                    </label>
+                    <textarea
+                      rows={2}
+                      value={member.bio || ''}
+                      placeholder="Görev tanımı ve biyografi özeti yazın..."
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        updateCMS((prev) => {
+                          const updated = [...prev.team];
+                          updated[idx] = { ...updated[idx], bio: val };
+                          return { ...prev, team: updated };
+                        });
+                      }}
+                      className="w-full px-2 py-1.5 bg-slate-950 border border-slate-800 rounded text-slate-200 text-xs focus:border-amber-400/60"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] text-[#00B4D8] uppercase font-semibold block mb-0.5">
+                      Kurum / Rozet Metni (Sağ Alt - "ÖNDER Ekibi" Kısmı)
+                    </label>
+                    <input
+                      type="text"
+                      value={member.affiliation ?? ''}
+                      placeholder={data.ekipPage?.defaultAffiliation || 'ÖNDER Ekibi'}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        updateCMS((prev) => {
+                          const updated = [...prev.team];
+                          updated[idx] = { ...updated[idx], affiliation: val };
+                          return { ...prev, team: updated };
+                        });
+                      }}
+                      className="w-full px-2 py-1 bg-slate-950 border border-slate-800 rounded text-slate-200 text-xs focus:border-[#00B4D8]"
+                    />
+                    <span className="text-[9px] text-slate-500">
+                      Boş bırakılırsa varsayılan ({data.ekipPage?.defaultAffiliation || 'ÖNDER Ekibi'}) kullanılır.
+                    </span>
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] text-slate-500 uppercase font-semibold block mb-1">Üye Fotoğrafı</label>
+                    <CMSImageUploader
+                      value={member.imageUrl || ''}
+                      onChange={(url) => {
+                        updateCMS((prev) => {
+                          const updated = [...prev.team];
+                          updated[idx] = { ...updated[idx], imageUrl: url };
+                          return { ...prev, team: updated };
+                        });
+                      }}
+                      compact
+                      aspectRatio="square"
+                    />
+                  </div>
+                </div>
+              </div>
+            );
+
+            return (
+              <div className="space-y-8">
+                {/* 1. BÖLÜM: ORGANİZASYON EKİBİ YÖNETİMİ */}
+                <div className="bg-[#05101F] border border-slate-800 rounded-2xl p-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5 border-b border-slate-800/80 pb-4">
+                    <div>
+                      <div className="flex items-center gap-2.5 mb-1">
+                        <Briefcase className="w-5 h-5 text-[#00B4D8]" />
+                        <h3 className="text-lg font-bold text-white">Organizasyon Ekibi Yönetimi</h3>
+                        <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-[#00B4D8]/20 text-[#00B4D8] border border-[#00B4D8]/30">
+                          {orgMembers.length} Üye
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-400">
+                        Ekip sayfasındaki "Organizasyon Ekibi" bölümünde görünen saha, divan, koordinasyon ve operasyon üyelerini yönetin.
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newMember = {
+                          id: `member-${Date.now()}`,
+                          fullName: 'Yeni Organizasyon Ekip Üyesi',
+                          role: 'Koordinatör',
+                          bio: 'Etkinlik planlama, saha koordinasyonu ve operasyonel yönetim.',
+                          imageUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+                          university: 'Selçuk Üniversitesi',
+                          category: 'divan' as const,
+                          teamType: 'organizasyon' as const,
+                          affiliation: data.ekipPage?.defaultAffiliation || 'ÖNDER Ekibi'
+                        };
+                        updateCMS((prev) => ({
+                          ...prev,
+                          team: [...prev.team, newMember]
+                        }));
+                      }}
+                      className="px-4 py-2 bg-[#00B4D8] hover:bg-[#00B4D8]/90 text-[#05101F] font-bold text-xs rounded-xl flex items-center gap-1.5 cursor-pointer shrink-0 transition-colors shadow-sm shadow-[#00B4D8]/20"
+                    >
+                      <Plus className="w-4 h-4" /> Organizasyon Ekip Üyesi Ekle
                     </button>
                   </div>
 
-                  <div className="space-y-2.5">
-                    <div>
-                      <label className="text-[10px] text-slate-500 uppercase font-semibold block mb-0.5">Üniversite / Kurum</label>
-                      <input
-                        type="text"
-                        value={member.university || ''}
-                        placeholder="Örn: Selçuk Üniversitesi"
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          updateCMS((prev) => {
-                            const updated = [...prev.team];
-                            updated[idx] = { ...updated[idx], university: val };
-                            return { ...prev, team: updated };
-                          });
+                  {orgMembers.length === 0 ? (
+                    <div className="p-8 text-center bg-slate-900/40 rounded-xl border border-dashed border-slate-800 space-y-2">
+                      <p className="text-slate-400 text-sm">Henüz Organizasyon Ekibi üyesi bulunmuyor.</p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newMember = {
+                            id: `member-${Date.now()}`,
+                            fullName: 'Yeni Organizasyon Ekip Üyesi',
+                            role: 'Koordinatör',
+                            bio: 'Etkinlik planlama, saha koordinasyonu ve operasyonel yönetim.',
+                            imageUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+                            university: 'Selçuk Üniversitesi',
+                            category: 'divan' as const,
+                            teamType: 'organizasyon' as const,
+                            affiliation: data.ekipPage?.defaultAffiliation || 'ÖNDER Ekibi'
+                          };
+                          updateCMS((prev) => ({
+                            ...prev,
+                            team: [...prev.team, newMember]
+                          }));
                         }}
-                        className="w-full px-2 py-1 bg-slate-950 border border-slate-800 rounded text-slate-300 text-xs"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-[10px] text-slate-500 uppercase font-semibold block mb-0.5">Birim / Kategori</label>
-                      <select
-                        value={member.category || 'divan'}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          updateCMS((prev) => {
-                            const updated = [...prev.team];
-                            updated[idx] = { ...updated[idx], category: val };
-                            return { ...prev, team: updated };
-                          });
-                        }}
-                        className="w-full px-2 py-1 bg-slate-950 border border-slate-800 rounded text-slate-300 text-xs"
+                        className="px-3 py-1.5 bg-[#00B4D8]/20 text-[#00B4D8] hover:bg-[#00B4D8]/30 rounded-lg text-xs font-semibold"
                       >
-                        <option value="divan">Genel Koordinasyon & Divan</option>
-                        <option value="komisyon_baskani">Komisyon Başkanları</option>
-                        <option value="yonetim">Yönetim Kurulu</option>
-                        <option value="akademik">Akademik Danışmanlar</option>
-                        <option value="koordinasyon">Gençlik Koordinasyonu</option>
-                        <option value="genel_koordinasyon">Genel Koordinasyon</option>
-                        <option value="basin_medya">Basın & Medya</option>
-                        <option value="lojistik">Lojistik & Protokol</option>
-                        <option value="delege_iliskileri">Delege İlişkileri</option>
-                      </select>
+                        İlk Organizasyon Üyesini Ekle
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {orgMembers.map(({ member, idx }) =>
+                        renderMemberCard(member, idx, 'Organizasyon Ekibi', 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30')
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* 2. BÖLÜM: AKADEMİ EKİBİ YÖNETİMİ */}
+                <div className="bg-[#05101F] border border-slate-800 rounded-2xl p-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5 border-b border-slate-800/80 pb-4">
+                    <div>
+                      <div className="flex items-center gap-2.5 mb-1">
+                        <GraduationCap className="w-5 h-5 text-amber-400" />
+                        <h3 className="text-lg font-bold text-white">Akademi Ekibi Yönetimi</h3>
+                        <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                          {acadMembers.length} Üye
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-400">
+                        Ekip sayfasındaki "Akademi Ekibi" bölümünde görünen komisyon başkanları, akademisyenler ve danışmanları yönetin.
+                      </p>
                     </div>
 
-                    <div>
-                      <label className="text-[10px] text-amber-400 uppercase font-semibold block mb-0.5">
-                        Görev Tanımı ve Biyografi Özeti
-                      </label>
-                      <textarea
-                        rows={2}
-                        value={member.bio || ''}
-                        placeholder="Görev tanımı ve biyografi özeti yazın..."
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          updateCMS((prev) => {
-                            const updated = [...prev.team];
-                            updated[idx] = { ...updated[idx], bio: val };
-                            return { ...prev, team: updated };
-                          });
-                        }}
-                        className="w-full px-2 py-1.5 bg-slate-950 border border-slate-800 rounded text-slate-200 text-xs focus:border-amber-400/60"
-                      />
-                    </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      {acadMembers.length === 0 && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const defaultAcad = TEAM_MEMBERS.filter((m) =>
+                              m.teamType === 'akademi' ||
+                              m.category === 'komisyon_baskani' ||
+                              m.category === 'akademik'
+                            ).map((m) => ({ ...m, teamType: 'akademi' as const }));
 
-                    <div>
-                      <label className="text-[10px] text-[#00B4D8] uppercase font-semibold block mb-0.5">
-                        Kurum / Rozet Metni (Sağ Alt - "ÖNDER Ekibi" Kısmı)
-                      </label>
-                      <input
-                        type="text"
-                        value={member.affiliation ?? ''}
-                        placeholder={data.ekipPage?.defaultAffiliation || 'ÖNDER Ekibi'}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          updateCMS((prev) => {
-                            const updated = [...prev.team];
-                            updated[idx] = { ...updated[idx], affiliation: val };
-                            return { ...prev, team: updated };
-                          });
-                        }}
-                        className="w-full px-2 py-1 bg-slate-950 border border-slate-800 rounded text-slate-200 text-xs focus:border-[#00B4D8]"
-                      />
-                      <span className="text-[9px] text-slate-500">
-                        Boş bırakılırsa varsayılan ({data.ekipPage?.defaultAffiliation || 'ÖNDER Ekibi'}) kullanılır.
-                      </span>
-                    </div>
+                            updateCMS((prev) => ({
+                              ...prev,
+                              team: [...prev.team, ...defaultAcad]
+                            }));
+                          }}
+                          className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-amber-300 font-semibold text-xs rounded-xl flex items-center gap-1.5 cursor-pointer shrink-0 transition-colors border border-amber-500/30"
+                        >
+                          <RefreshCw className="w-3.5 h-3.5" /> Varsayılan Kadroyu Yükle ({TEAM_MEMBERS.filter(m => m.teamType === 'akademi' || m.category === 'komisyon_baskani' || m.category === 'akademik').length})
+                        </button>
+                      )}
 
-                    <div>
-                      <label className="text-[10px] text-slate-500 uppercase font-semibold block mb-1">Üye Fotoğrafı</label>
-                      <CMSImageUploader
-                        value={member.imageUrl || ''}
-                        onChange={(url) => {
-                          updateCMS((prev) => {
-                            const updated = [...prev.team];
-                            updated[idx] = { ...updated[idx], imageUrl: url };
-                            return { ...prev, team: updated };
-                          });
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newMember = {
+                            id: `member-${Date.now()}`,
+                            fullName: 'Yeni Akademi Ekip Üyesi',
+                            role: 'Komisyon Başkanı / Akademik Danışman',
+                            bio: 'Akademik danışmanlık, komisyon müzakere rehberliği ve raporlama.',
+                            imageUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+                            university: 'Selçuk Üniversitesi',
+                            category: 'komisyon_baskani' as const,
+                            teamType: 'akademi' as const,
+                            affiliation: data.ekipPage?.defaultAffiliation || 'ÖNDER Ekibi'
+                          };
+                          updateCMS((prev) => ({
+                            ...prev,
+                            team: [...prev.team, newMember]
+                          }));
                         }}
-                        compact
-                        aspectRatio="square"
-                      />
+                        className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-xl flex items-center gap-1.5 cursor-pointer shrink-0 transition-colors shadow-sm shadow-amber-500/20"
+                      >
+                        <Plus className="w-4 h-4" /> Akademi Ekip Üyesi Ekle
+                      </button>
                     </div>
                   </div>
+
+                  {acadMembers.length === 0 ? (
+                    <div className="p-8 text-center bg-slate-900/40 rounded-xl border border-dashed border-slate-800 space-y-3">
+                      <p className="text-slate-400 text-sm">
+                        Henüz Akademi Ekibi üyesi bulunmuyor. Yeni üye ekleyebilir veya sistemdeki hazır komisyon başkanları kadrosunu tek tıkla yükleyebilirsiniz.
+                      </p>
+                      <div className="flex justify-center gap-3">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const defaultAcad = TEAM_MEMBERS.filter((m) =>
+                              m.teamType === 'akademi' ||
+                              m.category === 'komisyon_baskani' ||
+                              m.category === 'akademik'
+                            ).map((m) => ({ ...m, teamType: 'akademi' as const }));
+
+                            updateCMS((prev) => ({
+                              ...prev,
+                              team: [...prev.team, ...defaultAcad]
+                            }));
+                          }}
+                          className="px-3.5 py-2 bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 rounded-lg text-xs font-semibold flex items-center gap-1.5 border border-amber-500/30"
+                        >
+                          <RefreshCw className="w-3.5 h-3.5" /> Hazır Komisyon Başkanlarını Yükle
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {acadMembers.map(({ member, idx }) =>
+                        renderMemberCard(member, idx, 'Akademi Ekibi', 'bg-amber-500/20 text-amber-300 border border-amber-500/30')
+                      )}
+                    </div>
+                  )}
                 </div>
-              ))}
-            </div>
-          </div>
+              </div>
+            );
+          })()}
         </div>
       )}
 

@@ -432,7 +432,7 @@
       "fullName": "Yeni Ekip Üyesi",
       "role": "Koordinatör",
       "bio": "Görev tanımı ve biyografi özeti.",
-      "imageUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
+      "imageUrl": "https://xnlvuorunaplvbfpodxe.supabase.co/storage/v1/object/public/gallery/cms-1789933732797-fjzi.png",
       "university": "Selçuk Üniversitesi",
       "category": "divan",
       "affiliation": "ÖNDER Ekibi"
@@ -442,10 +442,21 @@
       "fullName": "Yeni Ekip Üyesi",
       "role": "Koordinatör",
       "bio": "Görev tanımı ve biyografi özeti.",
-      "imageUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
+      "imageUrl": "https://xnlvuorunaplvbfpodxe.supabase.co/storage/v1/object/public/gallery/cms-1789933745180-oooj.jpg",
       "university": "Selçuk Üniversitesi",
       "category": "divan",
       "affiliation": "ÖNDER Ekibi"
+    },
+    {
+      "id": "member-1789928789353",
+      "fullName": "Son Çamaşır Bükücü",
+      "role": "Meçul prens",
+      "bio": "veni vidi vici",
+      "imageUrl": "https://xnlvuorunaplvbfpodxe.supabase.co/storage/v1/object/public/gallery/cms-1789928870690-uvpw.jpeg",
+      "university": "Selçuk Üniversitesi",
+      "category": "divan",
+      "teamType": "akademi",
+      "affiliation": "boş"
     }
   ],
   "program": [
@@ -642,7 +653,7 @@
     "heroBadge": "GÖNÜLLÜ VE PROFESYONEL KADRO",
     "heroTitle": "100 Kişilik Organizasyon Ekibi",
     "heroDesc": "“Kökümüz İrfan, Sözümüz İstikbal” — İrfan Meclisi'nin planlanmasından oturumların yönetilmesine kadar 3 gün boyunca sahada görev yapan divan heyeti, komisyon başkanları ve koordinasyon birimlerimiz.",
-    "defaultAffiliation": "ÖNDER Ekibi"
+    "defaultAffiliation": "İrfan Meclis Ekibi"
   },
   "basvuruPage": {
     "heroBadge": "MECLİS DELEGE SEÇİMLERİ",

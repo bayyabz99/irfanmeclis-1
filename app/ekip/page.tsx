@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { 
@@ -8,21 +8,17 @@ import {
   Sparkles, 
   ArrowRight, 
   GraduationCap, 
-  Search,
   Building2,
-  Mail,
-  Award
+  Briefcase
 } from 'lucide-react';
 import { TEAM_MEMBERS } from '@/lib/data';
 import { getStoredCMSData, fetchServerCMSData, CMSData, INITIAL_CMS_DATA } from '@/lib/cmsStorage';
 import InnerPageHero from '@/components/InnerPageHero';
 
 export default function TeamPage() {
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [searchQuery, setSearchQuery] = useState<string>('');
-  const [cmsData, setCmsData] = useState<CMSData>(INITIAL_CMS_DATA);
+  const [cmsData, setCmsData] = React.useState<CMSData>(INITIAL_CMS_DATA);
 
-  React.useEffect(() => {
+  useEffect(() => {
     setCmsData(getStoredCMSData());
     fetchServerCMSData().then((serverData) => {
       if (serverData) setCmsData(serverData);
@@ -38,93 +34,87 @@ export default function TeamPage() {
     };
   }, []);
 
-  const categories = [
-    { id: 'all', label: 'Tüm Kadro' },
-    { id: 'divan', label: 'Genel Koordinasyon & Divan' },
-    { id: 'komisyon_baskani', label: 'Komisyon Başkanları' },
-    { id: 'yonetim', label: 'Yönetim Kurulu' },
-    { id: 'akademik', label: 'Akademik Danışmanlar' },
-    { id: 'koordinasyon', label: 'Gençlik Koordinasyonu' },
-  ];
+  // Smooth scroll to anchor on navigation
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.hash) {
+      const hash = window.location.hash.substring(1);
+      const timer = setTimeout(() => {
+        const el = document.getElementById(hash);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
-  const teamList = cmsData.team && cmsData.team.length > 0 ? cmsData.team : TEAM_MEMBERS;
+  const isAkademiMember = (member: any) => {
+    if (member.teamType === 'akademi') return true;
+    if (member.teamType === 'organizasyon') return false;
+    return (
+      member.category === 'akademik' ||
+      member.category === 'komisyon_baskani' ||
+      (member.role && member.role.toLowerCase().includes('komisyon'))
+    );
+  };
 
-  const filteredTeam = teamList.filter((member: any) => {
-    const matchCat = selectedCategory === 'all' || member.category === selectedCategory;
-    const name = member.name || member.fullName || '';
-    const role = member.role || '';
-    const university = member.university || '';
-    const matchSearch = 
-      name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      role.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      university.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchCat && matchSearch;
-  });
+  const rawList = cmsData.team && cmsData.team.length > 0 ? cmsData.team : TEAM_MEMBERS;
+  
+  // Guarantee both sections are populated properly
+  const orgFiltered = rawList.filter((m: any) => !isAkademiMember(m));
+  const acadFiltered = rawList.filter((m: any) => isAkademiMember(m));
+
+  const organizasyonMembers = orgFiltered.length > 0 
+    ? orgFiltered 
+    : TEAM_MEMBERS.filter((m: any) => !isAkademiMember(m));
+
+  const akademiMembers = acadFiltered.length > 0 
+    ? acadFiltered 
+    : TEAM_MEMBERS.filter((m: any) => isAkademiMember(m));
 
   return (
     <div className="igm-page">
       {/* 1. HERO BANNER */}
       <InnerPageHero
         badge={cmsData.ekipPage?.heroBadge || "GÖNÜLLÜ VE PROFESYONEL KADRO"}
-        title={cmsData.ekipPage?.heroTitle || "100 Kişilik Organizasyon Ekibi"}
-        description={cmsData.ekipPage?.heroDesc || "“Kökümüz İrfan, Sözümüz İstikbal” — İrfan Meclisi'nin planlanmasından oturumların yönetilmesine kadar 3 gün boyunca sahada görev yapan divan heyeti, komisyon başkanları ve koordinasyon birimlerimiz."}
+        title={cmsData.ekipPage?.heroTitle || "Organizasyon ve Akademi Ekibi"}
+        description={cmsData.ekipPage?.heroDesc || "“Kökümüz İrfan, Sözümüz İstikbal” — İrfan Meclisi'nin planlanmasından oturumların yönetilmesine kadar 3 gün boyunca sahada görev yapan organizasyon birimlerimiz ve komisyonları yöneten akademi kadromuz."}
         breadcrumbs={[
           { label: 'Ana Sayfa', href: '/' },
-          { label: 'Organizasyon Ekibi' }
+          { label: 'Ekip' }
         ]}
       />
 
-      {/* 2. FILTER & SEARCH CONTROLS */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-20">
-        <div className="p-6 rounded-3xl bg-[#06182e] border border-[#183659]/70 shadow-2xl space-y-6">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <h3 className="text-xl font-serif font-bold text-white">Birimlere Göre İnceleyin</h3>
-              <p className="text-xs text-slate-300">Ekip üyeleri ve koordinasyon sorumluları</p>
+      {/* 2. BÖLÜM 1: ORGANİZASYON EKİBİ BÖLÜMÜ */}
+      <section id="organizasyon-ekibi" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 scroll-mt-28">
+        {/* Section Header */}
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6 border-b border-[#183659]">
+          <div>
+            <div className="flex items-center gap-2 text-[#4DA3FF] font-bold text-xs uppercase tracking-wider mb-2">
+              <Briefcase className="w-4 h-4" />
+              <span>Saha, Lojistik & Divan Heyeti</span>
             </div>
-
-            {/* Search Input */}
-            <div className="relative w-full md:w-80">
-              <Search className="w-4 h-4 text-[#4DA3FF] absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder="İsim, görev veya üniversite ara..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-[#030a14] border border-[#183659] rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-cyan-400"
-              />
-            </div>
-          </div>
-
-          {/* Category Tabs */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar">
-            {categories.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => setSelectedCategory(cat.id)}
-                className={`px-4 py-2.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer ${
-                  selectedCategory === cat.id
-                    ? 'bg-[#4DA3FF] text-[#020B16] shadow-lg shadow-cyan-500/20 font-bold'
-                    : 'bg-[#030a14] text-slate-300 hover:text-white border border-[#183659] hover:border-cyan-400/40'
-                }`}
-              >
-                {cat.label}
-              </button>
-            ))}
+            <h2 className="text-2xl sm:text-3xl font-serif font-bold text-white flex items-center gap-3">
+              <span>Organizasyon Ekibi</span>
+              <span className="text-xs font-sans font-bold px-2.5 py-1 rounded-full bg-[#4DA3FF]/15 text-[#4DA3FF] border border-[#4DA3FF]/30">
+                {organizasyonMembers.length} Üye
+              </span>
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl">
+              Etkinliğin planlanmasından yürütülmesine, delege kabulünden genel kurul oturumlarına kadar sahada aktif görev alan birimlerimiz.
+            </p>
           </div>
         </div>
-      </section>
 
-      {/* 3. TEAM MEMBERS GRID */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {filteredTeam.map((member) => (
+        {/* Members Grid: Image, Name, Role */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-8">
+          {organizasyonMembers.map((member: any) => (
             <div
               key={member.id}
-              className="group rounded-2xl bg-[#092746] border border-[#4DA3FF]/20 hover:border-[#4DA3FF]/60 p-6 flex flex-col justify-between transition-all duration-300 hover:shadow-2xl hover:shadow-[#4DA3FF]/10"
+              className="group rounded-2xl bg-[#092746] border border-[#4DA3FF]/20 hover:border-[#4DA3FF]/60 p-6 flex flex-col justify-between transition-all duration-300 hover:shadow-2xl hover:shadow-[#4DA3FF]/10 hover:-translate-y-1"
             >
               <div>
-                {/* Profile Photo */}
+                {/* Üyenin Görseli */}
                 <div className="relative w-full aspect-square rounded-xl overflow-hidden mb-5 bg-[#061A33] border border-[#4DA3FF]/20">
                   <Image
                     src={member.imageUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80'}
@@ -134,16 +124,26 @@ export default function TeamPage() {
                     unoptimized
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#061A33]/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  
+                  {/* Floating team badge */}
+                  <div className="absolute top-2.5 left-2.5">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#061A33]/90 text-cyan-300 border border-cyan-400/30 backdrop-blur-sm">
+                      Organizasyon
+                    </span>
+                  </div>
                 </div>
 
-                {/* Info */}
-                <h3 className="text-lg font-serif font-bold text-white group-hover:text-[#4DA3FF] transition-colors">
+                {/* Üyenin İsmi */}
+                <h3 className="text-lg font-serif font-bold text-white group-hover:text-[#4DA3FF] transition-colors leading-snug">
                   {member.fullName}
                 </h3>
-                <p className="text-xs font-semibold text-[#4DA3FF] mt-1 font-sans">
+
+                {/* Üyenin Görevi */}
+                <p className="text-xs font-semibold text-[#4DA3FF] mt-1.5 font-sans leading-relaxed">
                   {member.role}
                 </p>
 
+                {/* Üniversite / Kurum Bilgisi */}
                 {member.university && (
                   <div className="mt-3 flex items-center gap-2 text-xs text-slate-300">
                     <GraduationCap className="w-4 h-4 text-[#4DA3FF] shrink-0" />
@@ -151,6 +151,7 @@ export default function TeamPage() {
                   </div>
                 )}
 
+                {/* Biyografi / Tanım (Opsiyonel) */}
                 {member.bio && (
                   <p className="mt-3 text-xs text-slate-400 line-clamp-2 leading-relaxed font-sans">
                     {member.bio}
@@ -158,10 +159,10 @@ export default function TeamPage() {
                 )}
               </div>
 
-              {/* Tag / Footer of card */}
+              {/* Alt Rozet */}
               <div className="mt-5 pt-4 border-t border-white/10 flex items-center justify-between">
                 <span className="text-[10px] uppercase font-bold tracking-wider text-[#4DA3FF] bg-[#061A33] px-2.5 py-1 rounded-full border border-[#4DA3FF]/20">
-                  {member.category.replace('_', ' ')}
+                  {member.category ? member.category.replace('_', ' ') : 'Organizasyon'}
                 </span>
                 <span className="text-[10px] text-slate-400 font-medium">
                   {member.affiliation || cmsData.ekipPage?.defaultAffiliation || 'ÖNDER Ekibi'}
@@ -170,12 +171,94 @@ export default function TeamPage() {
             </div>
           ))}
         </div>
+      </section>
 
-        {filteredTeam.length === 0 && (
-          <div className="p-16 text-center bg-[#092746] rounded-2xl border border-[#4DA3FF]/20">
-            <p className="text-slate-300 text-sm">Aradığınız kriterlere uygun ekip üyesi bulunamadı.</p>
+      {/* 3. BÖLÜM 2: AKADEMİ EKİBİ BÖLÜMÜ */}
+      <section id="akademi-ekibi" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 scroll-mt-28 border-t border-[#183659]/60">
+        {/* Section Header */}
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6 border-b border-[#183659]">
+          <div>
+            <div className="flex items-center gap-2 text-amber-400 font-bold text-xs uppercase tracking-wider mb-2">
+              <GraduationCap className="w-4 h-4" />
+              <span>Bilim, Müfredat & Komisyon Masaları</span>
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-serif font-bold text-white flex items-center gap-3">
+              <span>Akademi Ekibi</span>
+              <span className="text-xs font-sans font-bold px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                {akademiMembers.length} Üye
+              </span>
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl">
+              8 ana ihtisas komisyonunda yasa tekliflerini, madde müzakerelerini ve akademik içerik standartlarını yöneten komisyon başkanlarımız ve akademik mentörler.
+            </p>
           </div>
-        )}
+        </div>
+
+        {/* Members Grid: Image, Name, Role */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-8">
+          {akademiMembers.map((member: any) => (
+            <div
+              key={member.id}
+              className="group rounded-2xl bg-[#092746] border border-amber-400/25 hover:border-amber-400/70 p-6 flex flex-col justify-between transition-all duration-300 hover:shadow-2xl hover:shadow-amber-500/10 hover:-translate-y-1"
+            >
+              <div>
+                {/* Üyenin Görseli */}
+                <div className="relative w-full aspect-square rounded-xl overflow-hidden mb-5 bg-[#061A33] border border-amber-400/25">
+                  <Image
+                    src={member.imageUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80'}
+                    alt={member.fullName || 'Akademi Ekip Üyesi'}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    unoptimized
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#061A33]/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  
+                  {/* Floating team badge */}
+                  <div className="absolute top-2.5 left-2.5">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#061A33]/90 text-amber-300 border border-amber-400/30 backdrop-blur-sm">
+                      Akademi
+                    </span>
+                  </div>
+                </div>
+
+                {/* Üyenin İsmi */}
+                <h3 className="text-lg font-serif font-bold text-white group-hover:text-amber-300 transition-colors leading-snug">
+                  {member.fullName}
+                </h3>
+
+                {/* Üyenin Görevi */}
+                <p className="text-xs font-semibold text-amber-300 mt-1.5 font-sans leading-relaxed">
+                  {member.role}
+                </p>
+
+                {/* Üniversite / Kurum Bilgisi */}
+                {member.university && (
+                  <div className="mt-3 flex items-center gap-2 text-xs text-slate-300">
+                    <GraduationCap className="w-4 h-4 text-amber-400 shrink-0" />
+                    <span className="truncate">{member.university}</span>
+                  </div>
+                )}
+
+                {/* Biyografi / Tanım (Opsiyonel) */}
+                {member.bio && (
+                  <p className="mt-3 text-xs text-slate-400 line-clamp-2 leading-relaxed font-sans">
+                    {member.bio}
+                  </p>
+                )}
+              </div>
+
+              {/* Alt Rozet */}
+              <div className="mt-5 pt-4 border-t border-white/10 flex items-center justify-between">
+                <span className="text-[10px] uppercase font-bold tracking-wider text-amber-300 bg-[#061A33] px-2.5 py-1 rounded-full border border-amber-400/25">
+                  {member.category ? member.category.replace('_', ' ') : 'Akademi'}
+                </span>
+                <span className="text-[10px] text-slate-400 font-medium">
+                  {member.affiliation || cmsData.ekipPage?.defaultAffiliation || 'ÖNDER Ekibi'}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
       </section>
 
       {/* 4. BOTTOM JOIN CTA */}

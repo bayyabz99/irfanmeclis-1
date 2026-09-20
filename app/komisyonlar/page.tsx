@@ -2,12 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Layers, Sparkles, ArrowRight, Search, CheckCircle2, FileText, Users, Flag } from 'lucide-react';
+import { Layers, Sparkles, ArrowRight, Search, CheckCircle2, FileText, Users } from 'lucide-react';
 import { COMMISSIONS } from '@/lib/data';
 import { getStoredCMSData, fetchServerCMSData, CMSData, INITIAL_CMS_DATA } from '@/lib/cmsStorage';
 import CommissionCard from '@/components/CommissionCard';
 import InnerPageHero from '@/components/InnerPageHero';
-import PartiesSection from '@/components/PartiesSection';
 
 export default function CommissionsPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -97,13 +96,6 @@ export default function CommissionsPage() {
                 className="w-full bg-[#030a14] border border-[#183659] rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-cyan-400"
               />
             </div>
-            <a
-              href="#partiler"
-              className="hidden sm:flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#092746] hover:bg-[#183659] border border-[#4DA3FF]/30 text-cyan-300 text-xs font-semibold whitespace-nowrap transition-colors"
-            >
-              <Flag className="w-3.5 h-3.5" />
-              <span>Meclis Partileri</span>
-            </a>
           </div>
         </div>
       </section>
@@ -177,8 +169,6 @@ export default function CommissionsPage() {
         </div>
       </section>
 
-      {/* 5. MECLİS PARTİLERİ & TEMSİL GRUPLARI */}
-      <PartiesSection data={cmsData.partiesSection} />
 
       {/* 6. BOTTOM CTA */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
