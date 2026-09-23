@@ -297,6 +297,63 @@ export default function ContactPage() {
         </div>
       </section>
 
+      {/* 5. PROMINENT DEVELOPER & CREATOR SHOWCASE */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#092746] via-[#0b2f56] to-[#071c35] border border-[#4DA3FF]/30 p-8 sm:p-12 shadow-2xl">
+          {/* Subtle glow / background effect */}
+          <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-[#4DA3FF]/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-[#258BF5]/10 rounded-full blur-3xl pointer-events-none" />
+
+          <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8 text-center md:text-left">
+            <div className="flex flex-col md:flex-row items-center gap-6 sm:gap-8">
+              {/* Large Circular Logo */}
+              <div className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden bg-white p-2 shadow-2xl border-2 border-[#4DA3FF]/50 shrink-0 group hover:scale-105 transition-transform duration-300 flex items-center justify-center">
+                <Image
+                  src="/ziftstudio.png"
+                  alt="Zift Studio Logo"
+                  width={128}
+                  height={128}
+                  className="w-full h-full object-contain"
+                />
+              </div>
+
+              {/* Text Info */}
+              <div className="space-y-3 max-w-2xl">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#4DA3FF]/10 border border-[#4DA3FF]/30 text-[#4DA3FF] text-xs font-semibold uppercase tracking-wider">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Dijital Geliştirme & Tasarım</span>
+                </div>
+                
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-serif font-bold text-white leading-snug">
+                  Bu site bir Muhammed Ali Kıtır kuruluşu olan{' '}
+                  <span className="text-[#4DA3FF] underline decoration-[#4DA3FF]/40 underline-offset-4">
+                    ZiftStudio.site
+                  </span>{' '}
+                  tarafından yapılmıştır.
+                </h2>
+
+                <p className="text-sm text-slate-300 font-sans leading-relaxed">
+                  İrfan Meclisi dijital platformunun tüm yazılım mimarisi, kullanıcı arayüzü (UI/UX) tasarımı ve interaktif meclis sistemleri Zift Studio tarafından geliştirilmiştir.
+                </p>
+              </div>
+            </div>
+
+            {/* Action / Link Button */}
+            <div className="shrink-0 w-full sm:w-auto">
+              <a
+                href="https://ziftstudio.site"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-full bg-gradient-to-r from-[#4DA3FF] to-[#258BF5] hover:from-[#258BF5] hover:to-[#1a73e8] text-[#061A33] font-bold text-sm shadow-xl hover:shadow-[#4DA3FF]/30 transition-all duration-300 group w-full sm:w-auto"
+              >
+                <span>ZiftStudio.site'ı Ziyaret Et</span>
+                <ExternalLink className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
     </div>
   );
 }

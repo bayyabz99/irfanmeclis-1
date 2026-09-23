@@ -112,7 +112,10 @@ export function mapRowToApplication(row: any): Application {
     lastLoginAt: row.last_login_at || undefined,
     approvedAt: row.approved_at || undefined,
     approvedBy: row.approved_by || undefined,
-    updatedAt: row.updated_at || undefined
+    updatedAt: row.updated_at || undefined,
+    paymentEmailSent: Boolean(row.payment_email_sent),
+    paymentEmailSentAt: row.payment_email_sent_at || undefined,
+    paymentEmailNotes: row.payment_email_notes || undefined
   };
 }
 
@@ -142,7 +145,10 @@ export function mapApplicationToRow(app: Application): Record<string, any> {
     last_login_at: app.lastLoginAt || null,
     approved_at: app.approvedAt || null,
     approved_by: app.approvedBy || null,
-    updated_at: app.updatedAt || new Date().toISOString()
+    updated_at: app.updatedAt || new Date().toISOString(),
+    payment_email_sent: Boolean(app.paymentEmailSent),
+    payment_email_sent_at: app.paymentEmailSentAt || null,
+    payment_email_notes: app.paymentEmailNotes || null
   };
 }
 
@@ -379,6 +385,46 @@ export function toggleUserStatus(id: string): Application | null {
   }
 
   return toggled;
+}
+
+export function updateApplicationPaymentEmailStatus(
+  id: string,
+  sentNotes?: string
+): Application[] {
+  const apps = getStoredApplications();
+  let changedApp: Application | null = null;
+  const now = new Date().toISOString();
+  const updated = apps.map((app) => {
+    if (app.id === id) {
+      changedApp = {
+        ...app,
+        paymentEmailSent: true,
+        paymentEmailSentAt: now,
+        paymentEmailNotes: sentNotes || app.paymentEmailNotes || 'IBAN & Bilgilendirme E-postası iletildi.',
+        updatedAt: now
+      };
+      return changedApp;
+    }
+    return app;
+  });
+  saveStoredApplications(updated);
+
+  if (supabase && changedApp) {
+    supabase
+      .from('applications')
+      .update({
+        payment_email_sent: true,
+        payment_email_sent_at: now,
+        payment_email_notes: (changedApp as Application).paymentEmailNotes,
+        updated_at: now
+      })
+      .eq('id', id)
+      .then(({ error }) => {
+        if (error) console.error('Supabase update payment email status error:', error);
+      });
+  }
+
+  return updated;
 }
 
 export function safeDeleteApplication(id: string): Application[] {

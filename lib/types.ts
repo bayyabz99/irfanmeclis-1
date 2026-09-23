@@ -78,7 +78,28 @@ export type Application = {
   approvedAt?: string;
   approvedBy?: string;
   updatedAt?: string;
+  paymentEmailSent?: boolean;
+  paymentEmailSentAt?: string;
+  paymentEmailNotes?: string;
 };
+
+export interface PaymentEmailSettings {
+  bankName: string;
+  accountHolder: string;
+  iban: string;
+  feeAmount: string;
+  paymentDescription: string;
+  emailSubject: string;
+  emailHeaderTitle: string;
+  emailMessage: string;
+  additionalNotes: string;
+  smtpHost?: string;
+  smtpPort?: number;
+  smtpSecure?: boolean;
+  smtpUser?: string;
+  smtpPass?: string;
+  senderName?: string;
+}
 
 export type GalleryItemStatus = 'pending' | 'approved' | 'rejected';
 

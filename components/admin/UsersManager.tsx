@@ -36,7 +36,8 @@ import {
   ChevronLeft,
   ChevronRight,
   ArrowUpDown,
-  Lock
+  Lock,
+  CreditCard
 } from 'lucide-react';
 import { Application, ApplicationStatus, GalleryItem } from '@/lib/types';
 import { 
@@ -50,10 +51,14 @@ import {
   syncApplicationsWithSupabase
 } from '@/lib/storage';
 import { COMMISSIONS } from '@/lib/data';
+import PaymentEmailSettingsModal from '@/components/admin/PaymentEmailSettingsModal';
+import SendPaymentEmailModal from '@/components/admin/SendPaymentEmailModal';
 
 export default function UsersManager() {
   const [applications, setApplications] = useState<Application[]>([]);
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
+  const [settingsModalOpen, setSettingsModalOpen] = useState(false);
+  const [emailModalUser, setEmailModalUser] = useState<Application | null>(null);
 
   // Search & Filter State
   const [searchQuery, setSearchQuery] = useState('');
@@ -249,6 +254,14 @@ export default function UsersManager() {
         </div>
 
         <div className="flex items-center gap-3">
+          <button
+            onClick={() => setSettingsModalOpen(true)}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-[#DFB052] border border-[#DFB052]/40 text-xs font-bold shadow-sm transition-all cursor-pointer"
+            title="Admin IBAN, katılım tutarı ve bilgilendirme e-posta şablonunu düzenle"
+          >
+            <CreditCard className="w-4 h-4 text-[#DFB052]" />
+            <span>IBAN & E-Posta Şablonu</span>
+          </button>
           <div className="text-right hidden sm:block">
             <span className="text-xs text-slate-400 block">Toplam Kayıt</span>
             <span className="text-lg font-bold text-slate-900">{applications.length} Kullanıcı</span>
@@ -449,6 +462,18 @@ export default function UsersManager() {
                       <td className="py-3 px-4 text-right">
                         <div className="flex items-center justify-end gap-1.5">
                           <button
+                            onClick={() => setEmailModalUser(user)}
+                            className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                              user.paymentEmailSent
+                                ? 'text-sky-600 bg-sky-50 hover:bg-sky-100 border border-sky-200'
+                                : 'text-amber-600 bg-amber-50 hover:bg-amber-100 border border-amber-200'
+                            }`}
+                            title={user.paymentEmailSent ? `IBAN Bilgilendirme postası iletildi (${user.paymentEmailSentAt ? new Date(user.paymentEmailSentAt).toLocaleDateString('tr-TR') : ''}). Tekrar göndermek için tıklayın.` : 'IBAN ve Bilgilendirme Postası Gönder'}
+                          >
+                            <Mail className="w-4 h-4" />
+                          </button>
+
+                          <button
                             onClick={() => {
                               setSelectedUser(user);
                               setShowMoreDetails(false);
@@ -609,6 +634,16 @@ export default function UsersManager() {
                 </div>
                 <div className="flex items-center gap-2">
                   <button
+                    type="button"
+                    onClick={() => setEmailModalUser(selectedUser)}
+                    className="px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-amber-500 hover:bg-amber-600 text-white shadow-sm flex items-center gap-1.5 cursor-pointer"
+                    title="Bu adaya IBAN ve katılım payı bilgilendirme e-postası gönder"
+                  >
+                    <Mail className="w-3.5 h-3.5" />
+                    <span>{selectedUser.paymentEmailSent ? 'Postayı Tekrar Gönder' : 'IBAN & Bilgilendirme Gönder'}</span>
+                  </button>
+
+                  <button
                     onClick={() => handleStatusUpdate(selectedUser, 'approved')}
                     className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                       selectedUser.status === 'approved'
@@ -630,6 +665,25 @@ export default function UsersManager() {
                   </button>
                 </div>
               </div>
+
+              {/* Email Sent Notice Banner */}
+              {selectedUser.paymentEmailSent && (
+                <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span>
+                      Bu kullanıcıya <strong>{selectedUser.paymentEmailSentAt ? new Date(selectedUser.paymentEmailSentAt).toLocaleString('tr-TR') : ''}</strong> tarihinde IBAN & bilgilendirme e-postası iletilmiştir.
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setEmailModalUser(selectedUser)}
+                    className="text-[11px] underline font-semibold text-emerald-700 hover:text-emerald-900 cursor-pointer"
+                  >
+                    Tekrar Gönder
+                  </button>
+                </div>
+              )}
 
               {/* TOGGLE: DAHA FAZLASINI GÖSTER / DAHA AZ GÖSTER */}
               <div className="pt-2">
@@ -1020,6 +1074,31 @@ export default function UsersManager() {
           </div>
         </div>
       )}
+
+      {/* Payment & IBAN Settings Modal */}
+      <PaymentEmailSettingsModal
+        isOpen={settingsModalOpen}
+        onClose={() => setSettingsModalOpen(false)}
+      />
+
+      {/* Send Payment Email Modal */}
+      <SendPaymentEmailModal
+        isOpen={Boolean(emailModalUser)}
+        applicant={emailModalUser}
+        onClose={() => setEmailModalUser(null)}
+        onOpenSettings={() => {
+          setEmailModalUser(null);
+          setSettingsModalOpen(true);
+        }}
+        onEmailSent={(updatedUser) => {
+          setApplications((prev) =>
+            prev.map((u) => (u.id === updatedUser.id ? updatedUser : u))
+          );
+          if (selectedUser && selectedUser.id === updatedUser.id) {
+            setSelectedUser(updatedUser);
+          }
+        }}
+      />
     </div>
   );
 }

@@ -70,6 +70,8 @@ import CMSSectionEditor from '@/components/admin/CMSSectionEditor';
 import UsersManager from '@/components/admin/UsersManager';
 import PdfReportGenerator from '@/components/admin/PdfReportGenerator';
 import SupabaseConfigModal from '@/components/admin/SupabaseConfigModal';
+import PaymentEmailSettingsModal from '@/components/admin/PaymentEmailSettingsModal';
+import SendPaymentEmailModal from '@/components/admin/SendPaymentEmailModal';
 import {
   getStoredApplications,
   getStoredGallery,
@@ -123,6 +125,8 @@ export default function ModernCMSAdminDashboard() {
   const [notificationsModalOpen, setNotificationsModalOpen] = useState(false);
   const [adminUserModalOpen, setAdminUserModalOpen] = useState(false);
   const [supabaseModalOpen, setSupabaseModalOpen] = useState(false);
+  const [settingsModalOpen, setSettingsModalOpen] = useState(false);
+  const [emailModalApp, setEmailModalApp] = useState<Application | null>(null);
   const [cloudConfigured, setCloudConfigured] = useState(isSupabaseConfigured);
   const [reportInitialFilters, setReportInitialFilters] = useState<{
     day?: string;
@@ -1351,7 +1355,19 @@ export default function ModernCMSAdminDashboard() {
               </div>
             )}
 
-            <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+            <div className="flex flex-wrap items-center justify-end gap-2 pt-2 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => {
+                  const target = selectedDelegeModal;
+                  setSelectedDelegeModal(null);
+                  setEmailModalApp(target);
+                }}
+                className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-sm"
+              >
+                <Mail className="w-3.5 h-3.5" />
+                <span>Bilgilendirme Postası Gönder</span>
+              </button>
               <button
                 onClick={() => setSelectedDelegeModal(null)}
                 className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs cursor-pointer"
@@ -1459,6 +1475,28 @@ export default function ModernCMSAdminDashboard() {
         isOpen={supabaseModalOpen} 
         onClose={() => setSupabaseModalOpen(false)} 
         onConfigUpdated={() => setCloudConfigured(checkIsSupabaseConfigured())} 
+      />
+
+      {/* Payment & IBAN Settings Modal */}
+      <PaymentEmailSettingsModal
+        isOpen={settingsModalOpen}
+        onClose={() => setSettingsModalOpen(false)}
+      />
+
+      {/* Send Payment Email Modal */}
+      <SendPaymentEmailModal
+        isOpen={Boolean(emailModalApp)}
+        applicant={emailModalApp}
+        onClose={() => setEmailModalApp(null)}
+        onOpenSettings={() => {
+          setEmailModalApp(null);
+          setSettingsModalOpen(true);
+        }}
+        onEmailSent={(updatedApp) => {
+          setApplications((prev) =>
+            prev.map((a) => (a.id === updatedApp.id ? updatedApp : a))
+          );
+        }}
       />
     </div>
   );

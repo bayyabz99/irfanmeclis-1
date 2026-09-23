@@ -12,7 +12,7 @@
     "heroPrefix": "ÖNDER DERNEĞİ KATKILARIYLA",
     "heroTitle": "İRFAN MECLİSİ",
     "heroDesc": "“Kökümüz İrfan, Sözümüz İstikbal”",
-    "heroBgImage": "/images/anasayfa-arkaplan.png",
+    "heroBgImage": "https://xnlvuorunaplvbfpodxe.supabase.co/storage/v1/object/public/gallery/cms-1790178591521-qj0u.png",
     "editorialQuote": "Fikir\nÜreten\nGençlik\nMeclisi",
     "aboutSummary": {
       "tag": "~ NEDEN İRFAN MECLİSİ? ~",
@@ -432,7 +432,7 @@
       "fullName": "Yeni Ekip Üyesi",
       "role": "Koordinatör",
       "bio": "Görev tanımı ve biyografi özeti.",
-      "imageUrl": "https://xnlvuorunaplvbfpodxe.supabase.co/storage/v1/object/public/gallery/cms-1789933732797-fjzi.png",
+      "imageUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
       "university": "Selçuk Üniversitesi",
       "category": "divan",
       "affiliation": "ÖNDER Ekibi"
@@ -442,7 +442,7 @@
       "fullName": "Yeni Ekip Üyesi",
       "role": "Koordinatör",
       "bio": "Görev tanımı ve biyografi özeti.",
-      "imageUrl": "https://xnlvuorunaplvbfpodxe.supabase.co/storage/v1/object/public/gallery/cms-1789933745180-oooj.jpg",
+      "imageUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
       "university": "Selçuk Üniversitesi",
       "category": "divan",
       "affiliation": "ÖNDER Ekibi"
@@ -653,7 +653,7 @@
     "heroBadge": "GÖNÜLLÜ VE PROFESYONEL KADRO",
     "heroTitle": "100 Kişilik Organizasyon Ekibi",
     "heroDesc": "“Kökümüz İrfan, Sözümüz İstikbal” — İrfan Meclisi'nin planlanmasından oturumların yönetilmesine kadar 3 gün boyunca sahada görev yapan divan heyeti, komisyon başkanları ve koordinasyon birimlerimiz.",
-    "defaultAffiliation": "İrfan Meclis Ekibi"
+    "defaultAffiliation": "ÖNDER Ekibi"
   },
   "basvuruPage": {
     "heroBadge": "MECLİS DELEGE SEÇİMLERİ",

@@ -25,17 +25,20 @@ import {
   User, 
   FileSpreadsheet,
   Calendar,
-  RefreshCw
+  RefreshCw,
+  CreditCard
 } from 'lucide-react';
 import { Application, ApplicationStatus } from '@/lib/types';
 import { 
   updateApplicationStatus, 
   toggleAttendance, 
-  exportApplicationsToExcel,
+  exportApplicationsToExcel, 
   getStoredApplications,
   syncApplicationsWithSupabase 
 } from '@/lib/storage';
 import QrTicketModal from '@/components/QrTicketModal';
+import PaymentEmailSettingsModal from '@/components/admin/PaymentEmailSettingsModal';
+import SendPaymentEmailModal from '@/components/admin/SendPaymentEmailModal';
 
 interface DelegatesManagerProps {
   applications?: Application[];
@@ -88,6 +91,8 @@ export default function DelegatesManager({
   const [ticketModalApp, setTicketModalApp] = useState<Application | null>(null);
   const [detailQrDataUrl, setDetailQrDataUrl] = useState<string>('');
   const [showDetailPassword, setShowDetailPassword] = useState(false);
+  const [settingsModalOpen, setSettingsModalOpen] = useState(false);
+  const [emailModalApp, setEmailModalApp] = useState<Application | null>(null);
 
   // Generate QR Code for detail modal
   useEffect(() => {
@@ -197,6 +202,14 @@ export default function DelegatesManager({
             >
               <RefreshCw className={`w-3.5 h-3.5 text-[#4DA3FF] ${isSyncing ? 'animate-spin' : ''}`} />
               <span>{isSyncing ? 'Yenileniyor...' : 'Buluttan Yenile'}</span>
+            </button>
+            <button
+              onClick={() => setSettingsModalOpen(true)}
+              title="Admin IBAN, katılım tutarı ve bilgilendirme e-posta şablonunu düzenle"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#092746] hover:bg-[#103a66] border border-[#DFB052]/50 text-[#DFB052] text-xs font-bold shadow-lg transition-all cursor-pointer"
+            >
+              <CreditCard className="w-4 h-4 text-[#DFB052]" />
+              <span>IBAN & E-Posta Şablonu</span>
             </button>
             <button
               onClick={() => exportApplicationsToExcel(applications)}
@@ -331,34 +344,50 @@ export default function DelegatesManager({
                       <div className="text-slate-400 text-[10px] truncate max-w-[150px]">{app.email}</div>
                     </td>
 
-                    {/* 5. Onay Durumu */}
+                    {/* 5. Onay Durumu & E-Posta Bilgisi */}
                     <td className="p-3.5 text-center">
-                      <span
-                        className={`px-3 py-1 rounded-full text-[10px] font-bold inline-flex items-center gap-1.5 ${
-                          app.status === 'approved'
-                            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                            : app.status === 'pending'
-                            ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                            : 'bg-red-500/20 text-red-300 border border-red-500/30'
-                        }`}
-                      >
+                      <div className="flex flex-col items-center gap-1">
                         <span
-                          className={`w-1.5 h-1.5 rounded-full ${
+                          className={`px-3 py-1 rounded-full text-[10px] font-bold inline-flex items-center gap-1.5 ${
                             app.status === 'approved'
-                              ? 'bg-emerald-400'
+                              ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
                               : app.status === 'pending'
-                              ? 'bg-amber-400'
-                              : 'bg-red-400'
+                              ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                              : 'bg-red-500/20 text-red-300 border border-red-500/30'
                           }`}
-                        />
-                        <span>
-                          {app.status === 'approved'
-                            ? 'ONAYLANDI'
-                            : app.status === 'pending'
-                            ? 'BEKLEMEDE'
-                            : 'REDDEDİLDİ'}
+                        >
+                          <span
+                            className={`w-1.5 h-1.5 rounded-full ${
+                              app.status === 'approved'
+                                ? 'bg-emerald-400'
+                                : app.status === 'pending'
+                                ? 'bg-amber-400'
+                                : 'bg-red-400'
+                            }`}
+                          />
+                          <span>
+                            {app.status === 'approved'
+                              ? 'ONAYLANDI'
+                              : app.status === 'pending'
+                              ? 'BEKLEMEDE'
+                              : 'REDDEDİLDİ'}
+                          </span>
                         </span>
-                      </span>
+
+                        {app.paymentEmailSent ? (
+                          <span 
+                            title={`IBAN Bilgilendirmesi iletildi (${app.paymentEmailSentAt ? new Date(app.paymentEmailSentAt).toLocaleDateString('tr-TR') : ''})`}
+                            className="inline-flex items-center gap-1 text-[9px] text-emerald-400 font-semibold"
+                          >
+                            <Mail className="w-2.5 h-2.5" />
+                            <span>Posta İletildi ✓</span>
+                          </span>
+                        ) : (
+                          <span className="text-[9px] text-slate-500">
+                            Posta Bekliyor
+                          </span>
+                        )}
+                      </div>
                     </td>
 
                     {/* 6. 3 Günlük Yoklama Durumu */}
@@ -393,6 +422,20 @@ export default function DelegatesManager({
                     {/* 8. Aksiyon Butonları */}
                     <td className="p-3.5 text-right">
                       <div className="inline-flex items-center gap-1.5">
+                        {/* Bilgilendirme Postası Gönder Butonu */}
+                        <button
+                          onClick={() => setEmailModalApp(app)}
+                          className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition-all shadow-sm cursor-pointer ${
+                            app.paymentEmailSent
+                              ? 'bg-[#0a2f58] hover:bg-[#12427b] text-sky-300 border border-sky-500/30'
+                              : 'bg-amber-600/30 hover:bg-amber-600/50 text-amber-300 border border-amber-500/40'
+                          }`}
+                          title={app.paymentEmailSent ? `IBAN Bilgilendirme e-postası daha önce iletildi (${app.paymentEmailSentAt ? new Date(app.paymentEmailSentAt).toLocaleDateString('tr-TR') : ''}). Tekrar göndermek için tıklayın.` : 'Bu adayın e-postasına IBAN ve katılım payı bilgilendirme postası gönder'}
+                        >
+                          <Mail className="w-3 h-3" />
+                          <span>{app.paymentEmailSent ? 'Posta İletildi' : 'Posta Gönder'}</span>
+                        </button>
+
                         {/* Tüm Bilgileri Göster Button */}
                         <button
                           onClick={() => setSelectedDetailApp(app)}
@@ -400,7 +443,7 @@ export default function DelegatesManager({
                           title="Tüm başvuru detaylarını ve QR kodu aç"
                         >
                           <Eye className="w-3.5 h-3.5" />
-                          <span>Tüm Bilgileri Göster</span>
+                          <span>Detay</span>
                         </button>
 
                         {/* QR Kodumu Göster Hızlı Butonu */}
@@ -515,16 +558,49 @@ export default function DelegatesManager({
                 )}
               </div>
 
-              <button
-                onClick={() => {
-                  setTicketModalApp(selectedDetailApp);
-                }}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0c2b4c] border border-[#4DA3FF]/30 text-[#4DA3FF] text-xs font-bold hover:bg-[#103a66] cursor-pointer"
-              >
-                <QrCode className="w-3.5 h-3.5" />
-                <span>Bileti Yazdır & QR İndir</span>
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setEmailModalApp(selectedDetailApp)}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all shadow cursor-pointer ${
+                    selectedDetailApp.paymentEmailSent
+                      ? 'bg-blue-600 hover:bg-blue-500 text-white'
+                      : 'bg-amber-600 hover:bg-amber-500 text-white'
+                  }`}
+                  title="Adaya IBAN ve katılım payı bilgilendirme e-postası gönder"
+                >
+                  <Mail className="w-3.5 h-3.5" />
+                  <span>{selectedDetailApp.paymentEmailSent ? 'Postayı Tekrar Gönder' : 'IBAN & Bilgilendirme Postası Gönder'}</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setTicketModalApp(selectedDetailApp);
+                  }}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0c2b4c] border border-[#4DA3FF]/30 text-[#4DA3FF] text-xs font-bold hover:bg-[#103a66] cursor-pointer"
+                >
+                  <QrCode className="w-3.5 h-3.5" />
+                  <span>Bileti Yazdır & QR İndir</span>
+                </button>
+              </div>
             </div>
+
+            {/* Email Sent Notice Banner */}
+            {selectedDetailApp.paymentEmailSent && (
+              <div className="p-3 rounded-xl bg-emerald-950/60 border border-emerald-500/30 text-emerald-200 text-xs flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>
+                    Bu adaya <strong>{selectedDetailApp.paymentEmailSentAt ? new Date(selectedDetailApp.paymentEmailSentAt).toLocaleString('tr-TR') : ''}</strong> tarihinde IBAN ve bilgilendirme e-postası iletilmiştir.
+                  </span>
+                </div>
+                <button
+                  onClick={() => setEmailModalApp(selectedDetailApp)}
+                  className="text-[11px] underline font-semibold text-emerald-300 hover:text-white cursor-pointer"
+                >
+                  Tekrar Gönder
+                </button>
+              </div>
+            )}
 
             {/* 2-Column Info Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
@@ -690,6 +766,35 @@ export default function DelegatesManager({
         application={ticketModalApp}
         isOpen={Boolean(ticketModalApp)}
         onClose={() => setTicketModalApp(null)}
+      />
+
+      {/* Payment & IBAN Settings Modal */}
+      <PaymentEmailSettingsModal
+        isOpen={settingsModalOpen}
+        onClose={() => setSettingsModalOpen(false)}
+      />
+
+      {/* Send Payment Email Modal */}
+      <SendPaymentEmailModal
+        isOpen={Boolean(emailModalApp)}
+        applicant={emailModalApp}
+        onClose={() => setEmailModalApp(null)}
+        onOpenSettings={() => {
+          setEmailModalApp(null);
+          setSettingsModalOpen(true);
+        }}
+        onEmailSent={(updatedApp) => {
+          setInternalApps((prev) =>
+            prev.map((a) => (a.id === updatedApp.id ? updatedApp : a))
+          );
+          if (selectedDetailApp && selectedDetailApp.id === updatedApp.id) {
+            setSelectedDetailApp(updatedApp);
+          }
+          if (onApplicationsChange) {
+            const current = applications.map((a) => (a.id === updatedApp.id ? updatedApp : a));
+            onApplicationsChange(current);
+          }
+        }}
       />
 
     </div>

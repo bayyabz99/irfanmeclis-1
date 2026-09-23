@@ -241,7 +241,7 @@ export default function Footer() {
 
         {/* Bottom Bar: Copyright & Legal */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-          <p>© 2026 ÖNDER Derneği Öncülüğünde İrfan Meclisi. Tüm hakları saklıdır.</p>
+          <p>© İrfan Meclisi. Tüm hakları saklıdır.</p>
           <div className="flex items-center gap-5">
             <Link href="/hakkinda" className="hover:text-slate-300 transition-colors">
               KVKK
@@ -254,6 +254,33 @@ export default function Footer() {
             <Link href="/iletisim" className="hover:text-slate-300 transition-colors">
               İletişim
             </Link>
+          </div>
+        </div>
+
+        {/* Developer Credit - ZiftStudio */}
+        <div className="mt-8 pt-6 border-t border-slate-800/60 flex items-center justify-center">
+          <div className="flex items-center gap-3 text-xs sm:text-sm text-slate-400">
+            <div className="relative w-7 h-7 rounded-full overflow-hidden bg-white shrink-0 shadow-md border border-slate-700/60 flex items-center justify-center p-0.5">
+              <Image 
+                src="/ziftstudio.png" 
+                alt="Zift Studio Logo" 
+                width={28} 
+                height={28} 
+                className="w-full h-full object-contain rounded-full"
+              />
+            </div>
+            <p className="text-center font-normal">
+              Bu site bir Muhammed Ali Kıtır kuruluşu olan{' '}
+              <a 
+                href="https://ziftstudio.site" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="text-white hover:text-[#4DA3FF] font-semibold transition-colors underline underline-offset-4 decoration-[#4DA3FF]/50"
+              >
+                ZiftStudio.site
+              </a>{' '}
+              tarafından yapılmıştır.
+            </p>
           </div>
         </div>
 
